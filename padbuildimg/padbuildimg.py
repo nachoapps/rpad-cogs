@@ -544,7 +544,8 @@ class PadBuildImage:
         if param_key in ['PORTRAIT_WIDTH', 'PADDING', 'LATENTS_WIDTH']:
             param_value = int(param_value)
         if param_key in ['ASSETS_DIR', 'PORTRAIT_DIR', 'OUTPUT_DIR'] \
-                and param_value[-1] != '/' or param_value[-1] != '\\':
+                and param_value[-1] not in ['/', '\\']:
+            print(param_value[-1])
             param_value += '/'
         self.settings.setBuildImgParamsByKey(param_key, param_value)
         await self.bot.say(box('Set {} to {}'.format(param_key, param_value)))
