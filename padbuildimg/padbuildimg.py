@@ -1,5 +1,6 @@
 import json
 import math
+import csv
 
 import discord
 from discord.ext import commands
@@ -30,6 +31,7 @@ Format:
     Card name must be first, otherwise the order does not matter
     Separate each card with /
     Separate each team with ;
+    To use / in card name, put quote around the entire team slot (e.g. "g/l medjed(g/x zela)"/...)
 Latent Acronyms:
     Killers: bak(balanced), phk(physical), hek(healer), drk(dragon), gok(god), aak(attacker, dek(devil), mak(machine)
              evk(evo mat), rek(redeemable), awk(awoken mat), enk(enhance)
@@ -149,7 +151,6 @@ class PaDTeamLexer(object):
     def t_ID(self, t):
         r'^.+?(?=[\(\|\[])|^(?!.*[\(\|\[].*).+'
         # first word before ( or [ or { or entire word if those characters are not in string
-        # TODO: support double quoted strings
         return t
 
     def t_ASSIST(self, t):
@@ -262,13 +263,12 @@ class PadBuildImageGenerator(object):
         self.padinfo_cog = padinfo_cog
         self.lexer = PaDTeamLexer().build()
         self.err_msg = []
-        team_str_list = [x.split('/') for x in input_str.split(';')]
         self.build = {
             'NAME': build_name,
             'TEAM': [],
             'INSTRUCTION': None
         }
-        for team in team_str_list:
+        for team in [row for row in csv.reader(input_str.split(';'), delimiter='/')]:
             team_sublist = []
             for slot in team:
                 team_sublist.extend(self.process_card(slot))
@@ -433,29 +433,25 @@ class PadBuildImageGenerator(object):
                                     (255, 255, 255, 0))
         y_offset = 0
         for team in self.build['TEAM']:
-            has_assist = False
-            has_latents = False
+            has_assist = not any([card is None for idx, card in enumerate(team) if idx % 2 == 1])
+            has_latents = any([card['LATENT'] is not None for idx, card in enumerate(team) if idx % 2 == 0])
             for idx, card in enumerate(team):
                 if idx > 11 or idx > 9 and len(self.build['TEAM']) > 1:
                     break
                 if card:
                     x, y = idx_to_xy(idx)
-                    portrait = self.combine_portrait(card, y % 2 == 1)
+                    portrait = self.combine_portrait(card, idx % 2 == 0)
                     x_offset = self.params.PADDING * math.ceil(x / 4)
                     self.build_img.paste(
                         portrait,
                         (x_offset + x * self.params.PORTRAIT_WIDTH,
                          y_offset + y * self.params.PORTRAIT_WIDTH))
-                    if y % 2 == 0:
-                        has_assist = True
-                    elif y % 2 == 1:
+                    if has_latents and idx % 2 == 0 and card['LATENT'] is not None:
                         latents = self.combine_latents(card['LATENT'])
-                        if latents:
-                            has_latents = True
-                            self.build_img.paste(
-                                latents,
-                                (x_offset + x * self.params.PORTRAIT_WIDTH,
-                                 y_offset + (y + 1) * self.params.PORTRAIT_WIDTH))
+                        self.build_img.paste(
+                            latents,
+                            (x_offset + x * self.params.PORTRAIT_WIDTH,
+                             y_offset + (y + 1) * self.params.PORTRAIT_WIDTH))
             y_offset += self.params.PORTRAIT_WIDTH + self.params.PADDING * 2
             if has_assist:
                 y_offset += self.params.PORTRAIT_WIDTH
@@ -552,19 +548,6 @@ class PadBuildImage:
             param_value += '/'
         self.settings.setBuildImgParamsByKey(param_key, param_value)
         await self.bot.say(box('Set {} to {}'.format(param_key, param_value)))
-
-
-    # @commands.command(pass_context=True)
-    # @checks.is_owner()
-    # async def debugbuildimg(self, ctx, *, query):
-    #     padinfo_cog = self.bot.get_cog('PadInfo')
-    #     m, err, debug_info = padinfo_cog.findMonster(query)
-    #
-    #     if m is None:
-    #         await self.bot.say(box('No match: ' + err))
-    #         return
-    #
-    #     await self.bot.say(box(json.dumps(m.search, indent=2, default=lambda o: o.__dict__)))
 
 
 def setup(bot):
