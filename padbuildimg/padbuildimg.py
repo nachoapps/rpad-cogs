@@ -434,7 +434,8 @@ class PadBuildImageGenerator(object):
         y_offset = 0
         for team in self.build['TEAM']:
             has_assist = not any([card is None for idx, card in enumerate(team) if idx % 2 == 1])
-            has_latents = any([card['LATENT'] is not None for idx, card in enumerate(team) if idx % 2 == 0])
+            has_latents = any([card['LATENT'] is not None for idx, card in enumerate(team)
+                               if idx % 2 == 0 and card is not None])
             for idx, card in enumerate(team):
                 if idx > 11 or idx > 9 and len(self.build['TEAM']) > 1:
                     break
