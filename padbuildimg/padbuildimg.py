@@ -26,17 +26,19 @@ HELP_MSG = """
 Generates an image representing a team.
 
 Format: 
-    card_name(assist)[latent,latent]|Stats
-    card_name must be first, otherwise the order does not matter
+    card name(assist)[latent,latent]|Stats
+    Card name must be first, otherwise the order does not matter
     Separate each card with /
     Separate each team with ;
 Latent Acronyms:
-    Killers (first 2 letters + k): bak, phk, hek, drk, gok, aak, dek, mak, evk, rek, awk, enk
+    Killers: bak(balanced), phk(physical), hek(healer), drk(dragon), gok(god), aak(attacker, dek(devil), mak(machine)
+             evk(evo mat), rek(redeemable), awk(awoken mat), enk(enhance)
     Stats (+ for 2 slot): hp, atk, rcv, all(all stat), hp+, atk+, rcv+
     Resists (+ for 2 slot): rres, bres, gres, lres, dres, rres+, bres+, gres+, lres+, dres+
     Others: sdr, ah(autoheal)
 Stats Format:
-    LV### SLV## AW# +H## +A## +R## +(297|0)
+    | LV### SLV## AW# +H## +A## +R## +(297|0)
+    | indicates end of card name and start of stats
     LV: level, 1 to 110
     SLV: skill level, 1 to 99
     AW: awakenings, 0 to 9
@@ -147,6 +149,7 @@ class PaDTeamLexer(object):
     def t_ID(self, t):
         r'^.+?(?=[\(\|\[])|^(?!.*[\(\|\[].*).+'
         # first word before ( or [ or { or entire word if those characters are not in string
+        # TODO: support double quoted strings
         return t
 
     def t_ASSIST(self, t):
