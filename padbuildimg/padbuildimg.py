@@ -32,19 +32,19 @@ Format:
     Separate each team with ;
 Latent Acronyms:
     Killers (first 2 letters + k): bak, phk, hek, drk, gok, aak, dek, mak, evk, rek, awk, enk
-    Stats (+ for 2 slot): all, hp+, atk+, rcv+, hp, atk, rcv
-    Resists (+ for 2 slot): rres+, bres+, gres+, lres+, dres+, rres, bres, gres, lres, dres
+    Stats (+ for 2 slot): hp, atk, rcv, all(all stat), hp+, atk+, rcv+
+    Resists (+ for 2 slot): rres, bres, gres, lres, dres, rres+, bres+, gres+, lres+, dres+
     Others: sdr, ah(autoheal)
 Stats Format:
-    LV## SLV## AW# +H## +A## +R## +(297|0)
-    LV: level
-    SLV: skill level
-    AW: awakenings
-    +H: HP plus
-    +A: ATK plus
-    +R: RCV plus
+    LV### SLV## AW# +H## +A## +R## +(297|0)
+    LV: level, 1 to 110
+    SLV: skill level, 1 to 99
+    AW: awakenings, 0 to 9
+    +H: HP plus, 0 to 99
+    +A: ATK plus, 0 to 99
+    +R: RCV plus, 0 to 99
     +: total plus (+0 or +297 only)
-    Order does not matter
+    Case insensitive, order does not matter
 """
 
 LATENTS_MAP = {
@@ -162,21 +162,23 @@ class PaDTeamLexer(object):
         return t
 
     def t_LV(self, t):
-        r'LV\d{1,3}'
+        r'[lL][vV]\d{1,3}'
         # LV followed by 1~3 digit number
-        t.value = int(t.value.replace('LV', ''))
+        t.value = int(t.value[2:])
+        if t.value > 110:
+            t.value = 110
         return t
 
     def t_SLV(self, t):
-        r'SLV\d{1,2}'
+        r'[sS][lL][vV]\d{1,2}'
         # SL followed by 1~2 digit number
-        t.value = int(t.value.replace('SLV', ''))
+        t.value = int(t.value[3:])
         return t
 
     def t_AWAKE(self, t):
-        r'AW\d'
+        r'[aA][wW]\d'
         # AW followed by 1 digit number
-        t.value = int(t.value.replace('AW', ''))
+        t.value = int(t.value[2:])
         return t
 
     def t_STATS(self, t):
@@ -186,25 +188,27 @@ class PaDTeamLexer(object):
     def t_P_ALL(self, t):
         r'\+\d{1,3}'
         # + followed by 0 or 297
-        t.value = int(t.value.strip('+'))
+        t.value = int(t.value[1:])
+        if t.value > 297:
+            t.value = 297
         return t
 
     def t_P_HP(self, t):
-        r'\+H\d{1,3}'
-        # +H followed by 3 digit number
-        t.value = int(t.value.replace('+H', ''))
+        r'\+[hH]\d{1,2}'
+        # +H followed by 2 digit number
+        t.value = int(t.value[2:])
         return t
 
     def t_P_ATK(self, t):
-        r'\+A\d{1,3}'
-        # AW followed by 1 digit number
-        t.value = int(t.value.replace('+A', ''))
+        r'\+[aA]\d{1,2}'
+        # +A followed by 2 digit number
+        t.value = int(t.value[2:])
         return t
 
     def t_P_RCV(self, t):
-        r'\+R\d{1,3}'
-        # AW followed by 1 digit number
-        t.value = int(t.value.replace('+R', ''))
+        r'\+[rR]\d{1,2}'
+        # +R followed by 2 digit number
+        t.value = int(t.value[2:])
         return t
 
     t_ignore = ' \t\n'
@@ -303,7 +307,7 @@ class PadBuildImageGenerator(object):
                     else:
                         m, err, debug_info = self.padinfo_cog.findMonster(tok.value)
                         if m is None:
-                            return None if is_assist else [None, None]
+                            raise ValueError('{} not found'.format(tok.value))
                         result_card['ID'] = m.monster_no
                 elif tok.type == 'P_ALL':
                     if tok.value == 0:
@@ -318,7 +322,7 @@ class PadBuildImageGenerator(object):
                     result_card[tok.type.replace('P_', '+')] = tok.value
         except Exception as ex:
             self.err_msg.append(str(ex))
-            return None if is_assist else [None, None]
+            return result_card if is_assist else [None, None]
 
         if is_assist:
             return result_card
