@@ -14,7 +14,7 @@ Code should adhere to the [Google Python Style Guide](https://google.github.io/s
 * Familiarize yourself with how to use a command prompt and Git Bash (if you can't do this you will have a baaaaaaad time) (though in Git all you have to do is git clone so you don't actually need to know everything)
 
 ## Installing Miru Dependencies
-* For Romanji/Kana conversion you will use Romkan. This is a bit tricky to install.
+* For Romanji/Kana conversion you will use Romkan. This is a bit tricky to install so we'll go over it first. This is a required dependency even if you don't think you need it, just do it.
     * git clone [this repo](https://github.com/soimort/python-romkan) into any folder you want.
     * Open setup.py in the text editor or IDE of your choice. Make the following replacement (basically add `encoding='utf8'` in 3 places):
     ```python
