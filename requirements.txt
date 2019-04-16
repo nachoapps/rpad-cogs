@@ -1,0 +1,15 @@
+#These are the required packages for installing rpad-cogs.
+PrettyTable
+backoff
+python-dateutil
+dill
+pytz
+ply
+numpy
+opencv-python
+pillow
+pymysql
+pypng
+aioodbc
+twython
+google-auth
