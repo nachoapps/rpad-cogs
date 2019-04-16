@@ -8,22 +8,9 @@ Code should adhere to the [Google Python Style Guide](https://google.github.io/s
 
 # Requirements
 
-Cogs here depend on the following packages, which can be installed using `pip install <package name>` in the command prompt:
+The cogs here are cogs for [Red](https://twentysix26.github.io/Red-Docs/), a customizable Discord bot. Instructions for installing and setting up Red can be found [here.](https://twentysix26.github.io/Red-Docs/red_install_windows/)
 
-* PrettyTable
-* backoff
-* python-dateutil
-* dill
-* pytz
-* ply
-* numpy
-* opencv-python
-* pillow
-* pymysql
-* pypng
-* aioodbc
-* twython
-* google-auth
+Cogs here depend on certain packages, which can be run by downloading the `requirements.txt` file and running `pip install -r requirements.txt`.
 
 Additionally, the cogs require `romkan` and `psutil`.
 
