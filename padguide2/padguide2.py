@@ -2340,7 +2340,7 @@ class MonsterIndex(object):
         return None, "Could not find a match for: " + query, None
         
     
-    # verify that potential matches od in fact have the prefixes that we want
+    # verify that potential matches do in fact have the prefixes that we want
     def remove_potential_matches_without_all_prefixes(self, matches, query_prefixes):
         to_remove = set()
         for m in matches:
