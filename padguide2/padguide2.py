@@ -2092,12 +2092,11 @@ class MonsterIndex(object):
                     nm.base_monster_no_na, nm.monster_no_na)
         named_monsters.sort(key=named_monsters_sort)
 
-        self.all_entries = {}
         self.all_prefixes = set()
+        self.all_entries = {}
         self.two_word_entries = {}
         for nm in named_monsters:
-            for prefix in nm.prefixes:
-                self.all_prefixes.add(prefix)
+            self.all_prefixes.update(nm.prefixes)
             for nickname in nm.final_nicknames:
                 self.all_entries[nickname] = nm
             for nickname in nm.final_two_word_nicknames:
@@ -2279,6 +2278,9 @@ class MonsterIndex(object):
         # couldn't find anything
         return None, "Could not find a match for: " + query, None
     
+    
+    # implements the lookup for id2, where you are allowed to specify multiple prefixes for a card
+    # search is not as robust as standard id because you should be able to be a lot more specific just from prefixes
     def find_monster_multiple_prefixes(self, query):
         query = rpadutils.rmdiacritics(query).lower().strip()
         # id search
@@ -2288,10 +2290,7 @@ class MonsterIndex(object):
                 return None, 'Looks like a monster ID but was not found', None
             else:
                 return m, None, "ID lookup"
-            # special handling for na/jp
-    
-        # TODO: need to handle na_only?
-    
+        
         # handle exact nickname match
         if query in self.all_entries:
             return self.all_entries[query], None, "Exact nickname"
@@ -2301,40 +2300,48 @@ class MonsterIndex(object):
             return None, 'Japanese queries must be at least 2 characters', None
         elif len(query) < 4 and not contains_jp:
             return None, 'Your query must be at least 4 letters', None
-        
+
+        # we want to look up only the main part of the query, and then verify that each result has the prefixes
+        # so break up the query into an array of prefixes, and a string (new_query) that will be the lookup
         query_prefixes = []
-        parts_of_query = query.split(' ')
+        parts_of_query = query.split()
         parts_of_new_query = []
-        for part in parts_of_query:
+        new_query = ''
+        for i, part in enumerate(parts_of_query):
             if part in self.all_prefixes:
                 query_prefixes.append(part)
             else:
-                parts_of_new_query.append(part)
+                new_query = ' '.join(parts_of_query[i:])
                 break
-        new_query = ' '.join(parts_of_new_query)
         
         # if we don't actually have multiple prefixes, then default to using the regular id lookup
         if len(query_prefixes) < 2:
             return self.find_monster(query)
         
         matches = set()
+        
+        # first try to get matches from nicknames
         for nickname, m in self.all_entries.items():
             if new_query in nickname:
                 matches.add(m)
-        self.check_prefixes_from_potential_matches(matches, query_prefixes)
+        self.remove_potential_matches_without_all_prefixes(matches, query_prefixes)
         
+        # if we don't have any candidates yet, pick a new method
         if not len(matches):
+            
+            # try matching on exact names next
             for nickname, m in self.all_na_name_to_monsters.items():
                 if new_query in m.name_na.lower() or new_query in m.name_jp.lower():
                     matches.add(m)
-            self.check_prefixes_from_potential_matches(matches, query_prefixes)
+            self.remove_potential_matches_without_all_prefixes(matches, query_prefixes)
             
         if len(matches):
             return self.pickBestMonster(matches), None, None
         return None, "Could not find a match for: " + query, None
         
     
-    def check_prefixes_from_potential_matches(self, matches, query_prefixes):
+    # verify that potential matches od in fact have the prefixes that we want
+    def remove_potential_matches_without_all_prefixes(self, matches, query_prefixes):
         to_remove = set()
         for m in matches:
             for prefix in query_prefixes:
