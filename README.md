@@ -31,6 +31,13 @@ romkan: download zip file from https://github.com/tejstead/python-romkan and unz
 
 psutil: type `pip3 install psutil --upgrade` in command prompt
 
+Some cogs depend on other cogs and must be installed in the right order. This list may be incomplete, but here are cogs recommended to be installed first.
+
+* rpadutils
+* padvision
+* padguide2
+
+
 # Puzzle and Dragons
 
 Most cogs here relate to the mobile game 'Puzzle and Dragons'. Data is sourced from the
