@@ -8,26 +8,28 @@ Code should adhere to the [Google Python Style Guide](https://google.github.io/s
 
 # Requirements
 
-Cogs here depend on one or more of the following packages. I haven't done a good job verifying
-this list.
+Cogs here depend on the following packages, which can be installed using `pip install <package name>` in the command prompt:
 
+* PrettyTable
+* backoff
 * python-dateutil
+* dill
 * pytz
-* twython
-* feedparser
-* romkan 
-  + check out project from git
-  + update open calls in setup.py to include `encoding='utf8'`
-  + run setup.py install
-* tabulate
-* pypng
-* padtools
+* ply
+* numpy
 * opencv-python
-* Pillow
-* setuptools
-* google-cloud
-* google-api
+* pillow
+* pymysql
+* pypng
+* aioodbc
+* twython
+* google-auth
 
+Additionally, the cogs require `romkan` and `psutil`.
+
+romkan: download zip file from https://github.com/tejstead/python-romkan and unzip it anywhere, open command prompt, cd to your python-romkan-master folder, and type `python setup.py install`
+
+psutil: type `pip3 install psutil --upgrade` in command prompt
 
 # Puzzle and Dragons
 
