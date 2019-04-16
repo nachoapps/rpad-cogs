@@ -42,6 +42,8 @@ Code should adhere to the [Google Python Style Guide](https://google.github.io/s
     * dill
     * prettytable
     * ply
+    * aiohttp
+    * discord
 ## Setting up the bot
 * Install Red - [Windows Install](https://twentysix26.github.io/Red-Docs/red_install_windows/) (or switch to whichever OS you want)
 * Create your bot account & have it join a private server with just you and the bot, for testing. Probably don't name it Miru to avoid confusion. This step is also explained in the above instructions.
@@ -56,7 +58,6 @@ Code should adhere to the [Google Python Style Guide](https://google.github.io/s
     * rpadutils
     * padguide2
     * padinfo
-    * padsearch
 * After you have done all of this, restart the bot again. Hopefully by now `^id ` should work!
 # Puzzle and Dragons
 
