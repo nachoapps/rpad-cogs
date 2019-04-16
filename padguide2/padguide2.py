@@ -2093,8 +2093,11 @@ class MonsterIndex(object):
         named_monsters.sort(key=named_monsters_sort)
 
         self.all_entries = {}
+        self.all_prefixes = set()
         self.two_word_entries = {}
         for nm in named_monsters:
+            for prefix in nm.prefixes:
+                self.all_prefixes.add(prefix)
             for nickname in nm.final_nicknames:
                 self.all_entries[nickname] = nm
             for nickname in nm.final_two_word_nicknames:
@@ -2191,7 +2194,7 @@ class MonsterIndex(object):
 
         return prefixes
 
-    def find_monster(self, query):
+    def find_monster(self, query, multiple_prefixes=False):
         query = rpadutils.rmdiacritics(query).lower().strip()
 
         # id search
@@ -2214,7 +2217,17 @@ class MonsterIndex(object):
             return None, 'Japanese queries must be at least 2 characters', None
         elif len(query) < 4 and not contains_jp:
             return None, 'Your query must be at least 4 letters', None
+        
+        matches, err, debug_info = self.find_matches_multiple_prefixes(query) if multiple_prefixes else self.find_matches(query)
+        
+        if len(matches):
+            return self.pickBestMonster(matches), err, debug_info
+        
+        # couldn't find anything
+        return None, "Could not find a match for: " + query, None
 
+    def find_matches(self, query):
+        print('starting query: %s' % query)
         # TODO: this should be a length-limited priority queue
         matches = set()
         # prefix search for nicknames, space-preceeded, take max id
@@ -2222,63 +2235,116 @@ class MonsterIndex(object):
             if nickname.startswith(query + ' '):
                 matches.add(m)
         if len(matches):
-            return self.pickBestMonster(matches), None, "Space nickname prefix, max of {}".format(len(matches))
-
+            print('case 1')
+            return matches, None, "Space nickname prefix, max of {}".format(len(matches))
+    
         # prefix search for nicknames, take max id
         for nickname, m in self.all_entries.items():
             if nickname.startswith(query):
                 matches.add(m)
         if len(matches):
             all_names = ",".join(map(lambda x: x.name_na, matches))
-            return self.pickBestMonster(matches), None, "Nickname prefix, max of {}, matches=({})".format(len(matches), all_names)
-
+            print('case 2')
+            return matches, None, "Nickname prefix, max of {}, matches=({})".format(len(matches),
+                                                                                                          all_names)
+    
         # prefix search for full name, take max id
         for nickname, m in self.all_entries.items():
             if (m.name_na.lower().startswith(query) or m.name_jp.lower().startswith(query)):
                 matches.add(m)
         if len(matches):
-            return self.pickBestMonster(matches), None, "Full name, max of {}".format(len(matches))
-
+            print('case 3')
+            return matches, None, "Full name, max of {}".format(len(matches))
+    
         # for nicknames with 2 names, prefix search 2nd word, take max id
         if query in self.two_word_entries:
-            return self.two_word_entries[query], None, "Second-word nickname prefix, max of {}".format(len(matches))
-
+            match_as_set_to_return = set()
+            match_as_set_to_return.add(self.two_word_entries[query])
+            print('case 4')
+            return match_as_set_to_return, None, "Second-word nickname prefix, max of {}".format(len(matches))
+    
         # TODO: refactor 2nd search characteristcs for 2nd word
-
+    
         # full name contains on nickname, take max id
         for nickname, m in self.all_entries.items():
             if (query in m.name_na.lower() or query in m.name_jp.lower()):
                 matches.add(m)
         if len(matches):
-            return self.pickBestMonster(matches), None, 'Full name match on nickname, max of {}'.format(len(matches))
-
+            print('case 5')
+            return matches, None, 'Full name match on nickname, max of {}'.format(len(matches))
+    
         # full name contains on full monster list, take max id
-
+    
         for m in self.all_monsters:
             if (query in m.name_na.lower() or query in m.name_jp.lower()):
                 matches.add(m)
         if len(matches):
-            return self.pickBestMonster(matches), None, 'Full name match on full list, max of {}'.format(len(matches))
-
+            print('case 6')
+            return matches, None, 'Full name match on full list, max of {}'.format(len(matches))
+    
         # No decent matches. Try near hits on nickname instead
         matches = difflib.get_close_matches(query, self.all_entries.keys(), n=1, cutoff=.8)
         if len(matches):
             match = matches[0]
-            return self.all_entries[match], None, 'Close nickname match ({})'.format(match)
-
+            match_as_set_to_return = set()
+            match_as_set_to_return.add(self.all_entries[match])
+            print('case 7')
+            return match_as_set_to_return, None, 'Close nickname match ({})'.format(match)
+    
         # Still no decent matches. Try near hits on full name instead
         matches = difflib.get_close_matches(
             query, self.all_na_name_to_monsters.keys(), n=1, cutoff=.9)
         if len(matches):
             match = matches[0]
-            return self.all_na_name_to_monsters[match], None, 'Close name match ({})'.format(match)
-
+            match_as_set_to_return = set()
+            match_as_set_to_return.add(self.all_na_name_to_monsters[match])
+            print('case 8')
+            return match_as_set_to_return, None, 'Close name match ({})'.format(match)
+    
         # couldn't find anything
+        print('case failure')
         return None, "Could not find a match for: " + query, None
-
+    
+    def find_matches_multiple_prefixes(self, query):
+        query_prefixes = []
+        parts_of_query = query.split(' ')
+        parts_of_new_query = []
+        for part in parts_of_query:
+            if part in self.all_prefixes:
+                query_prefixes.append(part)
+            else:
+                parts_of_new_query.append(part)
+                break
+        new_query = ' '.join(parts_of_new_query)
+        for prefix in query_prefixes:
+            print('hi ' + prefix)
+        matches = set()
+        for nickname, m in self.all_entries.items():
+            if new_query in nickname:
+                matches.add(m)
+        if not len(matches):
+            matches = difflib.get_close_matches(new_query, self.all_entries.keys(), n=1, cutoff=.8)
+        new_matches = set()
+        for m in matches:
+            keep = True
+            print('Match: %s' % m.name_na)
+            print('Printing match prefixes')
+            for this_prefix in m.prefixes:
+                print(this_prefix)
+            print('Done printing match prefixes')
+            for prefix in query_prefixes:
+                print(prefix)
+                if prefix not in m.prefixes:
+                    keep = False
+                    print('removing %s' % m.name_na)
+                    break
+            if keep:
+                new_matches.add(m)
+                print('keeping %s' % m.name_na)
+        return new_matches, None, None
+    
     def pickBestMonster(self, named_monster_list):
         return max(named_monster_list, key=lambda x: (not x.is_low_priority, x.rarity, x.monster_no_na))
-
 
 class NamedMonsterGroup(object):
     def __init__(self, monster_group: MonsterGroup, basename_overrides: list):
@@ -2370,7 +2436,7 @@ class NamedMonster(object):
         self.monster_no = monster.monster_no
         self.monster_no_na = monster.monster_no_na
         self.monster_no_jp = monster.monster_no_jp
-
+        
         # ID of the root of the tree for this monster
         self.base_monster_no = monster_group.base_monster_no
         self.base_monster_no_na = monster_group.base_monster_no_na
