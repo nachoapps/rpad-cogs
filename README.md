@@ -59,6 +59,14 @@ Code should adhere to the [Google Python Style Guide](https://google.github.io/s
     * padguide2
     * padinfo
 * After you have done all of this, restart the bot again. Hopefully by now `^id ` should work!
+
+## Other
+
+### Emoji
+* If you want emojis in `^id` commands, and you are setting this up for DEV PURPOSES ONLY, you can talk to tactical_retreat about getting your bot invited to the emoji servers. If you want to make your own separate Miru instance though, you're on your own for that.
+* Give t_r your bot's invite link & ask him for the server IDs
+* Then use `^padinfo setemojiservers` with the IDs he gives you. The main Miru server is one of them, you can get that ID yourself.
+
 # Puzzle and Dragons
 
 Most cogs here relate to the mobile game 'Puzzle and Dragons'. Data is sourced from the
