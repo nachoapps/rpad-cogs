@@ -76,3 +76,4 @@ Cogs not intended for normal use, or superceded.
 | adminlog       | In-memory storage of user messages and lookup               |
 | donations      | Tracks users who have donated for hosting fees              |
 | supermod       | April fools joke, random moderator selection                |
+-
