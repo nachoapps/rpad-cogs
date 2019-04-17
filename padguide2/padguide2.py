@@ -2279,9 +2279,14 @@ class MonsterIndex(object):
         return None, "Could not find a match for: " + query, None
     
     
-    # implements the lookup for id2, where you are allowed to specify multiple prefixes for a card
-    # search is not as robust as standard id because you should be able to be a lot more specific just from prefixes
+
     def find_monster_multiple_prefixes(self, query):
+        """Search with multiple prefixes allowed.
+        
+        Implements the lookup for id2, where you are allowed to specify multiple prefixes for a card.
+        Follows a similar logic to the regular id but after each check, will remove any potential match that doesn't
+        contain every single specified prefix.
+        """
         query = rpadutils.rmdiacritics(query).lower().strip()
         # id search
         if query.isdigit():
@@ -2305,7 +2310,6 @@ class MonsterIndex(object):
         # so break up the query into an array of prefixes, and a string (new_query) that will be the lookup
         query_prefixes = []
         parts_of_query = query.split()
-        parts_of_new_query = []
         new_query = ''
         for i, part in enumerate(parts_of_query):
             if part in self.all_prefixes:
@@ -2328,7 +2332,6 @@ class MonsterIndex(object):
         
         # if we don't have any candidates yet, pick a new method
         if not len(matches):
-            
             # try matching on exact names next
             for nickname, m in self.all_na_name_to_monsters.items():
                 if new_query in m.name_na.lower() or new_query in m.name_jp.lower():
