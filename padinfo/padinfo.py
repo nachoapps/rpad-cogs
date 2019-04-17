@@ -168,18 +168,25 @@ class PadInfo:
         """Monster info (limited to NA monsters ONLY)"""
         await self._do_id(ctx, query, na_only=True)
 
+    async def _do_id(self, ctx, query: str, na_only=False):
+        m, err, debug_info = self.findMonster(query, na_only=na_only)
+        if m is not None:
+            await self._do_idmenu(ctx, m, self.id_emoji)
+        else:
+            await self.bot.say(self.makeFailureMsg(err))
+    
     @commands.command(name="id2", pass_context=True)
-    async def _do_id_all_multiple_prefixes(self, ctx, *, query: str):
+    async def _do_id_all_2(self, ctx, *, query: str):
         """Monster info (main tab)"""
-        await self._do_id(ctx, query, multiple_prefixes=True)
+        await self._do_id2(ctx, query)
 
     @commands.command(name="idna2", pass_context=True)
     async def _do_id_na(self, ctx, *, query: str):
         """Monster info (limited to NA monsters ONLY)"""
-        await self._do_id(ctx, query, na_only=True, multiple_prefixes=True)
+        await self._do_id2(ctx, query, na_only=True)
     
-    async def _do_id(self, ctx, query: str, na_only=False, multiple_prefixes=False):
-        m, err, debug_info = self.findMonster(query, na_only=na_only, multiple_prefixes=multiple_prefixes)
+    async def _do_id2(self, ctx, query: str, na_only=False):
+        m, err, debug_info = self.findMonster(query, na_only=na_only)
         if m is not None:
             await self._do_idmenu(ctx, m, self.id_emoji)
         else:
@@ -422,7 +429,7 @@ class PadInfo:
 
     def findMonster(self, query, na_only=False, multiple_prefixes=False):
         query = rmdiacritics(query)
-        nm, err, debug_info = self._findMonster(query, na_only, multiple_prefixes)
+        nm, err, debug_info = self._findMonster(query, na_only)
 
         monster_no = nm.monster_no if nm else -1
         self.historic_lookups[query] = monster_no
@@ -432,12 +439,26 @@ class PadInfo:
 
         return m, err, debug_info
 
-    def _findMonster(self, query, na_only=False, multiple_prefixes=False):
+    def _findMonster(self, query, na_only=False):
         monster_index = self.index_na if na_only else self.index_all
-        if multiple_prefixes:
-            return monster_index.find_monster_multiple_prefixes(query)
-        else:
-            return monster_index.find_monster(query)
+        return monster_index.find_monster(query)
+        
+    def findMonster2(self, query, na_only=False):
+        query = rmdiacritics(query)
+        nm, err, debug_info = self._findMonster2(query, na_only)
+
+        monster_no = nm.monster_no if nm else -1
+        self.historic_lookups[query] = monster_no
+        dataIO.save_json(self.historic_lookups_file_path, self.historic_lookups)
+
+        m = self.get_monster_by_no(nm.monster_no) if nm else None
+
+        return m, err, debug_info
+
+    def _findMonster2(self, query, na_only=False):
+        monster_index = self.index_na if na_only else self.index_all
+        return monster_index.find_monster_multiple_prefixes(query)
+
 
     def map_awakenings_text(self, m):
         """Exported for use in other cogs"""
