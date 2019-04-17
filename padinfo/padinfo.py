@@ -186,7 +186,7 @@ class PadInfo:
         await self._do_id2(ctx, query, na_only=True)
     
     async def _do_id2(self, ctx, query: str, na_only=False):
-        m, err, debug_info = self.findMonster(query, na_only=na_only)
+        m, err, debug_info = self.findMonster2(query, na_only=na_only)
         if m is not None:
             await self._do_idmenu(ctx, m, self.id_emoji)
         else:
