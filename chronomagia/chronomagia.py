@@ -93,7 +93,9 @@ class ChronoMagia:
         names_to_card = {x.name_clean: x for x in self.card_data}
 
         # Check if the card name starts with the query
-        matches = list(filter(lambda x: x.startswith(query), names_to_card.keys()))
+import re
+exp = re.compile(r'' + query, re.IGNORECASE)
+matches = list(filter(lambda x: exp.search(x), names_to_card.keys()))
 
         # Find a card that closely matches the query
         if not matches:
