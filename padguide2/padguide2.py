@@ -2280,10 +2280,11 @@ class MonsterIndex(object):
     
     
 
-    def find_monster_multiple_prefixes(self, query):
-        """Search with multiple prefixes allowed.
+    def find_monster2(self, query):
+        """Search with alternative method for resolving prefixes.
         
         Implements the lookup for id2, where you are allowed to specify multiple prefixes for a card.
+        All prefixes are required to be exactly matched by the card.
         Follows a similar logic to the regular id but after each check, will remove any potential match that doesn't
         contain every single specified prefix.
         """
@@ -2351,8 +2352,7 @@ class MonsterIndex(object):
                 if prefix not in m.prefixes:
                     to_remove.add(m)
                     break
-        for m in to_remove:
-            matches.remove(m)
+        matches.difference_update(to_remove)
     
     def pickBestMonster(self, named_monster_list):
         return max(named_monster_list, key=lambda x: (not x.is_low_priority, x.rarity, x.monster_no_na))
