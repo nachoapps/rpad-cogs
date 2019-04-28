@@ -72,14 +72,14 @@ def get_pic_url(m):
 class PadInfo:
     def __init__(self, bot):
         self.bot = bot
-        
+
         self.settings = PadInfoSettings("padinfo")
-        
+
         self.index_all = padguide2.empty_index()
         self.index_na = padguide2.empty_index()
-        
+
         self.menu = Menu(bot)
-        
+
         # These emojis are the keys into the idmenu submenus
         self.id_emoji = '\N{INFORMATION SOURCE}'
         self.evo_emoji = char_to_emoji('e')
@@ -91,18 +91,18 @@ class PadInfo:
         self.skillups_emoji = '\N{MEAT ON BONE}'
         self.pic_emoji = '\N{FRAME WITH PICTURE}'
         self.other_info_emoji = '\N{SCROLL}'
-        
+
         self.historic_lookups_file_path = "data/padinfo/historic_lookups.json"
         self.historic_lookups_file_path_id2 = "data/padinfo/historic_lookups_id2.json"
-        
+
         if not dataIO.is_valid_json(self.historic_lookups_file_path):
             print("Creating empty historic_lookups.json...")
             dataIO.save_json(self.historic_lookups_file_path, {})
-        
+
         if not dataIO.is_valid_json(self.historic_lookups_file_path_id2):
             print("Creating empty historic_lookups_id2.json...")
             dataIO.save_json(self.historic_lookups_file_path_id2, {})
-        
+
         self.historic_lookups = dataIO.load_json(self.historic_lookups_file_path)
         self.historic_lookups_id2 = dataIO.load_json(self.historic_lookups_file_path_id2)
 
@@ -122,7 +122,7 @@ class PadInfo:
             except Exception as ex:
                 print("reload padinfo loop caught exception " + str(ex))
                 traceback.print_exc()
-            
+
             await asyncio.sleep(60 * 60 * 1)
 
     async def refresh_index(self):
@@ -143,10 +143,10 @@ class PadInfo:
         if server not in ['NA', 'JP']:
             await self.bot.say(inline('Supported servers are NA, JP'))
             return
-        
+
         pg_cog = self.bot.get_cog('PadGuide2')
         monsters = pg_cog.database.rotating_skillups(server)
-        
+
         for page in pagify(monsters_to_rotation_list(monsters, server, self.index_all)):
             await self.bot.say(box(page))
 
@@ -241,46 +241,46 @@ class PadInfo:
         animated = self.check_monster_animated(m.monster_no_jp)
         pic_embed = monsterToPicEmbed(m, animated=animated)
         other_info_embed = monsterToOtherInfoEmbed(m)
-        
+
         emoji_to_embed = OrderedDict()
         emoji_to_embed[self.id_emoji] = id_embed
         emoji_to_embed[self.evo_emoji] = evo_embed
         emoji_to_embed[self.mats_emoji] = mats_embed
         emoji_to_embed[self.pic_emoji] = pic_embed
-        
+
         pantheon_embed = monsterToPantheonEmbed(m)
         if pantheon_embed:
             emoji_to_embed[self.pantheon_emoji] = pantheon_embed
-        
+
         skillups_embed = monsterToSkillupsEmbed(m)
         if skillups_embed:
             emoji_to_embed[self.skillups_emoji] = skillups_embed
-        
+
         emoji_to_embed[self.other_info_emoji] = other_info_embed
-        
+
         return await self._do_menu(ctx, starting_menu_emoji, emoji_to_embed)
 
     async def _do_evolistmenu(self, ctx, sm):
         monsters = sm.alt_evos
         monsters.sort(key=lambda m: m.monster_no)
-        
+
         emoji_to_embed = OrderedDict()
         for idx, m in enumerate(monsters):
             emoji = char_to_emoji(str(idx))
             emoji_to_embed[emoji] = monsterToEmbed(m, self.get_emojis())
             if m == sm:
                 starting_menu_emoji = emoji
-        
+
         return await self._do_menu(ctx, starting_menu_emoji, emoji_to_embed, timeout=60)
 
     async def _do_menu(self, ctx, starting_menu_emoji, emoji_to_embed, timeout=30):
         if starting_menu_emoji not in emoji_to_embed:
             # Selected menu wasn't generated for this monster
             return EMBED_NOT_GENERATED
-        
+
         remove_emoji = self.menu.emoji['no']
         emoji_to_embed[remove_emoji] = self.menu.reaction_delete_message
-        
+
         try:
             result_msg, result_embed = await self.menu.custom_menu(ctx, emoji_to_embed, starting_menu_emoji,
                                                                    timeout=timeout)
@@ -338,7 +338,7 @@ class PadInfo:
         if bad:
             await self.bot.say(inline('Too many inputs. Try wrapping your queries in quotes.'))
             return
-        
+
         # Handle a very specific failure case, user typing something like "uuvo ragdra"
         if ' ' not in left_query and right_query is not None and ' ' not in right_query and bad is None:
             combined_query = left_query + ' ' + right_query
@@ -346,13 +346,13 @@ class PadInfo:
             if nm and left_query in nm.prefixes:
                 left_query = combined_query
                 right_query = None
-        
+
         left_m, left_err, _ = self.findMonster(left_query)
         if right_query:
             right_m, right_err, _ = self.findMonster(right_query)
         else:
             right_m, right_err, = left_m, left_err
-        
+
         err_msg = '{} query failed to match a monster: [ {} ]. If your query is multiple words, wrap it in quotes.'
         if left_err:
             await self.bot.say(inline(err_msg.format('Left', left_query)))
@@ -360,12 +360,12 @@ class PadInfo:
         if right_err:
             await self.bot.say(inline(err_msg.format('Right', right_query)))
             return
-        
+
         emoji_to_embed = OrderedDict()
         emoji_to_embed[self.ls_emoji] = monstersToLsEmbed(left_m, right_m)
         emoji_to_embed[self.left_emoji] = monsterToEmbed(left_m, self.get_emojis())
         emoji_to_embed[self.right_emoji] = monsterToEmbed(right_m, self.get_emojis())
-        
+
         await self._do_menu(ctx, self.ls_emoji, emoji_to_embed)
 
     @commands.command(name="helpid", pass_context=True, aliases=['helppic', 'helpimg'])
@@ -381,17 +381,17 @@ class PadInfo:
         if channel is None:
             await self.bot.say(inline('You must be in a voice channel to use this command'))
             return
-        
+
         speech_cog = self.bot.get_cog('Speech')
         if not speech_cog:
             await self.bot.say(inline('Speech seems to be offline'))
             return
-        
+
         if server.lower() not in ['na', 'jp']:
             query = server + ' ' + (query or '')
             server = 'na'
         query = query.strip().lower()
-        
+
         m, err, debug_info = self.findMonster(query)
         if m is not None:
             base_dir = '/home/tactical0retreat/pad_data/voices/fixed'
@@ -433,13 +433,13 @@ class PadInfo:
     def findMonster(self, query, na_only=False):
         query = rmdiacritics(query)
         nm, err, debug_info = self._findMonster(query, na_only)
-        
+
         monster_no = nm.monster_no if nm else -1
         self.historic_lookups[query] = monster_no
         dataIO.save_json(self.historic_lookups_file_path, self.historic_lookups)
-        
+
         m = self.get_monster_by_no(nm.monster_no) if nm else None
-        
+
         return m, err, debug_info
 
     def _findMonster(self, query, na_only=False):
@@ -449,13 +449,13 @@ class PadInfo:
     def findMonster2(self, query, na_only=False):
         query = rmdiacritics(query)
         nm, err, debug_info = self._findMonster2(query, na_only)
-        
+
         monster_no = nm.monster_no if nm else -1
         self.historic_lookups_id2[query] = monster_no
         dataIO.save_json(self.historic_lookups_file_path_id2, self.historic_lookups_id2)
-        
+
         m = self.get_monster_by_no(nm.monster_no) if nm else None
-        
+
         return m, err, debug_info
 
     def _findMonster2(self, query, na_only=False):
@@ -476,7 +476,7 @@ class PadInfo:
     def check_monster_animated(self, monster_id: int):
         if not self.settings.animationDir():
             return False
-        
+
         try:
             animated_ids = set()
             for f in os.listdir(self.settings.animationDir()):
@@ -485,7 +485,7 @@ class PadInfo:
                     return True
         except:
             pass
-        
+
         return False
 
 def setup(bot):
@@ -769,7 +769,7 @@ def monsterToEmbed(m: padguide2.PgMonster, emoji_list):
     if m.limitbreak_stats and m.limitbreak_stats > 1:
         def lb(x):
             return int(round(m.limitbreak_stats * x))
-        
+
         stats_row_1 = 'Weighted {} | LB {}'.format(m.weighted_stats, lb(m.weighted_stats))
         stats_row_2 = '**HP** {} ({})\n**ATK** {} ({})\n**RCV** {} ({})'.format(
             m.hp, lb(m.hp), m.atk, lb(m.atk), m.rcv, lb(m.rcv))
@@ -783,10 +783,10 @@ def monsterToEmbed(m: padguide2.PgMonster, emoji_list):
         a = a.get_name()
         mapped_awakening = AWAKENING_NAME_MAP_RPAD.get(a, a)
         mapped_awakening = match_emoji(emoji_list, mapped_awakening)
-        
+
         if mapped_awakening is None:
             mapped_awakening = AWAKENING_NAME_MAP.get(a, a)
-        
+
         # Wrap superawakenings to the next line
         if len(m.awakenings) - idx == m.superawakening_count:
             awakenings_row += '\n{}'.format(mapped_awakening)
@@ -909,17 +909,17 @@ def monsters_to_rotation_list(monster_list, server: str, index_all: padguide2.Mo
 
     for m in monster_list:
         skill = m.server_actives[server]
-        
+
         sm = skill.monsters_with_active
-        
+
         # Since some newer monsters like jewel of creation are being used as
         # skillups, exclude them from the list of skillup targets.
-        
+
         def is_bad_type(m):
             return set(['enhance', 'evolve', 'vendor']).intersection(set(m.types))
-        
+
         sm = max(sm, key=lambda x: (not is_bad_type(x), x.monster_no))
-        
+
         skillup_name = cell_name(m)
         if skillup_name in ignore_monsters:
             continue
