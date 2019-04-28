@@ -106,6 +106,7 @@ class PadInfo:
         self.historic_lookups = dataIO.load_json(self.historic_lookups_file_path)
         self.historic_lookups_id2 = dataIO.load_json(self.historic_lookups_file_path_id2)
 
+
     def __unload(self):
         # Manually nulling out database because the GC for cogs seems to be pretty shitty
         self.index_all = padguide2.empty_index()
@@ -131,6 +132,7 @@ class PadInfo:
         await pg_cog.wait_until_ready()
         self.index_all = pg_cog.create_index()
         self.index_na = pg_cog.create_index(lambda m: m.on_na)
+
 
     def get_monster_by_no(self, monster_no: int):
         pg_cog = self.bot.get_cog('PadGuide2')
@@ -421,14 +423,17 @@ class PadInfo:
             self.settings.setEmojiServers(emoji_servers.split(','))
         await self.bot.say(inline('Set {} servers'.format(len(self.settings.emojiServers()))))
 
+
     def get_emojis(self):
         server_ids = self.settings.emojiServers()
         return [e for s in self.bot.servers if s.id in server_ids for e in s.emojis]
+
 
     def makeFailureMsg(self, err):
         msg = 'Lookup failed: {}.\n'.format(err)
         msg += 'Try one of <id>, <name>, [argbld]/[rgbld] <name>. Unexpected results? Use ^helpid for more info.'
         return box(msg)
+
 
     def findMonster(self, query, na_only=False):
         query = rmdiacritics(query)
@@ -442,9 +447,11 @@ class PadInfo:
 
         return m, err, debug_info
 
+
     def _findMonster(self, query, na_only=False):
         monster_index = self.index_na if na_only else self.index_all
         return monster_index.find_monster(query)
+
 
     def findMonster2(self, query, na_only=False):
         query = rmdiacritics(query)
@@ -458,9 +465,11 @@ class PadInfo:
 
         return m, err, debug_info
 
+
     def _findMonster2(self, query, na_only=False):
         monster_index = self.index_na if na_only else self.index_all
         return monster_index.find_monster2(query)
+
 
     def map_awakenings_text(self, m):
         """Exported for use in other cogs"""
@@ -472,6 +481,7 @@ class PadInfo:
         """Set a directory containing animated images"""
         self.settings.setAnimationDir(animation_dir)
         await self.bot.say(inline('Done'))
+
 
     def check_monster_animated(self, monster_id: int):
         if not self.settings.animationDir():
@@ -502,11 +512,13 @@ class PadInfoSettings(CogSettings):
         }
         return config
 
+
     def emojiServers(self):
         key = 'emoji_servers'
         if key not in self.bot_settings:
             self.bot_settings[key] = []
         return self.bot_settings[key]
+
 
     def setEmojiServers(self, emoji_servers):
         es = self.emojiServers()
@@ -514,8 +526,10 @@ class PadInfoSettings(CogSettings):
         es.extend(emoji_servers)
         self.save_settings()
 
+
     def animationDir(self):
         return self.bot_settings['animation_dir']
+
 
     def setAnimationDir(self, animation_dir):
         self.bot_settings['animation_dir'] = animation_dir
@@ -902,6 +916,7 @@ def monsters_to_rotation_list(monster_list, server: str, index_all: padguide2.Mo
     tbl.vrules = prettytable.NONE
     tbl.align = "l"
 
+
     def cell_name(m: padguide2.PgMonster):
         nm = index_all.monster_no_to_named_monster[m.monster_no]
         name = nm.group_computed_basename.title()
@@ -1070,6 +1085,7 @@ AWAKENING_NAME_MAP = {
 
 def createMultiplierText(hp1, atk1, rcv1, resist1, hp2=None, atk2=None, rcv2=None, resist2=None):
     hp2, atk2, rcv2, resist2 = hp2 or hp1, atk2 or atk1, rcv2 or rcv1, resist2 or resist1
+
 
     def fmtNum(val):
         return ('{:.2f}').format(val).strip('0').rstrip('.')
