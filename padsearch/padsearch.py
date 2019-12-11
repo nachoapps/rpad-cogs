@@ -655,7 +655,6 @@ class PadSearch:
                 # If it still failed, raise the original exception
                 raise ex
         dg_cog = self.bot.get_cog('Dadguide')
-        await dg_cog.wait_until_ready()
         monsters = dg_cog.database.get_all_monsters()
         matched_monsters = list(filter(config.check_filters, monsters))
 
