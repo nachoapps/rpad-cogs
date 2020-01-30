@@ -184,7 +184,7 @@ class TrUtils:
         click the ... on a message.
         """
         try:
-            msg = await self.bot.get_message(channel, str(msg_id))
+            msg = await self.bot.get_message(channel, int(msg_id))
         except discord.NotFound:
             await self.bot.say(inline('Cannot find that message, check the channel and message id'))
             return
@@ -221,7 +221,7 @@ class TrUtils:
 
     async def _dump(self, ctx, channel: discord.Channel=None, msg_id: int=None):
         if msg_id:
-            msg = await self.bot.get_message(channel, msg_id)
+            msg = await self.bot.get_message(channel, int(msg_id))
         else:
             msg_limit = 2 if channel == ctx.message.channel else 1
             async for message in self.bot.logs_from(channel, limit=msg_limit):
@@ -239,7 +239,7 @@ class TrUtils:
         To find a message ID, enable developer mode in Discord settings and
         click the ... on a message.
         """
-        msg = await self.bot.get_message(ctx.message.channel, msg_id)
+        msg = await self.bot.get_message(ctx.message.channel, int(msg_id))
         content = msg.content.strip()
         content = box(content.replace('`', u'\u200b`'))
         await self.bot.say(content)
@@ -625,7 +625,7 @@ class TrUtils:
                 msg += '\n\tNot allowed to ban in {}; nothing I can do here'.format(server.name)
                 continue
 
-            m = server.get_member(user.id)
+            m = server.get_member(int(user.id))
             if m is None:
                 try:
                     await self.bot.http.ban(user.id, server.id, 0)
@@ -692,7 +692,7 @@ class TrUtils:
         Use this command to provide feedback on the bot, including new features, changes
         to commands, requests for new ^pad/^which entries, etc.
         """
-        feedback_channel = self.bot.get_channel(self.settings.getFeedbackChannel())
+        feedback_channel = self.bot.get_channel(int(self.settings.getFeedbackChannel()))
         await self._send_feedback(ctx, message, feedback_channel, " Join the Miru Server to see any responses (^miruserver).")
 
     @commands.command(pass_context=True, no_pm=True)
@@ -709,7 +709,7 @@ class TrUtils:
 
         Use this command to submit feedback on https://pad.protic.site or the JP translations.
         """
-        feedback_channel = self.bot.get_channel(self.settings.getBlogFeedbackChannel())
+        feedback_channel = self.bot.get_channel(int(self.settings.getBlogFeedbackChannel()))
         await self._send_feedback(ctx, message, feedback_channel, " Join the PDX Server to see any responses (^pdx).")
 
     @commands.command(pass_context=True, no_pm=True)
@@ -742,7 +742,7 @@ class TrUtils:
                 self.settings.addTrackedUser(user.id)
                 await self.bot.say(inline('Tracking user'))
                 for server in self.bot.servers:
-                    member = server.get_member(user.id)
+                    member = server.get_member(int(user.id))
                     if member and str(member.status) != 'offline':
                         self.settings.updateTrackedUser(user.id)
                         await self.bot.say(inline('User currently online'))
@@ -750,7 +750,7 @@ class TrUtils:
         else:
             msg = 'Tracked users:\n'
             for user_id, track_info in self.settings.trackedUsers().items():
-                user = await self.bot.get_user_info(user_id)
+                user = await self.bot.get_user_info(int(user_id))
                 user_name = user.name if user else user_id
                 msg += '\t{} : {}'.format(user_name, json.dumps(track_info, sort_keys=True))
 

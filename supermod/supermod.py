@@ -291,11 +291,11 @@ class SuperMod:
         return [member for member in server.members if self.check_supermod(member, supermod_role)]
 
     def get_user_name(self, server, user_id):
-        member = server.get_member(user_id)
+        member = server.get_member(int(user_id))
         return "{} ({})".format(member.name if member else '<unknown>', user_id)
 
     def get_channel_name(self, server, channel_id):
-        channel = server.get_channel(channel_id)
+        channel = server.get_channel(int(channel_id))
         return "{} ({})".format(channel.name if channel else '<unknown>', channel_id)
 
     async def do_modlog(self, server_id, log_text, do_say=True):
@@ -315,7 +315,7 @@ class SuperMod:
             if not self.settings.serverEnabled(server_id):
                 continue
 
-            server = self.bot.get_server(server_id)
+            server = self.bot.get_server(int(server_id))
             if server is None:
                 continue
 
@@ -359,7 +359,7 @@ class SuperMod:
             output = output.strip() + "\n"
 
             for new_mod in new_mods:
-                member = server.get_member(new_mod)
+                member = server.get_member(int(new_mod))
                 if member is None:
                     print('Failed to look up member for id', new_mod)
                     continue

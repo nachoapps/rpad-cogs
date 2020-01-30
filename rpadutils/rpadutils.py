@@ -265,7 +265,7 @@ class Menu():
         await bot.delete_message(message)
 
 #     def perms(self, ctx):
-#         user = ctx.message.server.get_member(self.bot.user.id)
+#         user = ctx.message.server.get_member(int(self.bot.user.id))
 #         return ctx.message.channel.permissions_for(user)
 
     async def custom_menu(self, ctx, emoji_to_message, selected_emoji, **kwargs):

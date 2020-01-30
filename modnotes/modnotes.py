@@ -76,7 +76,7 @@ class ModNotes:
         user_notes = self.settings.getUserNotes(ctx.message.server.id)
         msg = 'Notes for {} users'.format(len(user_notes))
         for user_id, notes in user_notes.items():
-            user = ctx.message.server.get_member(user_id)
+            user = ctx.message.server.get_member(int(user_id))
             user_text = '{} ({})'.format(user.name, user.id) if user else user_id
             msg += '\n\t{} : {}'.format(len(notes), user_text)
 

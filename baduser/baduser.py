@@ -305,14 +305,12 @@ class BadUser:
     @baduser.command(pass_context=True)
     @checks.is_owner()
     async def addban(self, ctx, user_id: int, *, reason: str):
-        user_id = str(user_id)
         self.settings.addBannedUser(user_id, reason)
         await self.bot.say(inline('Done'))
 
     @baduser.command(pass_context=True)
     @checks.is_owner()
     async def rmban(self, ctx, user_id: int):
-        user_id = str(user_id)
         self.settings.rmBannedUser(user_id)
         await self.bot.say(inline('Done'))
 

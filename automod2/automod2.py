@@ -189,7 +189,7 @@ class AutoMod2:
         output = 'AutoMod configs\n'
         channels = self.settings.getChannels(ctx)
         for channel_id, config in channels.items():
-            channel = self.bot.get_channel(channel_id)
+            channel = self.bot.get_channel(int(channel_id))
             if channel is None:
                 continue
 
@@ -376,7 +376,7 @@ class AutoMod2:
         msg = 'Watchdog config:'
         watchdog_channel_id = self.settings.getWatchdogChannel(server_id)
         if watchdog_channel_id:
-            watchdog_channel = self.bot.get_channel(watchdog_channel_id)
+            watchdog_channel = self.bot.get_channel(int(watchdog_channel_id))
             if watchdog_channel:
                 msg += '\nChannel: ' + watchdog_channel.name
             else:
@@ -390,9 +390,9 @@ class AutoMod2:
             request_user_id = user_settings['request_user_id']
             reason = user_settings['reason'] or 'no reason'
 
-            request_user = ctx.message.server.get_member(request_user_id)
+            request_user = ctx.message.server.get_member(int(request_user_id))
             request_user_txt = request_user.name if request_user else '???'
-            member = ctx.message.server.get_member(user_id)
+            member = ctx.message.server.get_member(int(user_id))
             if user_cooldown and member:
                 msg += '\n{} ({})\n\tcooldown {}\n\tby {} because [{}]'.format(
                     member.name, member.id, user_cooldown, request_user_txt, reason)
@@ -403,7 +403,7 @@ class AutoMod2:
             request_user_id = phrase_settings['request_user_id']
             phrase = phrase_settings['phrase']
 
-            request_user = ctx.message.server.get_member(request_user_id)
+            request_user = ctx.message.server.get_member(int(request_user_id))
             request_user_txt = request_user.name if request_user else '???'
             if phrase_cooldown:
                 msg += '\n{} -> {}\n\tcooldown {}\n\tby {}'.format(
@@ -499,7 +499,7 @@ class AutoMod2:
         request_user_id = user_settings['request_user_id']
         reason = user_settings['reason'] or 'no reason'
 
-        request_user = message.server.get_member(request_user_id)
+        request_user = message.server.get_member(int(request_user_id))
         request_user_txt = request_user.mention if request_user else '???'
 
         now = datetime.utcnow()
@@ -548,7 +548,7 @@ class AutoMod2:
 
     async def _watchdog_print(self, watchdog_channel_id, output_msg):
         try:
-            watchdog_channel = self.bot.get_channel(watchdog_channel_id)
+            watchdog_channel = self.bot.get_channel(int(watchdog_channel_id))
             await self.bot.send_message(watchdog_channel, output_msg)
         except Exception as ex:
             print('failed to watchdog', str(ex))

@@ -98,7 +98,7 @@ class PadEvents:
                                 try:
                                     message = box("Server " + e.server + ", group " +
                                                   e.groupLongName() + " : " + e.name_and_modifier)
-                                    channel = self.bot.get_channel(gr['channel_id'])
+                                    channel = self.bot.get_channel(int(gr['channel_id']))
 
                                     try:
                                         role_name = '{}_group_{}'.format(
@@ -257,7 +257,7 @@ class PadEvents:
         msg = ""
         for cr in reg_list:
             reg_channel_id = cr['channel_id']
-            channel = self.bot.get_channel(reg_channel_id)
+            channel = self.bot.get_channel(int(reg_channel_id))
             channel_name = channel.name if channel else 'Unknown(' + reg_channel_id + ')'
             server_name = channel.server.name if channel else 'Unknown server'
             msg += "   " + cr['server'] + " : " + server_name + '(' + channel_name + ')\n'

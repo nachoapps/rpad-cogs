@@ -79,7 +79,7 @@ class ChannelMod:
             await self.bot.edit_channel(channel, name=new_name)
 
     async def check_inactive_channel(self, server_id: str, channel_id: str, timeout: int):
-        channel = self.bot.get_channel(channel_id)
+        channel = self.bot.get_channel(int(channel_id))
         if channel is None:
             print('timeout check: cannot find channel', channel_id)
             return
@@ -128,7 +128,7 @@ class ChannelMod:
     @checks.is_owner()
     async def addmirror(self, ctx, source_channel_id: str, dest_channel_id: str, docheck: bool=True):
         """Set mirroring between two channels."""
-        if docheck and (not self.bot.get_channel(source_channel_id) or not self.bot.get_channel(dest_channel_id)):
+        if docheck and (not self.bot.get_channel(int(source_channel_id)) or not self.bot.get_channel(int(dest_channel_id))):
             await self.bot.say(inline('Check your channel IDs, or maybe the bot is not in those servers'))
             return
         self.settings.add_mirrored_channel(source_channel_id, dest_channel_id)
@@ -138,7 +138,7 @@ class ChannelMod:
     @checks.is_owner()
     async def rmmirror(self, ctx, source_channel_id: str, dest_channel_id: str, docheck: bool=True):
         """Remove mirroring between two channels."""
-        if docheck and (not self.bot.get_channel(source_channel_id) or not self.bot.get_channel(dest_channel_id)):
+        if docheck and (not self.bot.get_channel(int(source_channel_id)) or not self.bot.get_channel(int(dest_channel_id))):
             await self.bot.say(inline('Check your channel IDs, or maybe the bot is not in those servers'))
             return
         self.settings.rm_mirrored_channel(source_channel_id, dest_channel_id)
@@ -151,11 +151,11 @@ class ChannelMod:
         mirrored_channels = self.settings.mirrored_channels()
         msg = 'Mirrored channels\n'
         for mc_id, config in mirrored_channels.items():
-            channel = self.bot.get_channel(mc_id)
+            channel = self.bot.get_channel(int(mc_id))
             channel_name = channel.name if channel else 'unknown'
             msg += '\n{} ({})'.format(mc_id, channel_name)
             for channel_id in config['channels']:
-                channel = self.bot.get_channel(channel_id)
+                channel = self.bot.get_channel(int(channel_id))
                 channel_name = channel.name if channel else 'unknown'
                 msg += '\n\t{} ({})'.format(channel_id, channel_name)
         await self.bot.say(box(msg))
@@ -193,7 +193,7 @@ class ChannelMod:
 
         for dest_channel_id in mirrored_channels:
             try:
-                dest_channel = self.bot.get_channel(dest_channel_id)
+                dest_channel = self.bot.get_channel(int(dest_channel_id))
                 if not dest_channel:
                     continue
 
@@ -250,11 +250,11 @@ class ChannelMod:
         mirrored_messages = self.settings.get_mirrored_messages(channel.id, message.id)
         for (dest_channel_id, dest_message_id) in mirrored_messages:
             try:
-                dest_channel = self.bot.get_channel(dest_channel_id)
+                dest_channel = self.bot.get_channel(int(dest_channel_id))
                 if not dest_channel:
                     print('could not locate channel to mod')
                     continue
-                dest_message = await self.bot.get_message(dest_channel, dest_message_id)
+                dest_message = await self.bot.get_message(dest_channel, int(dest_message_id))
                 if not dest_message:
                     print('could not locate message to mod')
                     continue
@@ -292,7 +292,7 @@ class ChannelModSettings(CogSettings):
         return servers[server_id]
 
     def get_inactivity_monitor_channels(self, server_id: str):
-        server = self.get_server(server_id)
+        server = self.get_server(int(server_id))
         key = 'inactivity_monitor_channels'
         if key not in server:
             server[key] = {}

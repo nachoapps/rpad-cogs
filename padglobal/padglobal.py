@@ -802,7 +802,7 @@ class PadGlobal:
     def _get_emojis(self):
         emojis = list()
         for server_id in self.settings.emojiServers():
-            emojis.extend(self.bot.get_server(server_id).emojis)
+            emojis.extend(self.bot.get_server(int(server_id)).emojis)
         return emojis
 
     @padglobal.command(pass_context=True)
@@ -840,7 +840,7 @@ class PadGlobal:
                 return
 
         for server_id in server_ids:
-            emoji_server = self.bot.get_server(server_id)
+            emoji_server = self.bot.get_server(int(server_id))
             if len(emoji_server.emojis) < 50:
                 break
 

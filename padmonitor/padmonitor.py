@@ -69,7 +69,7 @@ class PadMonitor:
 
     async def announce(self, channel_id, message):
         try:
-            channel = self.bot.get_channel(channel_id)
+            channel = self.bot.get_channel(int(channel_id))
             for page in pagify(message):
                 await self.bot.send_message(channel, box(page))
         except Exception as ex:

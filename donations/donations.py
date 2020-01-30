@@ -143,8 +143,8 @@ class Donations:
     @commands.command(pass_context=True, hidden=True)
     async def insultripper(self, ctx):
         """Fuck ripper."""
-        ripper_id = '123529484476350467'
-        ripper = ctx.message.server.get_member(ripper_id)
+        ripper_id = 123529484476350467
+        ripper = ctx.message.server.get_member(int(ripper_id))
         insult = random.choice(self.insults_list)
         if ripper:
             await self.bot.say(ripper.mention + ' ' + insult)
@@ -161,8 +161,8 @@ class Donations:
             await self.bot.say(inline('Donor-only command'))
             return
 
-        ripper_id = '123529484476350467'
-        ripper = ctx.message.server.get_member(ripper_id)
+        ripper_id = 123529484476350467
+        ripper = ctx.message.server.get_member(int(ripper_id))
 
         if ripper is None:
             await self.bot.say(inline('Ripper must be in this server to use this command'))
@@ -302,7 +302,7 @@ class Donations:
 
         msg += '\n\nDisabled servers:'
         for server_id in disabled_servers:
-            server = self.bot.get_server(server_id)
+            server = self.bot.get_server(int(server_id))
             msg += '\n\t{} ({})'.format(server.name if server else 'unknown', server_id)
 
         msg += '\n\n{} personal commands are set'.format(len(cmds))

@@ -175,7 +175,7 @@ class Seniority(object):
         await self.bot.say(inline('Done deleting existing points'))
 
         for channel_id in self.settings.channels(server.id).keys():
-            channel = self.bot.get_channel(channel_id)
+            channel = self.bot.get_channel(int(channel_id))
             if channel is None:
                 continue
             await self.bot.say(inline('About to process channel: ' + channel.name))
@@ -185,7 +185,7 @@ class Seniority(object):
 
             points = 0
             for user_msg in channel_msgs:
-                member = server.get_member(user_msg[0])
+                member = server.get_member(int(user_msg[0]))
                 if member is None:
                     continue
                 msg_content = user_msg[1]
@@ -237,12 +237,12 @@ class Seniority(object):
         msg += '\n\n'
         msg += 'Ignored Users:'
         for user_id in self.settings.blacklist(server_id):
-            member = server.get_member(user_id)
+            member = server.get_member(int(user_id))
             msg += '\n\t{} ({})'.format(member.name if member else 'unknown', user_id)
         msg += '\n\n'
         msg += 'Channels and max ppd:'
         for channel_id, config in self.settings.channels(server_id).items():
-            channel = self.bot.get_channel(channel_id)
+            channel = self.bot.get_channel(int(channel_id))
             msg += '\n\t{} : {}'.format(channel.name if channel else channel_id, config['max_ppd'])
         msg += '\n\n'
         msg += 'Roles:'
@@ -262,7 +262,7 @@ class Seniority(object):
 
     def get_announce_channel(self, server_id):
         announce_channel_id = self.settings.announce_channel(server_id)
-        return self.bot.get_channel(announce_channel_id)
+        return self.bot.get_channel(int(announce_channel_id))
 
     @seniority.group(pass_context=True, no_pm=True)
     async def grant(self, ctx):
@@ -307,7 +307,7 @@ class Seniority(object):
 
             grant_users, ignored_users = await self.get_grant_ignore_users(
                 server, role, amount, lookback_days, True)
-            grant_users = [server.get_member(x[0]) for x in grant_users]
+            grant_users = [server.get_member(int(x[0])) for x in grant_users]
 
             cs = 5
             user_chunks = [grant_users[i:i + cs] for i in range(0, len(grant_users), cs)]
@@ -334,7 +334,7 @@ class Seniority(object):
 
             grant_users, ignored_users = await self.get_grant_ignore_users(
                 server, role, amount, lookback_days, False)
-            grant_users = [server.get_member(x[0]) for x in grant_users]
+            grant_users = [server.get_member(int(x[0])) for x in grant_users]
 
             cs = 5
             user_chunks = [grant_users[i:i + cs] for i in range(0, len(grant_users), cs)]
@@ -370,7 +370,7 @@ class Seniority(object):
                 r = ''
                 for userid_points in user_list:
                     user_id = userid_points[0]
-                    member = server.get_member(user_id)
+                    member = server.get_member(int(user_id))
                     member_name = member.name if member else user_id
                     points = round(userid_points[1], 2)
                     r += '\n\t{} ({}) : {}'.format(member_name, user_id, points)
@@ -774,7 +774,7 @@ class Seniority(object):
             table_row = list()
             for cidx, col in enumerate(columns):
                 raw_value = row[cidx]
-                value = str(raw_value)
+                value = raw_value
                 if col == 'timestamp':
                     # Assign a UTC timezone to the datetime
                     raw_value = raw_value.replace(tzinfo=pytz.utc)
@@ -782,13 +782,13 @@ class Seniority(object):
                     raw_value = NA_TZ_OBJ.normalize(raw_value)
                     value = raw_value.strftime("%F %X")
                 elif col == 'channel_id':
-                    channel = server.get_channel(value) if server else None
+                    channel = server.get_channel(int(value)) if server else None
                     value = channel.name if channel else value
                 elif col == 'user_id':
-                    member = server.get_member(value) if server else None
+                    member = server.get_member(int(value)) if server else None
                     value = member.name if member else value
                 elif col == 'server_id':
-                    server_obj = self.bot.get_server(value)
+                    server_obj = self.bot.get_server(int(value))
                     value = server_obj.name if server_obj else value
                 elif cidx + 1 == len(columns):
                     grand_total += force_number(value)
