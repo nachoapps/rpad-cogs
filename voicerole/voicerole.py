@@ -3,7 +3,7 @@ from discord.ext import commands
 import os
 
 from __main__ import user_allowed, send_cmd_help
-from cogs.utils.dataIO import dataIO
+from redbot.core import Config
 
 from redbot.rpadutils import *
 from redbot.rpadutils import CogSettings

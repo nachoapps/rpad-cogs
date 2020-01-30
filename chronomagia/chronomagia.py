@@ -15,7 +15,7 @@ from discord.ext import commands
 from __main__ import send_cmd_help, set_cog
 from cogs.utils import checks
 from cogs.utils.chat_formatting import pagify, box
-from cogs.utils.dataIO import dataIO
+from redbot.core import Config
 
 from redbot import rpadutils
 from redbot.rpadutils import CogSettings

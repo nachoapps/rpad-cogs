@@ -11,7 +11,7 @@ import pytz
 
 from __main__ import send_cmd_help
 from cogs.utils import checks
-from cogs.utils.dataIO import dataIO
+from redbot.core import Config
 import sqlite3 as lite
 
 from redbot import rpadutils
