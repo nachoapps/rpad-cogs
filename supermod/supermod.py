@@ -272,8 +272,8 @@ class SuperMod:
     async def add_supermod(self, member: discord.Member, supermod_role: discord.Role):
         if supermod_role and not self.check_supermod(member, supermod_role):
             try:
-                await self.bot.add_roles(member, supermod_role)
-                await self.bot.send_message(member, SUPERMOD_MESSAGE)
+                await member.add_roles(supermod_role)
+                await  member.send(SUPERMOD_MESSAGE)
             except Exception as e:
                 print('Failed to supermod', member.name)
                 print(e)
@@ -281,7 +281,7 @@ class SuperMod:
     async def remove_supermod(self, member: discord.Member, supermod_role: discord.Role):
         if supermod_role and self.check_supermod(member, supermod_role):
             try:
-                await self.bot.remove_roles(member, supermod_role)
+                await    member.remove_roles(supermod_role)
             except Exception as e:
                 print("failed to remove supermod", member.name, e)
 
@@ -302,12 +302,12 @@ class SuperMod:
         mod_log_channel_id = self.settings.getModlogChannel(server_id)
         if mod_log_channel_id:
             try:
-                await self.bot.send_message(discord.Object(mod_log_channel_id), log_text)
+                await  discord.Object(mod_log_channel_id).send(log_text)
             except:
                 print("Couldn't log to " + mod_log_channel_id)
 
         if do_say:
-            await self.bot.say(log_text)
+            await ctx.send(log_text)
 
     async def do_refresh_supermod(self):
         print('REFRESH STARTING')
@@ -404,7 +404,7 @@ class SuperMod:
 
         if user_id in self.server_id_to_quiet_user_ids[server_id]:
             try:
-                await self.bot.delete_message(message)
+                await message.delete()
                 shh_count = self.server_id_to_quiet_user_ids[server_id][user_id]
                 self.server_id_to_quiet_user_ids[server_id][user_id] = shh_count + 1
                 if shh_count % 5 != 0:
@@ -417,7 +417,7 @@ class SuperMod:
                 elif shh_count < 15:
                     msg = BE_QUIET_3
                 if msg:
-                    await self.bot.send_message(message.channel, msg.format(message.author.mention))
+                    await  message.channel.send(msg.format(message.author.mention))
             except Exception as e:
                 print(e)
 
@@ -461,9 +461,9 @@ class SuperMod:
             color = ''.join([random.choice('0123456789ABCDEF') for x in range(6)])
             color = int(color, 16)
             embed.color = discord.Color(value=color)
-            await self.bot.send_message(message.channel, embed=embed)
+            await  message.channel.send(embed=embed)
 
-        await self.bot.delete_message(message)
+        await message.delete()
 
     @commands.group(pass_context=True)
     async def supermod(self, context):
@@ -476,88 +476,88 @@ class SuperMod:
     async def setRefreshTime(self, ctx, refresh_time_sec: int):
         """Set the global refresh period for SuperMod, in seconds (global)."""
         self.settings.setRefreshTimeSec(refresh_time_sec)
-        await self.bot.say(DONE)
-        await self.bot.say('be sure to reload!')
+        await ctx.send(DONE)
+        await ctx.send('be sure to reload!')
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.is_owner()
     async def toggleServerEnabled(self, ctx):
         """Enables or disables SuperMod on this server."""
         now_enabled = self.settings.toggleServerEnabled(ctx.message.guild.id)
-        await self.bot.say(SUPERMOD_ENABLED if now_enabled else SUPERMOD_DISABLED)
+        await ctx.send(SUPERMOD_ENABLED if now_enabled else SUPERMOD_DISABLED)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.is_owner()
     async def toggleThinkingEnabled(self, ctx):
         """Enables or disables :thinking: on this server."""
         now_enabled = self.settings.toggleThinkingEnabled(ctx.message.guild.id)
-        await self.bot.say(THINKING_ENABLED if now_enabled else THINKING_DISABLED)
+        await ctx.send(THINKING_ENABLED if now_enabled else THINKING_DISABLED)
 
     @supermod.command(pass_context=True)
     @checks.is_owner()
     async def forceRefresh(self, ctx):
         """Forces an immediate refresh of the SuperMods."""
         await self.do_refresh_supermod()
-        await self.bot.say(DONE)
+        await ctx.send(DONE)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def modhelp(self, ctx):
         """Prints help for moderators"""
         for page in pagify(MOD_HELP):
-            await self.bot.whisper(box(page))
+            await ctx.author.send(box(page))
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def addPermanentSupermod(self, ctx, user: discord.Member):
         """Ensures a user is always selected as SuperMod."""
         self.settings.addPermanentSupermod(ctx.message.guild.id, user.id)
-        await self.bot.say(DONE)
+        await ctx.send(DONE)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def rmPermanentSupermod(self, ctx, user: discord.Member):
         """Removes a user from the always SuperMod list."""
         self.settings.rmPermanentSupermod(ctx.message.guild.id, user.id)
-        await self.bot.say(DONE)
+        await ctx.send(DONE)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def setSupermodCount(self, ctx, count: int):
         """Set the number of automatically selected SuperMods on this server."""
         self.settings.setSupermodCount(ctx.message.guild.id, count)
-        await self.bot.say(DONE)
+        await ctx.send(DONE)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def setModLogChannel(self, ctx, channel: discord.Channel):
         """Sets the channel used for printing moderation logs."""
         self.settings.setModlogChannel(ctx.message.guild.id, channel.id)
-        await self.bot.say(DONE)
+        await ctx.send(DONE)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def clearModLogChannel(self, ctx):
         """Clears the channel used for printing moderation logs."""
         self.settings.clearModlogChannel(ctx.message.guild.id)
-        await self.bot.say(DONE)
+        await ctx.send(DONE)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def setSupermodRole(self, ctx, role_name: str):
         """Sets the role that designates a user as SuperMod (make sure to hoist it)."""
         role = get_role(ctx.message.guild.roles, role_name)
         self.settings.setSupermodRole(ctx.message.guild.id, role.id)
-        await self.bot.say(DONE)
+        await ctx.send(DONE)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def clearSupermodRole(self, ctx):
         """Clears the role that designates a user as SuperMod."""
         self.settings.clearSupermodRole(ctx.message.guild.id)
-        await self.bot.say(DONE)
+        await ctx.send(DONE)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def addDiscussionChannel(self, ctx, channel: discord.Channel):
         """Marks a channel as containing discussion.
@@ -572,7 +572,7 @@ class SuperMod:
         msg = CHANNEL_ENABLED.format(self.text_to_emoji(channel.name))
         await self.do_modlog(ctx.message.guild.id, msg)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def rmDiscussionChannel(self, ctx, channel: discord.Channel):
         """Clears the discussion status from a channel."""
@@ -580,7 +580,7 @@ class SuperMod:
         msg = CHANNEL_DISABLED.format(self.text_to_emoji(channel.name))
         await self.do_modlog(ctx.message.guild.id, msg)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def addBlacklistedUser(self, ctx, member: discord.Member):
         """Removes SuperMod status from a user (if they have it) and ensures they won't be selected."""
@@ -588,14 +588,14 @@ class SuperMod:
         await self.do_modlog(ctx.message.guild.id, inline('{} was naughty, no SuperMod fun time for them'.format(member.name)))
         await self.remove_supermod(member, self.get_supermod_role(ctx.message.server))
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def rmBlacklistedUser(self, ctx, member: discord.Member):
         """Re-enable SuperMod selection for a user."""
         self.settings.rmBlacklistUser(ctx.message.guild.id, member.id)
         await self.do_modlog(ctx.message.guild.id, inline('{} was forgiven, they can SuperMod again}'.format(member.name)))
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def info(self, ctx):
         """Print the SuperMod configuration for this server."""
@@ -652,15 +652,15 @@ class SuperMod:
             output += '\n\t{}'.format(self.get_user_name(server, user_id))
 
         for page in pagify(output):
-            await self.bot.say(box(page))
+            await ctx.send(box(page))
 
     @supermod.command(pass_context=True)
     async def help(self, ctx):
         """Prints help for users"""
         for page in pagify(USER_HELP):
-            await self.bot.whisper(box(page))
+            await ctx.author.send(box(page))
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @is_supermod()
     async def rename(self, ctx, member: discord.Member, *, new_name: str=None):
         """You're a SuperMod! Set the nickname on a user."""
@@ -672,13 +672,13 @@ class SuperMod:
 
         if member.id in self.settings.ignoreUsers():
             msg = USER_RENAME_FAILED_DISABLED.format(author_name, member.name)
-            await self.bot.say(msg)
+            await ctx.send(msg)
             return
 
         member_old_name = member.name
         msg_template = None
         try:
-            await self.bot.change_nickname(member, new_name)
+            await member.edit(nick=new_name)
             if new_name:
                 msg_template = USER_RENAME_SUCCEEDED
             else:
@@ -689,7 +689,7 @@ class SuperMod:
         msg = msg_template.format(author_name, member_old_name, new_name)
         await self.do_modlog(server_id, msg)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @is_supermod()
     async def quiet(self, ctx, member: discord.Member):
         """You're a SuperMod! Put someone in time-out."""
@@ -702,13 +702,13 @@ class SuperMod:
 
         if member.id in self.settings.ignoreUsers():
             msg = USER_QUIET_FAILED_DISABLED.format(author_name, member.name)
-            await self.bot.say(msg)
+            await ctx.send(msg)
             return
 
         supermod_role = self.get_supermod_role(server)
         if self.check_supermod(member, supermod_role):
             msg = USER_QUIET_FAILED_SUPERMOD.format(author_name, member.name)
-            await self.bot.say(msg)
+            await ctx.send(msg)
             return
 
         quiet_users = self.server_id_to_quiet_user_ids[server_id][member.id] = 0
@@ -717,7 +717,7 @@ class SuperMod:
         msg = msg_template.format(author_name, member.name)
         await self.do_modlog(server_id, msg)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @is_supermod()
     async def chat(self, ctx, *, new_channel_name):
         """You're a SuperMod! Change the channel name."""
@@ -732,7 +732,7 @@ class SuperMod:
 
         msg_template = None
         try:
-            await self.bot.edit_channel(channel, name=new_channel_name)
+            await channel.edit_channel(name=new_channel_name)
             msg_template = CHANNEL_RENAME_SUCCEEDED
         except Exception as e:
             msg_template = CHANNEL_RENAME_FAILED
@@ -740,7 +740,7 @@ class SuperMod:
         msg = msg_template.format(ctx.message.author.name, old_channel_name, new_channel_name)
         await self.do_modlog(server_id, msg)
 
-    @supermod.command(pass_context=True, no_pm=True)
+    @supermod.command()
     @is_supermod()
     async def topic(self, ctx, *, new_channel_topic):
         """You're a SuperMod! Change the channel topic."""
@@ -754,7 +754,7 @@ class SuperMod:
 
         msg_template = None
         try:
-            await self.bot.edit_channel(channel, topic=new_channel_topic)
+            await channel.edit_channel(topic=new_channel_topic)
             msg_template = CHANNEL_TOPIC_SUCCEEDED
         except Exception as e:
             msg_template = CHANNEL_TOPIC_FAILED
@@ -767,14 +767,14 @@ class SuperMod:
         """I guess you can set this if you don't like SuperMod, but why?"""
         author = ctx.message.author
         self.settings.addIgnoreUser(author.id)
-        await self.bot.say(USER_SET_IGNORE.format(author.name))
+        await ctx.send(USER_SET_IGNORE.format(author.name))
 
     @supermod.command(pass_context=True)
     async def noticeme(self, ctx):
         """You do like SuperMod! I knew you'd be back."""
         author = ctx.message.author
         self.settings.rmIgnoreUser(author.id)
-        await self.bot.say(USER_CLEARED_IGNORE.format(author.name))
+        await ctx.send(USER_CLEARED_IGNORE.format(author.name))
 
 
 

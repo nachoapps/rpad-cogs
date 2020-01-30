@@ -78,7 +78,7 @@ class SchoolIdol:
         if c:
             await self.do_menu(ctx, c)
         else:
-            await self.bot.say(inline('no matches'))
+            await ctx.send(inline('no matches'))
 
     async def do_menu(self, ctx, c):
         emoji_to_embed = OrderedDict()
@@ -93,7 +93,7 @@ class SchoolIdol:
             starting_menu_emoji = self.idol_emoji
 
         if starting_menu_emoji is None:
-            await self.bot.say(inline('no images found'))
+            await ctx.send(inline('no images found'))
             return None
 
         return await self._do_menu(ctx, starting_menu_emoji, emoji_to_embed)
@@ -108,7 +108,7 @@ class SchoolIdol:
             if result_msg and result_embed:
                 # Message is finished but not deleted, clear the footer
                 result_embed.set_footer(text=discord.Embed.Empty)
-                await self.bot.edit_message(result_msg, embed=result_embed)
+                await result_msg.edit_message(embed=result_embed)
         except Exception as ex:
             print('Menu failure', ex)
 

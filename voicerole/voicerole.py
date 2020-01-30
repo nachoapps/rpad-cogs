@@ -20,13 +20,11 @@ class VoiceRole:
         self.bot = bot
         self.settings = VoiceRoleSettings("voicerole")
 
-    async def _on_voice_state_update(self, before, after):
-        member_to_modify = None
-        if before.voice_channel is None and after.voice_channel is not None:
-            member_to_modify = after
+    async def _on_voice_state_update(self, member, before, after):
+        member_to_modify = member
+        if before is None and after is not None:
             do_add = True
-        elif before.voice_channel is not None and after.voice_channel is None:
-            member_to_modify = before
+        elif before is not None and after is None:
             do_add = False
         else:
             return
@@ -43,21 +41,21 @@ class VoiceRole:
         try:
             role = get_role_from_id(self.bot, server, role_id)
             if do_add:
-                await self.bot.add_roles(member_to_modify, role)
+                await member_to_modify.add_roles(role)
             else:
-                await self.bot.remove_roles(member_to_modify, role)
+                await  member_to_modify.remove_roles(role)
         except Exception as ex:
             print('voicerole failure {} {} {}'.format(server_id, channel_id, role_id))
             print(ex)
 
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group()
     @checks.mod_or_permissions(administrator=True)
     async def voicerole(self, ctx):
         """Automatic role adjustment on VC enter/exit."""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
-    @voicerole.command(pass_context=True, no_pm=True)
+    @voicerole.command()
     async def set(self, ctx, channel: discord.Channel, role: discord.Role):
         """Associate a channel with a role.
 
@@ -69,25 +67,25 @@ class VoiceRole:
 
         To reference a role, either make it pingable.
         """
-        if channel.type != discord.ChannelType.voice:
-            await self.bot.say('Not a voice channel')
+        if not isinstance(channel, discord.VoiceChannel):
+            await ctx.send('Not a voice channel')
             return
         self.settings.addChannelRole(ctx.message.guild.id, channel.id, role.id)
-        await self.bot.say('done')
+        await ctx.send('done')
 
-    @voicerole.command(pass_context=True, no_pm=True)
+    @voicerole.command()
     async def clear(self, ctx, channel: discord.Channel):
         """Clear the role associated with a channel"""
         self.settings.rmChannelRole(ctx.message.guild.id, channel.id)
-        await self.bot.say('done')
+        await ctx.send('done')
 
-    @voicerole.command(pass_context=True, no_pm=True)
+    @voicerole.command()
     async def list(self, ctx):
         """List the channel/role associations for this server."""
         msg = 'Channel -> Role:'
         for channel_id, role_id in self.settings.getChannelRoles(ctx.message.guild.id).items():
             msg += '\n\t{} : {}'.format(channel_id, role_id)
-        await self.bot.say(box(msg))
+        await ctx.send(box(msg))
 
 
 

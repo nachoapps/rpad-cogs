@@ -176,10 +176,10 @@ class PadInfo:
         """Print the Japanese name of a monster"""
         m, err, debug_info = self.findMonster(query)
         if m is not None:
-            await self.bot.say(monsterToHeader(m))
-            await self.bot.say(box(m.name_jp))
+            await ctx.send(monsterToHeader(m))
+            await ctx.send(box(m.name_jp))
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
     @commands.command(name="id", pass_context=True)
     async def _do_id_all(self, ctx, *, query: str):
@@ -196,7 +196,7 @@ class PadInfo:
         if m is not None:
             await self._do_idmenu(ctx, m, self.id_emoji)
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
     @commands.command(name="id2", pass_context=True)
     async def _do_id2_all(self, ctx, *, query: str):
@@ -213,7 +213,7 @@ class PadInfo:
         if m is not None:
             await self._do_idmenu(ctx, m, self.id_emoji)
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
     @commands.command(name="evos", pass_context=True)
     async def evos(self, ctx, *, query: str):
@@ -222,16 +222,16 @@ class PadInfo:
         if m is not None:
             await self._do_idmenu(ctx, m, self.evo_emoji)
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
-    @commands.command(name="mats", pass_context=True, aliases=['evomats', 'evomat'])
+    @commands.command(name="mats", aliases=['evomats', 'evomat'])
     async def evomats(self, ctx, *, query: str):
         """Monster info (evo materials tab)"""
         m, err, debug_info = self.findMonster(query)
         if m is not None:
             await self._do_idmenu(ctx, m, self.mats_emoji)
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
     @commands.command(pass_context=True)
     async def pantheon(self, ctx, *, query: str):
@@ -240,9 +240,9 @@ class PadInfo:
         if m is not None:
             menu = await self._do_idmenu(ctx, m, self.pantheon_emoji)
             if menu == EMBED_NOT_GENERATED:
-                await self.bot.say(inline('Not a pantheon monster'))
+                await ctx.send(inline('Not a pantheon monster'))
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
     @commands.command(pass_context=True)
     async def skillups(self, ctx, *, query: str):
@@ -251,9 +251,9 @@ class PadInfo:
         if m is not None:
             menu = await self._do_idmenu(ctx, m, self.skillups_emoji)
             if menu == EMBED_NOT_GENERATED:
-                await self.bot.say(inline('No skillups available'))
+                await ctx.send(inline('No skillups available'))
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
     async def _do_idmenu(self, ctx, m, starting_menu_emoji):
         emoji_to_embed = self.get_id_emoji_options(m=m)
@@ -324,27 +324,27 @@ class PadInfo:
             if result_msg and result_embed:
                 # Message is finished but not deleted, clear the footer
                 result_embed.set_footer(text=discord.Embed.Empty)
-                await self.bot.edit_message(result_msg, embed=result_embed)
+                await result_msg.edit_message(embed=result_embed)
         except Exception as ex:
             print('Menu failure', ex)
 
-    @commands.command(pass_context=True, aliases=['img'])
+    @commands.command(aliases=['img'])
     async def pic(self, ctx, *, query: str):
         """Monster info (full image tab)"""
         m, err, debug_info = self.findMonster(query)
         if m is not None:
             await self._do_idmenu(ctx, m, self.pic_emoji)
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
-    @commands.command(pass_context=True, aliases=['stats'])
+    @commands.command(aliases=['stats'])
     async def otherinfo(self, ctx, *, query: str):
         """Monster info (misc info tab)"""
         m, err, debug_info = self.findMonster(query)
         if m is not None:
             await self._do_idmenu(ctx, m, self.other_info_emoji)
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
     @commands.command(pass_context=True)
     async def lookup(self, ctx, *, query: str):
@@ -352,9 +352,9 @@ class PadInfo:
         m, err, debug_info = self.findMonster(query)
         if m is not None:
             embed = monsterToHeaderEmbed(m)
-            await self.bot.say(embed=embed)
+            await ctx.send(embed=embed)
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
     @commands.command(pass_context=True)
     async def evolist(self, ctx, *, query):
@@ -363,9 +363,9 @@ class PadInfo:
         if m is not None:
             await self._do_evolistmenu(ctx, m)
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
-    @commands.command(pass_context=True, aliases=['leaders', 'leaderskills', 'ls'])
+    @commands.command(aliases=['leaders', 'leaderskills', 'ls'])
     async def leaderskill(self, ctx, left_query: str, right_query: str = None, *, bad=None):
         """Display the multiplier and leaderskills for two monsters
 
@@ -373,7 +373,7 @@ class PadInfo:
         e.g.: ^leaderskill "r sonia" "b sonia"
         """
         if bad:
-            await self.bot.say(inline('Too many inputs. Try wrapping your queries in quotes.'))
+            await ctx.send(inline('Too many inputs. Try wrapping your queries in quotes.'))
             return
 
         # Handle a very specific failure case, user typing something like "uuvo ragdra"
@@ -392,10 +392,10 @@ class PadInfo:
 
         err_msg = '{} query failed to match a monster: [ {} ]. If your query is multiple words, wrap it in quotes.'
         if left_err:
-            await self.bot.say(inline(err_msg.format('Left', left_query)))
+            await ctx.send(inline(err_msg.format('Left', left_query)))
             return
         if right_err:
-            await self.bot.say(inline(err_msg.format('Right', right_query)))
+            await ctx.send(inline(err_msg.format('Right', right_query)))
             return
 
         emoji_to_embed = OrderedDict()
@@ -405,23 +405,23 @@ class PadInfo:
 
         await self._do_menu(ctx, self.ls_emoji, EmojiUpdater(emoji_to_embed))
 
-    @commands.command(name="helpid", pass_context=True, aliases=['helppic', 'helpimg'])
+    @commands.command(name="helpid", aliases=['helppic', 'helpimg'])
     async def _helpid(self, ctx):
         """Whispers you info on how to craft monster queries for ^id"""
-        await self.bot.whisper(box(HELP_MSG))
+        await ctx.author.send(box(HELP_MSG))
 
     @commands.command(pass_context=True)
     async def padsay(self, ctx, server, *, query: str = None):
         """Speak the voice line of a monster into your current chat"""
         voice = ctx.message.author.voice
-        channel = voice.voice_channel
-        if channel is None:
-            await self.bot.say(inline('You must be in a voice channel to use this command'))
+        if voice is None:
+            await ctx.send(inline('You must be in a voice channel to use this command'))
             return
+        channel = voice.voice_channel
 
         speech_cog = self.bot.get_cog('Speech')
         if not speech_cog:
-            await self.bot.say(inline('Speech seems to be offline'))
+            await ctx.send(inline('Speech seems to be offline'))
             return
 
         if server.lower() not in ['na', 'jp']:
@@ -435,12 +435,12 @@ class PadInfo:
             voice_file = os.path.join(base_dir, server, '{}.wav'.format(m.monster_no_na))
             header = '{} ({})'.format(monsterToHeader(m), server)
             if not os.path.exists(voice_file):
-                await self.bot.say(inline('Could not find voice for ' + header))
+                await ctx.send(inline('Could not find voice for ' + header))
                 return
-            await self.bot.say('Speaking for ' + header)
+            await ctx.send('Speaking for ' + header)
             await speech_cog.play_path(channel, voice_file)
         else:
-            await self.bot.say(self.makeFailureMsg(err))
+            await ctx.send(self.makeFailureMsg(err))
 
     @commands.group(pass_context=True)
     @checks.is_owner()
@@ -456,7 +456,7 @@ class PadInfo:
         self.settings.emojiServers().clear()
         if emoji_servers:
             self.settings.setEmojiServers(emoji_servers.split(','))
-        await self.bot.say(inline('Set {} servers'.format(len(self.settings.emojiServers()))))
+        await ctx.send(inline('Set {} servers'.format(len(self.settings.emojiServers()))))
 
     def get_emojis(self):
         server_ids = self.settings.emojiServers()
@@ -504,7 +504,7 @@ class PadInfo:
     async def setanimationdir(self, ctx, *, animation_dir=''):
         """Set a directory containing animated images"""
         self.settings.setAnimationDir(animation_dir)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
     def check_monster_animated(self, monster_id: int):
         if not self.settings.animationDir():

@@ -56,7 +56,7 @@ class Stickers:
         """
         command = command.lower()
         if command in self.bot.commands.keys():
-            await self.bot.say("That is already a standard command.")
+            await ctx.send("That is already a standard command.")
             return
         if not self.c_commands:
             self.c_commands = {}
@@ -64,7 +64,7 @@ class Stickers:
 
         cmdlist[command] = text
         dataIO.save_json(self.file_path, self.c_commands)
-        await self.bot.say("Sticker successfully added.")
+        await ctx.send("Sticker successfully added.")
 
     @sticker.command(pass_context=True)
     @is_sticker_admin()
@@ -78,16 +78,16 @@ class Stickers:
         if command in cmdlist:
             cmdlist.pop(command, None)
             dataIO.save_json(self.file_path, self.c_commands)
-            await self.bot.say("Sticker successfully deleted.")
+            await ctx.send("Sticker successfully deleted.")
         else:
-            await self.bot.say("Sticker doesn't exist.")
+            await ctx.send("Sticker doesn't exist.")
 
     @commands.command(pass_context=True)
     async def stickers(self, ctx):
         """Shows all stickers"""
         cmdlist = self.c_commands
         if not cmdlist:
-            await self.bot.say("There are no stickers yet")
+            await ctx.send("There are no stickers yet")
             return
 
         commands = list(cmdlist.keys())
@@ -117,21 +117,21 @@ class Stickers:
             msg += "\n\n"
 
         for page in pagify(msg):
-            await self.bot.whisper(box(page))
+            await ctx.author.send(box(page))
 
     @sticker.command(pass_context=True)
     @checks.is_owner()
     async def addadmin(self, ctx, user: discord.Member):
         """Adds a user to the stickers admin"""
         self.settings.addAdmin(user.id)
-        await self.bot.say("done")
+        await ctx.send("done")
 
     @sticker.command(pass_context=True)
     @checks.is_owner()
     async def rmadmin(self, ctx, user: discord.Member):
         """Removes a user from the stickers admin"""
         self.settings.rmAdmin(user.id)
-        await self.bot.say("done")
+        await ctx.send("done")
 
     async def checkCC(self, message):
         if len(message.content) < 2:
@@ -153,11 +153,11 @@ class Stickers:
         if image_url:
             footer_text = message.content + ' posted by ' + message.author.name
             embed = discord.Embed().set_image(url=image_url).set_footer(text=footer_text)
-            sticker_msg = await self.bot.send_message(message.channel, embed=embed)
+            sticker_msg = await  message.channel.send(embed=embed)
 
-            await self.bot.delete_message(message)
+            await message.delete()
 #             await asyncio.sleep(15)
-#             await self.bot.delete_message(sticker_msg)
+#             await sticker_msg.delete()
 
     def get_prefix(self, message):
         for p in self.bot.settings.get_prefixes(message.server):

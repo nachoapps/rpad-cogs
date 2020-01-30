@@ -91,7 +91,7 @@ class PadTwitch:
 
         self.stream.connect()
 
-        for channel in self.settings.channels().values():
+        for channel in self.settings.channels():
             if channel['enabled']:
                 channel_name = channel['name']
                 print('Connecting to twitch channel: {}'.format(channel_name))
@@ -187,36 +187,36 @@ class PadTwitch:
     @padtwitch.command(pass_context=True)
     async def setUserName(self, ctx, user_name: str):
         self.settings.setUserName(user_name)
-        await self.bot.say(inline('done, reload the cog'))
+        await ctx.send(inline('done, reload the cog'))
 
     @padtwitch.command(pass_context=True)
     async def setOauthCode(self, ctx, oauth_code: str):
         self.settings.setOauthCode(oauth_code)
-        await self.bot.say(inline('done, reload the cog'))
+        await ctx.send(inline('done, reload the cog'))
 
     @padtwitch.command(pass_context=True)
     async def setEnabled(self, ctx, twitch_channel: str, enabled: bool):
         self.settings.setChannelEnabled(twitch_channel, enabled)
-        await self.bot.say(inline('done, reload the cog'))
+        await ctx.send(inline('done, reload the cog'))
 
     @padtwitch.command(pass_context=True)
     async def join(self, ctx, twitch_channel):
         self.stream.join_channel(twitch_channel)
-        await self.bot.say(inline('done'))
+        await ctx.send(inline('done'))
 
     @padtwitch.command(pass_context=True)
     async def send(self, ctx, twitch_channel, *, msg_text):
         self.stream.send_chat_message(twitch_channel, msg_text)
-        await self.bot.say(inline('done'))
+        await ctx.send(inline('done'))
 
     @padtwitch.command(pass_context=True)
     async def list(self, ctx):
         msg = 'UserName: {}'.format(self.settings.getUserName())
         msg += '\nChannels:'
-        for channel, cs in self.settings.channels().items():
+        for channel in self.settings.channels():
             msg += '\n\t({}) {}'.format('+' if cs['enabled'] else '-', cs['name'])
 
-        await self.bot.say(box(msg))
+        await ctx.send(box(msg))
 
 
 

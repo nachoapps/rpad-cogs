@@ -71,7 +71,7 @@ class PadMonitor:
         try:
             channel = self.bot.get_channel(int(channel_id))
             for page in pagify(message):
-                await self.bot.send_message(channel, box(page))
+                await  channel.send(box(page))
         except Exception as ex:
             print('failed to send message to', channel_id, ' : ', ex)
 
@@ -82,19 +82,19 @@ class PadMonitor:
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
-    @padmonitor.command(pass_context=True, no_pm=True)
+    @padmonitor.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def addnewchannel(self, ctx):
         """Sets announcements for the current channel."""
         self.settings.add_new_monster_channel(ctx.message.channel.id)
-        await self.bot.say(inline('done'))
+        await ctx.send(inline('done'))
 
-    @padmonitor.command(pass_context=True, no_pm=True)
+    @padmonitor.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def rmnewchannel(self, ctx):
         """Removes announcements for the current channel."""
         self.settings.rm_new_monster_channel(ctx.message.channel.id)
-        await self.bot.say(inline('done'))
+        await ctx.send(inline('done'))
 
 
 

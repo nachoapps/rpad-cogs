@@ -26,11 +26,11 @@ class RpadUtils:
 
         self.bot = bot
 
-    async def on_command_error(self, error, ctx):
+    async def on_command_error(self, ctx, error):
         channel = ctx.message.channel
         if isinstance(error, ReportableError):
             msg = 'An error occurred while processing your command: {}'.format(error.message)
-            await self.bot.send_message(channel, inline(msg))
+            await  channel.send(inline(msg))
 
 
 
@@ -262,7 +262,7 @@ class Menu():
 
     # for use as an action
     async def reaction_delete_message(self, bot, ctx, message):
-        await bot.delete_message(message)
+        await message.delete()
 
 #     def perms(self, ctx):
 #         user = ctx.message.guild.get_member(int(self.bot.user.id))
@@ -302,15 +302,14 @@ class Menu():
                         new_message_content):
         if message:
             if type(new_message_content) == discord.Embed:
-                return await self.bot.edit_message(message, embed=new_message_content)
+                return await message.edit_message(embed=new_message_content)
             else:
-                return await self.bot.edit_message(message, new_message_content)
+                return await message.edit_message(new_message_content)
         else:
             if type(new_message_content) == discord.Embed:
-                return await self.bot.send_message(ctx.message.channel,
-                                                   embed=new_message_content)
+                return await ctx.message.channel.send(embed=new_message_content)
             else:
-                return await self.bot.say(new_message_content)
+                return await ctx.send(new_message_content)
 
     async def _custom_menu(self, ctx, emoji_to_message, selected_emoji,
                            allowed_action=True, **kwargs):
@@ -326,21 +325,21 @@ class Menu():
         if reactions_required:
             for e in emoji_to_message.emoji_dict:
                 try:
-                    await self.bot.add_reaction(message, e)
+                    await message.add_reaction(e)
                 except Exception as e:
                     # failed to add reaction, ignore
                     pass
 
-        r = await self.bot.wait_for_reaction(
-            emoji=list(emoji_to_message.emoji_dict.keys()),
-            message=message,
-            user=ctx.message.author,
-            check=check,
-            timeout=timeout)
+        r, u = await self.bot.wait_for('add_reaction',
+               emoji=list(emoji_to_message.emoji_dict.keys()),
+               message=message,
+               user=ctx.message.author,
+               check=check,
+               timeout=timeout)
 
         if r is None:
             try:
-                await self.bot.clear_reactions(message)
+                await message.clear_reactions()
             except Exception as e:
                 # This is expected when miru doesn't have manage messages
                 pass
@@ -403,28 +402,27 @@ def char_to_emoji(c):
 # Hack to fix discord.py
 ##############################
 class UserConverter2(converter.IDConverter):
-    @asyncio.coroutine
-    def convert(self):
-        message = self.ctx.message
-        bot = self.ctx.bot
-        match = self._get_id_match() or re.match(r'<@!?([0-9]+)>$', self.argument)
+    async def convert(self, ctx, argument):
+        message = ctx.message
+        bot = ctx.bot
+        match = self._get_id_match() or re.match(r'<@!?([0-9]+)>$', argument)
         server = message.guild
         result = None
         if match is None:
             # not a mention...
             if server:
-                result = server.get_member_named(self.argument)
+                result = server.get_member_named(argument)
             else:
-                result = _get_from_servers(bot, 'get_member_named', self.argument)
+                result = _get_from_servers(bot, 'get_member_named', argument)
         else:
             user_id = match.group(1)
             if server:
-                result = yield from bot.get_user_info(user_id)
+                result = yield from bot.fetch_user(user_id)
             else:
                 result = _get_from_servers(bot, 'get_member', user_id)
 
         if result is None:
-            raise BadArgument('Member "{}" not found'.format(self.argument))
+            raise BadArgument('Member "{}" not found'.format(argument))
 
         return result
 
@@ -613,16 +611,16 @@ def get_pdx_id_dadguide(m):
 
 async def await_and_remove(bot, react_msg, listen_user, delete_msgs=None, emoji="❌", timeout=15):
     try:
-        await bot.add_reaction(react_msg, emoji)
+        await react_msg.add_reaction(emoji)
     except Exception as e:
         # failed to add reaction, ignore
         return
 
-    r = await bot.wait_for_reaction(
-        emoji=[emoji],
-        message=react_msg,
-        user=listen_user,
-        timeout=timeout)
+    r, u = await bot.wait_for('add_reaction',
+           emoji=[emoji],
+           message=react_msg,
+           user=listen_user,
+           timeout=timeout)
 
     if r is None:
         try:
@@ -633,7 +631,7 @@ async def await_and_remove(bot, react_msg, listen_user, delete_msgs=None, emoji=
     else:
         msgs = delete_msgs or [react_msg]
         for m in msgs:
-            await bot.delete_message(m)
+            await m.delete()
 
 
 loop_executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)

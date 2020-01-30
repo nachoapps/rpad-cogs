@@ -61,7 +61,7 @@ class PadRem:
         You will need to reload the module after changing this.
         """
         self.settings.setBoost(machine_id, boost_rate)
-        await self.bot.say(box('Done'))
+        await ctx.send(box('Done'))
 
     @commands.command(name="remlist", pass_context=True)
     async def _remlist(self, ctx):
@@ -74,7 +74,7 @@ class PadRem:
                 msg += '\t{:7} -> {}\n'.format(key, machine.machine_name)
             msg += '\n'
 
-        await self.bot.say(box(msg))
+        await ctx.send(box(msg))
 
     @commands.command(name="reminfo", pass_context=True)
     async def _reminfo(self, ctx, server, rem_name):
@@ -86,13 +86,13 @@ class PadRem:
         """
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, JP")
+            await ctx.send("Unsupported server, pick one of NA, JP")
             return
 
         config = self.pgrem.server_to_config[server]
 
         if rem_name not in config.machines:
-            await self.bot.say(box('Unknown machine name'))
+            await ctx.send(box('Unknown machine name'))
             return
 
         machine = config.machines[rem_name]
@@ -109,20 +109,20 @@ class PadRem:
         """
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, JP")
+            await ctx.send("Unsupported server, pick one of NA, JP")
             return
 
         config = self.pgrem.server_to_config[server]
 
         if rem_name not in config.machines:
-            await self.bot.say(box('Unknown machine name'))
+            await ctx.send(box('Unknown machine name'))
             return
 
         machine = config.machines[rem_name]
         monster = machine.pickMonster()
 
         msg = 'You rolled : #{} {}'.format(monster.monster_no_na, monster.name_na)
-        await self.bot.say(box(msg))
+        await ctx.send(box(msg))
 
     @commands.command(name="rollremfor", pass_context=True)
     async def _rollremfor(self, ctx, server: str, rem_name: str, monster_query: str):
@@ -136,13 +136,13 @@ class PadRem:
         monster_query = monster_query.lower()
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, JP")
+            await ctx.send("Unsupported server, pick one of NA, JP")
             return
 
         config = self.pgrem.server_to_config[server]
 
         if rem_name not in config.machines:
-            await self.bot.say(box('Unknown machine name'))
+            await ctx.send(box('Unknown machine name'))
             return
 
         machine = config.machines[rem_name]
@@ -161,7 +161,7 @@ class PadRem:
                 break
 
         if not found:
-            await self.bot.say(box('That monster is not available in this REM'))
+            await ctx.send(box('That monster is not available in this REM'))
             return
 
         picks = 0
@@ -175,17 +175,17 @@ class PadRem:
                 price = stones * stone_price
                 msg = 'It took {} tries, ${:.0f}, and {} stones to pull : #{} {}'.format(
                     picks, price, stones, monster.monster_no_na, monster.name_na)
-                await self.bot.say(box(msg))
+                await ctx.send(box(msg))
                 return
 
-        await self.bot.say(box('You failed to roll your monster in 500 tries'))
+        await ctx.send(box('You failed to roll your monster in 500 tries'))
 
     async def sayPageOutput(self, msg, format_type=box):
         msg = msg.strip()
         msg = pagify(msg, ["\n"], shorten_by=20)
         for page in msg:
             try:
-                await self.bot.say(format_type(page))
+                await ctx.send(format_type(page))
             except Exception as e:
                 print("page output failed " + str(e))
                 print("tried to print: " + page)
@@ -195,7 +195,7 @@ class PadRem:
         msg = pagify(msg, ["\n"], shorten_by=20)
         for page in msg:
             try:
-                await self.bot.whisper(format_type(page))
+                await ctx.author.send(format_type(page))
             except Exception as e:
                 print("page output failed " + str(e))
                 print("tried to print: " + page)

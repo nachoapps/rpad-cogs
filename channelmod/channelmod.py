@@ -34,7 +34,7 @@ class ChannelMod:
         self.settings = ChannelModSettings("channelmod")
         self.channel_last_spoke = {}
 
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group()
     @checks.mod_or_permissions(manage_channels=True)
     async def channelmod(self, ctx):
         """Manage channel moderation settings"""
@@ -55,14 +55,14 @@ class ChannelMod:
         server = channel.guild
         has_permissions = channel.permissions_for(server.me).manage_channels
         if not has_permissions:
-            await self.bot.say(inline('I need manage channel permissions to do this'))
+            await ctx.send(inline('I need manage channel permissions to do this'))
             return
 
         self.settings.set_inactivity_monitor_channel(server.id, channel.id, timeout)
-        await self.bot.say(inline('done'))
+        await ctx.send(inline('done'))
 
     async def log_channel_activity_check(self, message):
-        if message.author.id == self.bot.user.id or message.channel.is_private:
+        if message.author.id == self.bot.user.id or not isinstance(channel, discord.GuildChannel):
             return
 
         server = message.guild
@@ -76,7 +76,7 @@ class ChannelMod:
 
         if channel.name.endswith(INACTIVE):
             new_name = channel.name[:-len(INACTIVE)]
-            await self.bot.edit_channel(channel, name=new_name)
+            await channel.edit_channel(name=new_name)
 
     async def check_inactive_channel(self, server_id: str, channel_id: str, timeout: int):
         channel = self.bot.get_channel(int(channel_id))
@@ -100,7 +100,7 @@ class ChannelMod:
         if time_exceeded and not channel.name.endswith(INACTIVE):
             new_name = channel.name + INACTIVE
             try:
-                await self.bot.edit_channel(channel, name=new_name)
+                await channel.edit_channel(name=new_name)
             except Exception as ex:
                 print('failed to edit channel: ' + str(ex))
 
@@ -129,20 +129,20 @@ class ChannelMod:
     async def addmirror(self, ctx, source_channel_id: str, dest_channel_id: str, docheck: bool=True):
         """Set mirroring between two channels."""
         if docheck and (not self.bot.get_channel(int(source_channel_id)) or not self.bot.get_channel(int(dest_channel_id))):
-            await self.bot.say(inline('Check your channel IDs, or maybe the bot is not in those servers'))
+            await ctx.send(inline('Check your channel IDs, or maybe the bot is not in those servers'))
             return
         self.settings.add_mirrored_channel(source_channel_id, dest_channel_id)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
     @channelmod.command(pass_context=True)
     @checks.is_owner()
     async def rmmirror(self, ctx, source_channel_id: str, dest_channel_id: str, docheck: bool=True):
         """Remove mirroring between two channels."""
         if docheck and (not self.bot.get_channel(int(source_channel_id)) or not self.bot.get_channel(int(dest_channel_id))):
-            await self.bot.say(inline('Check your channel IDs, or maybe the bot is not in those servers'))
+            await ctx.send(inline('Check your channel IDs, or maybe the bot is not in those servers'))
             return
         self.settings.rm_mirrored_channel(source_channel_id, dest_channel_id)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
     @channelmod.command(pass_context=True)
     @checks.is_owner()
@@ -158,10 +158,10 @@ class ChannelMod:
                 channel = self.bot.get_channel(int(channel_id))
                 channel_name = channel.name if channel else 'unknown'
                 msg += '\n\t{} ({})'.format(channel_id, channel_name)
-        await self.bot.say(box(msg))
+        await ctx.send(box(msg))
 
     async def mirror_msg_new(self, message):
-        if message.author.id == self.bot.user.id or message.channel.is_private:
+        if message.author.id == self.bot.user.id or not isinstance(channel, discord.GuildChannel):
             return
 
         channel = message.channel
@@ -201,13 +201,13 @@ class ChannelMod:
                     msg = 'Posted by **{}** in *{} - #{}*:'.format(message.author.name,
                                                                    message.guild.name,
                                                                    message.channel.name)
-                    await self.bot.send_message(dest_channel, msg)
+                    await  dest_channel.send(msg)
 
                 if attachment_bytes:
-                    dest_message = await self.bot.send_file(dest_channel, attachment_bytes, filename=filename, content=message.content)
+                    dest_message = await  dest_channel.send(attachment_bytes, filename=filename, content=message.content)
                     attachment_bytes.seek(0)
                 elif message.content:
-                    dest_message = await self.bot.send_message(dest_channel, message.content)
+                    dest_message = await  dest_channel.send(message.content)
                 else:
                     print('Failed to mirror message from ', channel.id, 'no action to take')
 
@@ -243,7 +243,7 @@ class ChannelMod:
                              delete_message_content: bool=False,
                              new_message_reaction=None,
                              delete_message_reaction=None):
-        if message.author.id == self.bot.user.id or message.channel.is_private:
+        if message.author.id == self.bot.user.id or not isinstance(channel, discord.GuildChannel):
             return
 
         channel = message.channel
@@ -254,17 +254,17 @@ class ChannelMod:
                 if not dest_channel:
                     print('could not locate channel to mod')
                     continue
-                dest_message = await self.bot.get_message(dest_channel, int(dest_message_id))
+                dest_message = await dest_channel.fetch_message(int(dest_message_id))
                 if not dest_message:
                     print('could not locate message to mod')
                     continue
 
                 if new_message_content:
-                    await self.bot.edit_message(dest_message, new_content=new_message_content)
+                    await dest_message.edit_message(new_content=new_message_content)
                 elif new_message_reaction:
-                    await self.bot.add_reaction(dest_message, new_message_reaction)
+                    await dest_message.add_reaction(new_message_reaction)
                 elif delete_message_content:
-                    await self.bot.delete_message(dest_message)
+                    await dest_message.delete()
                 elif delete_message_reaction:
                     await self.bot.remove_reaction(dest_message, delete_message_reaction, dest_message.guild.me)
             except Exception as ex:

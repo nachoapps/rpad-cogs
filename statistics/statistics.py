@@ -57,7 +57,7 @@ class Statistics:
         Retreive statistics
         """
         message = await self.embed_statistics()
-        await self.bot.say(embed=message)
+        await ctx.send(embed=message)
 
     @commands.command(pass_context=True)
     @checks.is_owner()
@@ -84,7 +84,7 @@ class Statistics:
             dataIO.save_json('data/statistics/settings.json', self.settings)
             message = '`Changed refresh rate to {} seconds`'.format(
                 self.refresh_rate)
-        await self.bot.say(message)
+        await ctx.send(message)
 
     async def embed_statistics(self):
         stats = self.retrieve_statistics()
@@ -137,9 +137,9 @@ class Statistics:
         io_writes = process.io_counters().write_count
 
         for channel in self.bot.get_all_channels():
-            if channel.type == discord.ChannelType.text:
+            if isinstance(channel, discord.TextChannel):
                 text_channels += 1
-            elif channel.type == discord.ChannelType.voice:
+            elif isinstance(channel, discord.VoiceChannel):
                 voice_channels += 1
         channels = text_channels + voice_channels
 

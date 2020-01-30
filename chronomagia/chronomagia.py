@@ -90,7 +90,7 @@ class ChronoMagia:
         """ChronoMagia query."""
         query = clean_name_for_query(query)
         if len(query) < 3:
-            await self.bot.say(inline('query must be at least 3 characters'))
+            await ctx.send(inline('query must be at least 3 characters'))
             return
 
         names_to_card = {x.name_clean: x for x in self.card_data}
@@ -109,7 +109,7 @@ class ChronoMagia:
         if matches:
             await self.do_menu(ctx, names_to_card[matches[0]])
         else:
-            await self.bot.say(inline('no matches'))
+            await ctx.send(inline('no matches'))
 
     async def do_menu(self, ctx, c):
         emoji_to_embed = OrderedDict()
@@ -126,7 +126,7 @@ class ChronoMagia:
             if result_msg and result_embed:
                 # Message is finished but not deleted, clear the footer
                 result_embed.set_footer(text=discord.Embed.Empty)
-                await self.bot.edit_message(result_msg, embed=result_embed)
+                await result_msg.edit_message(embed=result_embed)
         except Exception as ex:
             print('Menu failure', ex)
 

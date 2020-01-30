@@ -58,76 +58,76 @@ and starts following a user if one was set upon construction."""
         await self.refollow()
         print("done with on_ready")
 
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group()
     @checks.is_owner()
     async def twitter2(self, ctx):
         """Manage twitter feed mirroring"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
-    @twitter2.command(name="info", pass_context=True, no_pm=True)
+    @twitter2.command(name="info")
     async def _info(self, ctx):
-        await self.bot.say(self.info(ctx.message.channel))
+        await ctx.send(self.info(ctx.message.channel))
 
-#     @twitter2.command(name="follow", pass_context=True, no_pm=True)
+#     @twitter2.command(name="follow")
 #     @checks.mod_or_permissions(manage_guild=True)
 #     async def _follow(self, ctx, command):
-#         await self.bot.say("stopping follow on " + self.tuser)
+#         await ctx.send("stopping follow on " + self.tuser)
 #         tuser = command
 #         self.stream.disconnect()
-#         await self.bot.say("starting follow on " + tuser)
+#         await ctx.send("starting follow on " + tuser)
 #         await self.follow(tuser, ctx.message.channel)
 
-    @twitter2.command(name="addchannel", pass_context=True, no_pm=True)
+    @twitter2.command(name="addchannel")
     async def _addchannel(self, ctx, twitter_user):
         twitter_user = twitter_user.lower()
         already_following = twitter_user in self.channel_ids
         if already_following:
             if ctx.message.channel.id in self.channel_ids[twitter_user]:
-                await self.bot.say("Channel already active.")
+                await ctx.send("Channel already active.")
                 return
         elif not self.checkTwitterUser(twitter_user):
-            await self.bot.say(inline("User seems invalid : " + twitter_user))
+            await ctx.send(inline("User seems invalid : " + twitter_user))
             return
         else:
             self.channel_ids[twitter_user] = list()
 
         self.channel_ids[twitter_user].append(ctx.message.channel.id)
         self.save_config()
-        await self.bot.say(inline("Channel now active for user " + twitter_user))
+        await ctx.send(inline("Channel now active for user " + twitter_user))
 
         if not already_following:
-            await self.bot.say(inline("New account, restarting twitter connection"))
+            await ctx.send(inline("New account, restarting twitter connection"))
             await self.refollow()
 
-    @twitter2.command(name="rmchannel", pass_context=True, no_pm=True)
+    @twitter2.command(name="rmchannel")
     async def _rmchannel(self, ctx, twitter_user):
         twitter_user = twitter_user.lower()
         channel_id = ctx.message.channel.id
         if twitter_user not in self.channel_ids:
-            await self.bot.say(inline("That account is not active for any channels."))
+            await ctx.send(inline("That account is not active for any channels."))
             return
         elif channel_id not in self.channel_ids[twitter_user]:
-            await self.bot.say(inline("Channel was not active for that account."))
+            await ctx.send(inline("Channel was not active for that account."))
             return
 
         self.channel_ids[twitter_user].remove(channel_id)
-        await self.bot.say(inline("Channel removed for user " + twitter_user))
+        await ctx.send(inline("Channel removed for user " + twitter_user))
         if not len(self.channel_ids[twitter_user]):
-            await self.bot.say(inline("Last channel removed for " + twitter_user + ", restarting twitter connection"))
+            await ctx.send(inline("Last channel removed for " + twitter_user + ", restarting twitter connection"))
             self.channel_ids.pop(twitter_user)
             await self.refollow(True)
 
         self.save_config()
 
-    @twitter2.command(name="resend", pass_context=True, no_pm=True)
+    @twitter2.command(name="resend")
     async def _resend(self, ctx, idx: int=1):
         last_tweet = self.stream.last(idx)
         if last_tweet:
             print('Resending tweet idx ' + str(idx))
             await self.tweetAsync(last_tweet)
         else:
-            await self.bot.say('No tweet to send')
+            await ctx.send('No tweet to send')
 
     def checkTwitterUser(self, tuser):
         return self.stream.get_user(tuser) is not None
@@ -141,19 +141,19 @@ Returns False if the user does not exist, True otherwise."""
         # Stop previous thread, if any
         if self.stream_thread:
             if src_channel:
-                await self.bot.say("Disconnecting from twitter.")
+                await ctx.send("Disconnecting from twitter.")
             self.stream.disconnect()
             self.stream_thread.join()
 
         # Setup new thread to run the twitter stream in background
         if src_channel:
-            await self.bot.say("Connecting to twitter.")
+            await ctx.send("Connecting to twitter.")
 
         user_string = ",".join(self.channel_ids.keys())
         self.stream_thread = self.stream.follow_thread(user_string)
 
         if src_channel:
-            await self.bot.say("Now following these users: " + user_string + ".")
+            await ctx.send("Now following these users: " + user_string + ".")
 
     def totime(self, data):
         dt = TwitterUserStream.timeof(data)
@@ -164,14 +164,14 @@ Returns False if the user does not exist, True otherwise."""
     def tweet(self, data):
         self.bot.loop.call_soon(asyncio.async, self.tweetAsync(data))
 
-    @twitter2.command(name="testmsg", pass_context=True, no_pm=True)
+    @twitter2.command(name="testmsg")
     async def _testmsg(self, ctx, twitter_user):
         data = {
             'text': 'test msg',
             'id_str': 'idstring',
             'user': {'screen_name': twitter_user}
         }
-        await self.bot.say("Sending test msg: " + str(data))
+        await ctx.send("Sending test msg: " + str(data))
         await self.tweetAsync(data)
 
     async def tweetAsync(self, data):
@@ -207,7 +207,7 @@ Returns False if the user does not exist, True otherwise."""
 
         for chan_id in self.channel_ids[twitter_user]:
             print("for channel " + chan_id)
-            await self.bot.send_message(discord.Object(chan_id), message)
+            await  discord.Object(chan_id).send(message)
         return True
 
     def info(self, channel=None):

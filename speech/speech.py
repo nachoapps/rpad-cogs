@@ -63,24 +63,24 @@ class Speech:
     async def vcsay(self, ctx, *, text):
         """Speak into the current user's voice channel."""
         if not self.service:
-            await self.bot.say(inline('Set up an API key file first!'))
+            await ctx.send(inline('Set up an API key file first!'))
             return
 
         voice = ctx.message.author.voice
-        channel = voice.voice_channel
-        if channel is None:
-            await self.bot.say(inline('You must be in a voice channel to use this command'))
+        if voice is None:
+            await ctx.send(inline('You must be in a voice channel to use this command'))
             return
+        channel = voice.voice_channel
 
         if len(text) > 300:
-            await self.bot.say(inline('Command is too long'))
+            await ctx.send(inline('Command is too long'))
             return
 
         await self.speak(channel, text) 
 
     async def speak(self, channel, text: str):
         if self.busy:
-            await self.bot.say(inline('Sorry, saying something else right now'))
+            await ctx.send(inline('Sorry, saying something else right now'))
             return False
         else:
             self.busy = True
@@ -111,7 +111,7 @@ class Speech:
 
         voice_client = None
         try:
-            voice_client = await self.bot.join_voice_channel(channel)
+            voice_client = await channel.connect()
 
             use_avconv = False
             options = "-filter \"volume=volume=0.3\""
@@ -139,7 +139,7 @@ class Speech:
     async def setkeyfile(self, ctx, api_key_file):
         """Sets the google api key file."""
         self.settings.setKeyFile(api_key_file)
-        await self.bot.say("done, make sure the key file is in the data/speech directory")
+        await ctx.send("done, make sure the key file is in the data/speech directory")
 
 
 

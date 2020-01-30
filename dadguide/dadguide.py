@@ -227,7 +227,7 @@ class Dadguide(object):
     async def setdatafile(self, ctx, *, data_file):
         """Set a local path to dadguide data instead of downloading it."""
         self.settings.setDataFile(data_file)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
 
 class DadguideSettings(CogSettings):

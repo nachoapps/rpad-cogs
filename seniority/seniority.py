@@ -150,7 +150,7 @@ class Seniority(object):
 
         print('Seniority: init complete')
 
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group()
     @checks.mod_or_permissions(manage_guild=True)
     async def seniority(self, context):
         """Automatically promote people based on activity."""
@@ -162,26 +162,26 @@ class Seniority(object):
     async def rawquery(self, ctx, *, query: str):
         await self.queryAndPrint(ctx.message.server, query, [])
 
-    @seniority.command(pass_context=True, no_pm=True)
+    @seniority.command()
     @checks.is_owner()
     async def backfill(self, ctx, *, now_date_str: str):
         sqllog_cog = self.bot.get_cog('SqlActivityLogger')
         server = ctx.message.guild
 
-        await self.bot.say(inline('Deleting any existing points on ' + now_date_str))
+        await ctx.send(inline('Deleting any existing points on ' + now_date_str))
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(DELETE_DAY_QUERY, now_date_str, server.id)
-        await self.bot.say(inline('Done deleting existing points'))
+        await ctx.send(inline('Done deleting existing points'))
 
-        for channel_id in self.settings.channels(server.id).keys():
+        for channel_id in self.settings.channels(server.id):
             channel = self.bot.get_channel(int(channel_id))
             if channel is None:
                 continue
-            await self.bot.say(inline('About to process channel: ' + channel.name))
+            await ctx.send(inline('About to process channel: ' + channel.name))
             channel_msgs = sqllog_cog.get_server_channel_date_msgs(
                 server.id, channel.id, now_date_str)
-            await self.bot.say(inline('Retrieved {} messages'.format(len(channel_msgs))))
+            await ctx.send(inline('Retrieved {} messages'.format(len(channel_msgs))))
 
             points = 0
             for user_msg in channel_msgs:
@@ -192,9 +192,9 @@ class Seniority(object):
                 new_points = await self.process_message(
                     server, channel, member, now_date_str, msg_content)
                 points += new_points or 0
-            await self.bot.say(inline('{} points were earned'.format(points)))
+            await ctx.send(inline('{} points were earned'.format(points)))
 
-        await self.bot.say(inline('Finished with backfill'))
+        await ctx.send(inline('Finished with backfill'))
 
     @seniority.command(pass_context=True)
     @checks.is_owner()
@@ -203,15 +203,15 @@ class Seniority(object):
         avg_time = round(sum(self.insert_timing) / size, 4)
         max_time = round(max(self.insert_timing), 4)
         min_time = round(min(self.insert_timing), 4)
-        await self.bot.say(inline('{} inserts, min={} max={} avg={}'.format(size, min_time, max_time, avg_time)))
+        await ctx.send(inline('{} inserts, min={} max={} avg={}'.format(size, min_time, max_time, avg_time)))
 
     @seniority.command(pass_context=True)
     @checks.is_owner()
     async def togglelock(self, ctx):
         self.lock = not self.lock
-        await self.bot.say(inline('Locked is now {}'.format(self.lock)))
+        await ctx.send(inline('Locked is now {}'.format(self.lock)))
 
-    @seniority.command(pass_context=True, no_pm=True)
+    @seniority.command()
     async def printconfig(self, ctx):
         """Print the configuration for the server."""
         server = ctx.message.guild
@@ -241,8 +241,8 @@ class Seniority(object):
             msg += '\n\t{} ({})'.format(member.name if member else 'unknown', user_id)
         msg += '\n\n'
         msg += 'Channels and max ppd:'
-        for channel_id, config in self.settings.channels(server_id).items():
-            channel = self.bot.get_channel(int(channel_id))
+        for config in self.settings.channels(server_id):
+            channel = self.bot.get_channel(int(channel.id))
             msg += '\n\t{} : {}'.format(channel.name if channel else channel_id, config['max_ppd'])
         msg += '\n\n'
         msg += 'Roles:'
@@ -258,13 +258,13 @@ class Seniority(object):
             msg += '\n\t\tgrant_amount : {}'.format(config['grant_amount'])
 
         for page in pagify(msg):
-            await self.bot.say(box(page))
+            await ctx.send(box(page))
 
     def get_announce_channel(self, server_id):
         announce_channel_id = self.settings.announce_channel(server_id)
         return self.bot.get_channel(int(announce_channel_id))
 
-    @seniority.group(pass_context=True, no_pm=True)
+    @seniority.group()
     async def grant(self, ctx):
         """Seniority grant and remove actions."""
         if ctx.invoked_subcommand is None or \
@@ -272,28 +272,28 @@ class Seniority(object):
             await send_cmd_help(ctx)
             return
 
-    @grant.command(pass_context=True, no_pm=True)
+    @grant.command()
     async def listbelow(self, ctx):
         """List users below the remove amount."""
         server = ctx.message.guild
         lookback_days = self.settings.remove_lookback(server.id)
         await self.do_print_overages(server, lookback_days, 'remove_amount', False)
 
-    @grant.command(pass_context=True, no_pm=True)
+    @grant.command()
     async def listnear(self, ctx):
         """List users above the warn amount."""
         server = ctx.message.guild
         lookback_days = self.settings.grant_lookback(server.id)
         await self.do_print_overages(server, lookback_days, 'warn_amount', True)
 
-    @grant.command(pass_context=True, no_pm=True)
+    @grant.command()
     async def listover(self, ctx):
         """List users above the grant amount."""
         server = ctx.message.guild
         lookback_days = self.settings.grant_lookback(server.id)
         await self.do_print_overages(server, lookback_days, 'grant_amount', True)
 
-    @grant.command(pass_context=True, no_pm=True)
+    @grant.command()
     async def grantnow(self, ctx):
         """List users above the grant amount."""
         server = ctx.message.guild
@@ -303,7 +303,7 @@ class Seniority(object):
                 continue
 
             msg = 'Granting for role {} (point cutoff {})'.format(role.name, amount)
-            await self.bot.say(inline(msg))
+            await ctx.send(inline(msg))
 
             grant_users, ignored_users = await self.get_grant_ignore_users(
                 server, role, amount, lookback_days, True)
@@ -313,14 +313,14 @@ class Seniority(object):
             user_chunks = [grant_users[i:i + cs] for i in range(0, len(grant_users), cs)]
             for chunk in user_chunks:
                 msg = 'Granting to users: ' + ','.join([m.name for m in chunk])
-                await self.bot.say(inline(msg))
+                await ctx.send(inline(msg))
                 for member in chunk:
                     try:
-                        await self.bot.add_roles(member, role)
+                        await member.add_roles(role)
                     except Exception as ex:
                         raise rpadutils.ReportableError(str(ex))
 
-    @grant.command(pass_context=True, no_pm=True)
+    @grant.command()
     async def removenow(self, ctx):
         """List users below the remove amount."""
         server = ctx.message.guild
@@ -330,7 +330,7 @@ class Seniority(object):
                 continue
 
             msg = 'Removing for role {} (point cutoff {})'.format(role.name, amount)
-            await self.bot.say(inline(msg))
+            await ctx.send(inline(msg))
 
             grant_users, ignored_users = await self.get_grant_ignore_users(
                 server, role, amount, lookback_days, False)
@@ -340,10 +340,10 @@ class Seniority(object):
             user_chunks = [grant_users[i:i + cs] for i in range(0, len(grant_users), cs)]
             for chunk in user_chunks:
                 msg = 'Removing from users: ' + ','.join([m.name for m in chunk])
-                await self.bot.say(inline(msg))
+                await ctx.send(inline(msg))
                 for member in chunk:
                     try:
-                        await self.bot.remove_roles(member, role)
+                        await    member.remove_roles(role)
                     except Exception as ex:
                         raise rpadutils.ReportableError(str(ex))
 
@@ -352,15 +352,15 @@ class Seniority(object):
                                 lookback_days: int,
                                 check_name: str,
                                 points_greater_than: bool):
-        await self.bot.say(inline('Printing info for all roles'))
+        await ctx.send(inline('Printing info for all roles'))
 
         for role_id, role, amount in self.roles_and_amounts(server, check_name):
             if role is None:
-                await self.bot.say(inline('Cannot find role with id ' + role_id))
+                await ctx.send(inline('Cannot find role with id ' + role_id))
                 continue
 
             if amount <= 0:
-                await self.bot.say(inline('Skipping role {} (disabled)'.format(role.name)))
+                await ctx.send(inline('Skipping role {} (disabled)'.format(role.name)))
                 continue
 
             grant_users, ignored_users = await self.get_grant_ignore_users(
@@ -382,7 +382,7 @@ class Seniority(object):
             msg += process_userlist(ignored_users)
 
             for page in pagify(msg):
-                await self.bot.say(box(page))
+                await ctx.send(box(page))
 
     def roles_and_amounts(self, server: discord.Guild, check_name: str):
         for role_id, role_config in self.settings.roles(server.id).items():
@@ -449,7 +449,7 @@ class Seniority(object):
 
         return grant_users, ignored_users
 
-    @seniority.command(pass_context=True, no_pm=True)
+    @seniority.command()
     async def userhistory(self, ctx, user: discord.User, limit=30):
         """Print the points per day for a user."""
         limit = min(limit, 90)
@@ -457,41 +457,41 @@ class Seniority(object):
         args = [server.id, user.id, limit]
         await self.queryAndPrint(server, GET_USER_POINTS_QUERY, args, reverse=True, total=True)
 
-    @seniority.command(pass_context=True, no_pm=True)
+    @seniority.command()
     async def usercurrent(self, ctx, user: discord.User):
         """Print the current day's points for a user."""
         server = ctx.message.guild
         args = [now_date(), server.id, user.id]
         await self.queryAndPrint(server, GET_DATE_POINTS_QUERY, args)
 
-    @seniority.command(pass_context=True, no_pm=True)
+    @seniority.command()
     async def blacklist(self, ctx, user: discord.User, reason: str):
         """Ensure a user never gets a role auto granted."""
         server = ctx.message.guild
         by = ctx.message.author
         self.settings.add_blacklist(server.id, user.id, by.id, reason)
-        await self.bot.say(inline('Set blacklist'))
+        await ctx.send(inline('Set blacklist'))
 
-    @seniority.command(pass_context=True, no_pm=True)
+    @seniority.command()
     async def unblacklist(self, ctx, user: discord.User):
         """Remove the blacklist for a user."""
         server = ctx.message.guild
         if self.settings.remove_blacklist(server.id, user.id):
-            await self.bot.say(inline('Removed blacklist'))
+            await ctx.send(inline('Removed blacklist'))
         else:
-            await self.bot.say(inline('That user was not blacklisted'))
+            await ctx.send(inline('That user was not blacklisted'))
 
-    @seniority.command(pass_context=True, no_pm=True)
+    @seniority.command()
     async def checktext(self, ctx, text: str):
         """Check if text is considered significant by the current config.
         """
         is_good, cleaned_text, reason = self.check_acceptable(ctx.message.server, text)
         if is_good:
-            await self.bot.say(box('Message accepted, cleaned text:\n{}'.format(cleaned_text)))
+            await ctx.send(box('Message accepted, cleaned text:\n{}'.format(cleaned_text)))
         else:
-            await self.bot.say(box('Message rejected ({}), cleaned text:\n{}'.format(reason, cleaned_text)))
+            await ctx.send(box('Message rejected ({}), cleaned text:\n{}'.format(reason, cleaned_text)))
 
-    @seniority.group(pass_context=True, no_pm=True)
+    @seniority.group()
     async def config(self, ctx):
         """Toggle Seniority configuration settings."""
         if ctx.invoked_subcommand is None or \
@@ -499,57 +499,57 @@ class Seniority(object):
             await send_cmd_help(ctx)
             return
 
-    @config.command(pass_context=True, no_pm=True)
+    @config.command()
     async def announcechannel(self, ctx, channel: discord.Channel):
         """Set the announcement channel."""
         self.settings.set_announce_channel(ctx.message.guild.id, channel.id)
-        await self.bot.say(inline('Done.'))
+        await ctx.send(inline('Done.'))
 
-    @config.command(pass_context=True, no_pm=True)
+    @config.command()
     async def messagecap(self, ctx, cap_amount: int):
         """Set the number of messages required to reach maximum points for a channel."""
         self.settings.set_message_cap(ctx.message.guild.id, cap_amount)
-        await self.bot.say(inline('Done.'))
+        await ctx.send(inline('Done.'))
 
-    @config.command(pass_context=True, no_pm=True)
+    @config.command()
     async def serverpointcap(self, ctx, cap_amount: int):
         """Set the maximum number of points per day a user can receive in the server."""
         self.settings.set_server_point_cap(ctx.message.guild.id, cap_amount)
-        await self.bot.say(inline('Done.'))
+        await ctx.send(inline('Done.'))
 
-    @config.command(pass_context=True, no_pm=True)
+    @config.command()
     async def toggleautogrant(self, ctx):
         """Enable or disable the automatic granting of roles."""
         server_id = ctx.message.guild.id
         new_setting = not self.settings.auto_grant(server_id)
         self.settings.set_auto_grant(server_id, new_setting)
-        await self.bot.say(inline('Auto grant set to {}.'.format(new_setting)))
+        await ctx.send(inline('Auto grant set to {}.'.format(new_setting)))
 
-    @config.command(pass_context=True, no_pm=True)
+    @config.command()
     async def grantlookback(self, ctx, days: int):
         """Number of days to look back when computing points for granting a role."""
         server_id = ctx.message.guild.id
         self.settings.set_grant_lookback(server_id, days)
-        await self.bot.say(inline('Grant lookback set to {}.'.format(days)))
+        await ctx.send(inline('Grant lookback set to {}.'.format(days)))
 
-    @config.command(pass_context=True, no_pm=True)
+    @config.command()
     async def removelookback(self, ctx, days: int):
         """Number of days to look back when computing points for removing a role."""
         server_id = ctx.message.guild.id
         self.settings.set_remove_lookback(server_id, days)
-        await self.bot.say(inline('Remove lookback set to {}.'.format(days)))
+        await ctx.send(inline('Remove lookback set to {}.'.format(days)))
 
-    @config.command(pass_context=True, no_pm=True)
+    @config.command()
     async def channel(self, ctx, channel: discord.Channel, max_points_per_day: int):
         """Maximum points per day a user can earn in a channel (0 disables)."""
         server_id = ctx.message.guild.id
         self.settings.set_channel(server_id, channel.id, max_points_per_day)
         if max_points_per_day:
-            await self.bot.say(inline('Max points set to {}.'.format(max_points_per_day)))
+            await ctx.send(inline('Max points set to {}.'.format(max_points_per_day)))
         else:
-            await self.bot.say(inline('Channel disabled'))
+            await ctx.send(inline('Channel disabled'))
 
-    @config.command(pass_context=True, no_pm=True)
+    @config.command()
     async def role(self, ctx, role_name: str, remove_amount: int, warn_amount: int, grant_amount: int):
         """Set the configuration for a role.
 
@@ -566,7 +566,7 @@ class Seniority(object):
         self.settings.set_role(server.id, role.id, remove_amount, warn_amount, grant_amount)
 
         if remove_amount == 0 and grant_amount == 0:
-            await self.bot.say(inline('Role configuration deleted'))
+            await ctx.send(inline('Role configuration deleted'))
             return
 
         msg = 'Done.'
@@ -586,9 +586,9 @@ class Seniority(object):
             msg += '\nThis role will be granted when points in grant window exceed {}.'.format(
                 grant_amount)
 
-        await self.bot.say(box(msg))
+        await ctx.send(box(msg))
 
-    @seniority.group(pass_context=True, no_pm=True)
+    @seniority.group()
     async def acceptable(self, ctx):
         """Toggle Seniority text acceptability settings."""
         if ctx.invoked_subcommand is None or \
@@ -596,59 +596,59 @@ class Seniority(object):
             await send_cmd_help(ctx)
             return
 
-    @acceptable.command(pass_context=True, no_pm=True)
+    @acceptable.command()
     async def togglepolite(self, ctx):
         """Toggle application of the politeness detector."""
         server_id = ctx.message.guild.id
         new_setting = not self.settings.ignore_commands(server_id)
         self.settings.set_ignore_impolite(server_id, new_setting)
-        await self.bot.say(inline('ignore_commands set to {}.'.format(new_setting)))
+        await ctx.send(inline('ignore_commands set to {}.'.format(new_setting)))
 
-    @acceptable.command(pass_context=True, no_pm=True)
+    @acceptable.command()
     async def togglecommands(self, ctx):
         """Toggle rejection of bot commands."""
         server_id = ctx.message.guild.id
         new_setting = not self.settings.ignore_commands(server_id)
         self.settings.set_ignore_commands(server_id, new_setting)
-        await self.bot.say(inline('ignore_commands set to {}.'.format(new_setting)))
+        await ctx.send(inline('ignore_commands set to {}.'.format(new_setting)))
 
-    @acceptable.command(pass_context=True, no_pm=True)
+    @acceptable.command()
     async def toggleemoji(self, ctx):
         """Toggle deletion of emoji from text."""
         server_id = ctx.message.guild.id
         new_setting = not self.settings.ignore_emoji(server_id)
         self.settings.set_ignore_emoji(server_id, new_setting)
-        await self.bot.say(inline('ignore_emoji set to {}.'.format(new_setting)))
+        await ctx.send(inline('ignore_emoji set to {}.'.format(new_setting)))
 
-    @acceptable.command(pass_context=True, no_pm=True)
+    @acceptable.command()
     async def togglementions(self, ctx):
         """Toggle deletion of mentions from text."""
         server_id = ctx.message.guild.id
         new_setting = not self.settings.ignore_mentions(server_id)
         self.settings.set_ignore_mentions(server_id, new_setting)
-        await self.bot.say(inline('ignore_mentions set to {}.'.format(new_setting)))
+        await ctx.send(inline('ignore_mentions set to {}.'.format(new_setting)))
 
-    @acceptable.command(pass_context=True, no_pm=True)
+    @acceptable.command()
     async def toggleroomcodes(self, ctx):
         """Toggle rejection of text containing room codes."""
         server_id = ctx.message.guild.id
         new_setting = not self.settings.ignore_room_codes(server_id)
         self.settings.set_ignore_room_codes(server_id, new_setting)
-        await self.bot.say(inline('ignore_room_codes set to {}.'.format(new_setting)))
+        await ctx.send(inline('ignore_room_codes set to {}.'.format(new_setting)))
 
-    @acceptable.command(pass_context=True, no_pm=True)
+    @acceptable.command()
     async def minlength(self, ctx, length: int):
         """Set the minimum length of text."""
         server_id = ctx.message.guild.id
         self.settings.set_min_length(server_id, length)
-        await self.bot.say(inline('Min text length set to {}.'.format(length)))
+        await ctx.send(inline('Min text length set to {}.'.format(length)))
 
-    @acceptable.command(pass_context=True, no_pm=True)
+    @acceptable.command()
     async def minwords(self, ctx, words: int):
         """Set the minimum number of words in text."""
         server_id = ctx.message.guild.id
         self.settings.set_min_words(server_id, words)
-        await self.bot.say(inline('Min word count set to {}.'.format(words)))
+        await ctx.send(inline('Min word count set to {}.'.format(words)))
 
     def check_acceptable(self, server: discord.Guild, text: str):
         server_id = server.id
@@ -695,7 +695,8 @@ class Seniority(object):
         if user == self.bot.user.id:
             return
 
-        channel_config = self.settings.channels(server.id).get(channel.id, None)
+        channel_config = self.settings.channels(server.id)
+        channel_config = server.id and server.id[0]
         if not channel_config:
             return
 
@@ -803,7 +804,7 @@ class Seniority(object):
             result_text += '\n\nTotal: {}'.format(grand_total)
 
         for p in pagify(result_text):
-            await self.bot.say(box(p))
+            await ctx.send(box(p))
 
 
 def ensure_map(item, key, default_value):

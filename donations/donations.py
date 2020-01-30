@@ -83,7 +83,7 @@ class Donations:
                 donor_names.add(user.name)
 
         msg = DONATE_MSG.format(count=len(donors), donors=', '.join(sorted(donor_names)))
-        await self.bot.say(box(msg))
+        await ctx.send(box(msg))
 
     @commands.command(pass_context=True)
     async def mycommand(self, ctx, command: str, *, text: str):
@@ -91,11 +91,11 @@ class Donations:
         user_id = ctx.message.author.id
         text = clean_global_mentions(text)
         if user_id not in self.settings.donors():
-            await self.bot.say(inline('Only donors can set a personal command'))
+            await ctx.send(inline('Only donors can set a personal command'))
             return
 
         self.settings.addCustomCommand(user_id, command, text)
-        await self.bot.say(inline('I set up your command: ' + command))
+        await ctx.send(inline('I set up your command: ' + command))
 
     @commands.command(pass_context=True)
     async def myembed(self, ctx, command: str, title: str, url: str, footer: str):
@@ -113,73 +113,73 @@ class Donations:
         """
         user_id = ctx.message.author.id
         if user_id not in self.settings.donors():
-            await self.bot.say(inline('Only donors can set a personal command'))
+            await ctx.send(inline('Only donors can set a personal command'))
             return
 
         self.settings.addCustomEmbed(user_id, command, title, url, footer)
-        await self.bot.say(inline('I set up your embed: ' + command))
+        await ctx.send(inline('I set up your embed: ' + command))
 
     @commands.command(pass_context=True)
     async def spankme(self, ctx):
         """You are trash (donor only)."""
         user_id = ctx.message.author.id
         if user_id not in self.settings.donors():
-            await self.bot.say(inline('Donor-only command'))
+            await ctx.send(inline('Donor-only command'))
             return
 
-        await self.bot.say(ctx.message.author.mention + ' ' + random.choice(self.insults_list))
+        await ctx.send(ctx.message.author.mention + ' ' + random.choice(self.insults_list))
 
     @commands.command(pass_context=True)
     async def insultme(self, ctx):
         """You are consistently trash (donor only)."""
         user_id = ctx.message.author.id
         if user_id not in self.settings.donors():
-            await self.bot.say(inline('Donor-only command'))
+            await ctx.send(inline('Donor-only command'))
             return
 
         self.settings.addInsultsEnabled(user_id)
-        await self.bot.say(ctx.message.author.mention + ' ' 'Oh, I will.\n' + random.choice(self.insults_list))
+        await ctx.send(ctx.message.author.mention + ' ' 'Oh, I will.\n' + random.choice(self.insults_list))
 
-    @commands.command(pass_context=True, hidden=True)
+    @commands.command(hidden=True)
     async def insultripper(self, ctx):
         """Fuck ripper."""
         ripper_id = 123529484476350467
         ripper = ctx.message.guild.get_member(int(ripper_id))
         insult = random.choice(self.insults_list)
         if ripper:
-            await self.bot.say(ripper.mention + ' ' + insult)
+            await ctx.send(ripper.mention + ' ' + insult)
         else:
-            await self.bot.say('Ripper is not in this server but I let him know anyway')
+            await ctx.send('Ripper is not in this server but I let him know anyway')
             ripper = discord.utils.get(self.bot.get_all_members(), id=ripper_id)
-            await self.bot.send_message(ripper, '{} asked me to send you this:\n{}'.format(ctx.message.author.name, insult))
+            await  ripper.send('{} asked me to send you this:\n{}'.format(ctx.message.author.name, insult))
 
     @commands.command(pass_context=True)
     async def vcinsultripper(self, ctx):
         """Fuck ripper (verbally)"""
         user_id = ctx.message.author.id
         if user_id not in self.settings.donors():
-            await self.bot.say(inline('Donor-only command'))
+            await ctx.send(inline('Donor-only command'))
             return
 
         ripper_id = 123529484476350467
         ripper = ctx.message.guild.get_member(int(ripper_id))
 
         if ripper is None:
-            await self.bot.say(inline('Ripper must be in this server to use this command'))
+            await ctx.send(inline('Ripper must be in this server to use this command'))
 
         voice = ripper.voice
-        channel = voice.voice_channel
-        if channel is None:
-            await self.bot.say(inline('Ripper must be in a voice channel on this server to use this command'))
+        if voice is None:
+            await ctx.send(inline('Ripper must be in a voice channel on this server to use this command'))
             return
+        channel = voice.voice_channel
 
         insult = random.choice(self.insults_list)
         speech_cog = self.bot.get_cog('Speech')
         if not speech_cog:
-            await self.bot.say(inline('Speech seems to be offline'))
+            await ctx.send(inline('Speech seems to be offline'))
             return
 
-        await self.bot.say(ripper.mention + ' ' + insult)
+        await ctx.send(ripper.mention + ' ' + insult)
         await speech_cog.speak(channel, 'Hey Ripper, ' + insult)
 
     @commands.command(pass_context=True)
@@ -187,49 +187,49 @@ class Donations:
         """I am merciful (donor only)."""
         user_id = ctx.message.author.id
         if user_id not in self.settings.donors():
-            await self.bot.say(inline('Donor-only command'))
+            await ctx.send(inline('Donor-only command'))
             return
 
         self.settings.rmInsultsEnabled(user_id)
-        await self.bot.say('I will let you off easy this time.')
+        await ctx.send('I will let you off easy this time.')
 
     @commands.command(pass_context=True)
     async def kissme(self, ctx):
         """You are so cute! (donor only)."""
         user_id = ctx.message.author.id
         if user_id not in self.settings.donors():
-            await self.bot.say(inline('Donor-only command'))
+            await ctx.send(inline('Donor-only command'))
             return
 
-        await self.bot.say(ctx.message.author.mention + ' ' + random.choice(self.cute_list))
+        await ctx.send(ctx.message.author.mention + ' ' + random.choice(self.cute_list))
 
     @commands.command(pass_context=True)
     async def lewdme(self, ctx):
         """So nsfw. (donor only)."""
         user_id = ctx.message.author.id
         if user_id not in self.settings.donors():
-            await self.bot.say(inline('Donor-only command'))
+            await ctx.send(inline('Donor-only command'))
             return
 
         if 'nsfw' in ctx.message.channel.name.lower():
-            await self.bot.say(ctx.message.author.mention + ' ' + random.choice(self.sexy_list))
+            await ctx.send(ctx.message.author.mention + ' ' + random.choice(self.sexy_list))
         else:
-            await self.bot.say(ctx.message.author.mention + ' Oooh naughty...')
-            await self.bot.whisper(random.choice(self.sexy_list))
+            await ctx.send(ctx.message.author.mention + ' Oooh naughty...')
+            await ctx.author.send(random.choice(self.sexy_list))
 
     @commands.command(pass_context=True)
     async def pervme(self, ctx):
         """Hentai!!! (donor only)."""
         user_id = ctx.message.author.id
         if user_id not in self.settings.donors():
-            await self.bot.say(inline('Donor-only command'))
+            await ctx.send(inline('Donor-only command'))
             return
 
         if 'nsfw' in ctx.message.channel.name.lower():
-            await self.bot.say(ctx.message.author.mention + ' ' + random.choice(self.perverted_list))
+            await ctx.send(ctx.message.author.mention + ' ' + random.choice(self.perverted_list))
         else:
-            await self.bot.say(ctx.message.author.mention + ' Filthy hentai!')
-            await self.bot.whisper(random.choice(self.perverted_list))
+            await ctx.send(ctx.message.author.mention + ' Filthy hentai!')
+            await ctx.author.send(random.choice(self.perverted_list))
 
     @commands.group(pass_context=True)
     @checks.admin_or_permissions(manage_guild=True)
@@ -245,38 +245,38 @@ class Donations:
         server_id = ctx.message.guild.id
         if server_id in self.settings.disabledServers():
             self.settings.rmDisabledServer(server_id)
-            await self.bot.say(inline('Donor perks enabled on this server'))
+            await ctx.send(inline('Donor perks enabled on this server'))
         else:
             self.settings.addDisabledServer(server_id)
-            await self.bot.say(inline('Donor perks disabled on this server'))
+            await ctx.send(inline('Donor perks disabled on this server'))
 
     @donations.command(pass_context=True)
     @checks.is_owner()
     async def addDonor(self, ctx, user: discord.User):
         """Adds a a user as a donor."""
         self.settings.addDonor(user.id)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
     @donations.command(pass_context=True)
     @checks.is_owner()
     async def rmDonor(self, ctx, user: discord.User):
         """Removes a user as a donor."""
         self.settings.rmDonor(user.id)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
     @donations.command(pass_context=True)
     @checks.is_owner()
     async def addPatron(self, ctx, user: discord.User):
         """Adds a a user as a patron."""
         self.settings.addPatron(user.id)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
     @donations.command(pass_context=True)
     @checks.is_owner()
     async def rmPatron(self, ctx, user: discord.User):
         """Removes a user as a patron."""
         self.settings.rmPatron(user.id)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
     @donations.command(pass_context=True)
     @checks.is_owner()
@@ -308,7 +308,7 @@ class Donations:
         msg += '\n\n{} personal commands are set'.format(len(cmds))
         msg += '\n{} personal embeds are set'.format(len(cmds))
 
-        await self.bot.say(box(msg))
+        await ctx.send(box(msg))
 
     async def checkCC(self, message):
         if len(message.content) < 2:
@@ -332,7 +332,7 @@ class Donations:
         cmd = message.content[len(prefix):].lower()
         if user_cmd is not None:
             if cmd == user_cmd['command']:
-                await self.bot.send_message(message.channel, user_cmd['text'])
+                await  message.channel.send(user_cmd['text'])
                 return
         if user_embed is not None:
             if cmd == user_embed['command']:
@@ -346,7 +346,7 @@ class Donations:
                     embed.set_image(url=url)
                 if len(footer):
                     embed.set_footer(text=footer)
-                await self.bot.send_message(message.channel, embed=embed)
+                await  message.channel.send(embed=embed)
                 return
 
     def get_prefix(self, message):
@@ -381,7 +381,7 @@ class Donations:
         if mentions_bot or mentions_miru_and_roll:
             msg += ' ' + random.choice(self.insults_miru_reference)
             msg += '\n' + random.choice(self.insults_list)
-            await self.bot.send_message(message.channel, msg)
+            await  message.channel.send(msg)
             return
 
         # Semi-frequently respond to long messages
@@ -391,13 +391,13 @@ class Donations:
 
         if long_msg_and_roll or short_msg_and_roll:
             msg += ' ' + random.choice(self.insults_list)
-            await self.bot.send_message(message.channel, msg)
+            await  message.channel.send(msg)
             return
 
         # Periodically send private messages
         if roll(7):
             msg += ' ' + random.choice(self.insults_list)
-            await self.bot.send_message(message.author, msg)
+            await  message.author.send(msg)
             return
 
 

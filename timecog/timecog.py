@@ -32,12 +32,12 @@ class TimeCog:
         try:
             tz_obj = tzStrToObj(tz)
         except Exception as e:
-            await self.bot.say("Failed to parse tz: " + tz)
+            await ctx.send("Failed to parse tz: " + tz)
             return
 
         now = datetime.now(tz_obj)
         msg = "The time in " + now.strftime('%Z') + " is " + fmtTimeShort(now).strip()
-        await self.bot.say(inline(msg))
+        await ctx.send(inline(msg))
 
     @commands.command(name="timeto", pass_context=True)
     async def timeto(self, ctx, tz: str, *, time: str):
@@ -45,14 +45,14 @@ class TimeCog:
         try:
             tz_obj = tzStrToObj(tz)
         except Exception as e:
-            await self.bot.say("Failed to parse tz: " + tz)
+            await ctx.send("Failed to parse tz: " + tz)
             return
 
         try:
             time_obj = timeStrToObj(time)
         except Exception as e:
             print(e)
-            await self.bot.say("Failed to parse time: " + time)
+            await ctx.send("Failed to parse time: " + time)
             return
 
         now = datetime.now(tz_obj)
@@ -64,7 +64,7 @@ class TimeCog:
 
         msg = "There are " + fmtHrsMins(delta.seconds).strip() + \
             " until " + time.strip() + " in " + now.strftime('%Z')
-        await self.bot.say(inline(msg))
+        await ctx.send(inline(msg))
 
 
 def timeStrToObj(timestr):

@@ -83,7 +83,7 @@ class Profile:
         if profile_msg is None:
             return
 
-        await self.bot.say(profile_msg)
+        await ctx.send(profile_msg)
 
     @commands.command(name="idto", pass_context=True)
     async def idTo(self, ctx, user: discord.Member, server=None):
@@ -98,8 +98,8 @@ class Profile:
         warning = inline("{} asked me to send you this message. Report any harassment to the mods.".format(
             ctx.message.author.name))
         msg = warning + "\n" + profile_msg
-        await self.bot.send_message(user, msg)
-        await self.bot.whisper(inline("Sent your profile to " + user.name))
+        await  user.send(msg)
+        await ctx.author.send(inline("Sent your profile to " + user.name))
 
     @commands.command(name="idfor", pass_context=True)
     async def idFor(self, ctx, user: discord.Member, server=None):
@@ -111,14 +111,14 @@ class Profile:
         if profile_msg is None:
             return
 
-        await self.bot.whisper(profile_msg)
+        await ctx.author.send(profile_msg)
 
     async def getServer(self, user_id, server=None):
         if server is None:
             server = self.settings.getDefaultServer(user_id)
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say(inline('Unsupported server: ' + server))
+            await ctx.send(inline('Unsupported server: ' + server))
             return None
         return server
 
@@ -152,11 +152,11 @@ class Profile:
         """
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say(inline('Unsupported server: ' + server))
+            await ctx.send(inline('Unsupported server: ' + server))
             return
 
         self.settings.setDefaultServer(ctx.message.author.id, server)
-        await self.bot.say(inline('Set your default server to: ' + server))
+        await ctx.send(inline('Set your default server to: ' + server))
 
     @profile.command(name="id", pass_context=True)
     async def setId(self, ctx, server, *id):
@@ -171,11 +171,11 @@ class Profile:
         id = " ".join(id)
         clean_id = validateAndCleanId(id)
         if clean_id is None:
-            await self.bot.say(inline('Your ID looks invalid, expected a 9 digit code, got: {}'.format(id)))
+            await ctx.send(inline('Your ID looks invalid, expected a 9 digit code, got: {}'.format(id)))
             return
 
         self.settings.setId(ctx.message.author.id, server, clean_id)
-        await self.bot.say(inline('Set your id for {} to: {}'.format(server, formatId(clean_id))))
+        await ctx.send(inline('Set your id for {} to: {}'.format(server, formatId(clean_id))))
 
     @profile.command(name="name", pass_context=True)
     async def setName(self, ctx, server, *name):
@@ -186,7 +186,7 @@ class Profile:
 
         name = " ".join(name)
         self.settings.setName(ctx.message.author.id, server, name)
-        await self.bot.say(inline('Set your name for {} to: {}'.format(server, name)))
+        await ctx.send(inline('Set your name for {} to: {}'.format(server, name)))
 
     @profile.command(name="text", pass_context=True)
     async def setText(self, ctx, server, *text):
@@ -201,11 +201,11 @@ class Profile:
         text = " ".join(text).strip()
 
         if text == '':
-            await self.bot.say(inline('Profile text required'))
+            await ctx.send(inline('Profile text required'))
             return
 
         self.settings.setProfileText(ctx.message.author.id, server, text)
-        await self.bot.say(inline('Set your profile for ' + server + ' to:\n' + text))
+        await ctx.send(inline('Set your profile for ' + server + ' to:\n' + text))
 
     @profile.command(name="clear", pass_context=True)
     async def clear(self, ctx, server=None):
@@ -216,13 +216,13 @@ class Profile:
         user_id = ctx.message.author.id
         if server is None:
             self.settings.clearProfile(user_id)
-            await self.bot.say(inline('Cleared your profile for all servers'))
+            await ctx.send(inline('Cleared your profile for all servers'))
         else:
             server = normalizeServer(server)
             self.settings.clearProfile(user_id, server)
-            await self.bot.say(inline('Cleared your profile for ' + server))
+            await ctx.send(inline('Cleared your profile for ' + server))
 
-    @profile.command(name="search", pass_context=True, no_pm=False)
+    @profile.command(name="search", no_pm=False)
     async def search(self, ctx, server, *search_text):
         """profile search <server> <search text>
 
@@ -234,7 +234,7 @@ class Profile:
 
         search_text = " ".join(search_text).strip().lower()
         if search_text == '':
-            await self.bot.say(inline('Search text required'))
+            await ctx.send(inline('Search text required'))
             return
 
         # Get all profiles for server
@@ -249,7 +249,7 @@ class Profile:
 
         template = 'Found {}/{} matching profiles in {} for : {}'
         msg = template.format(len(matching_profiles), len(profiles), server, search_text)
-        await self.bot.say(inline(msg))
+        await ctx.send(inline(msg))
 
         if len(matching_profiles) == 0:
             return
@@ -271,7 +271,7 @@ class Profile:
         msg = pagify(msg, ["\n"], shorten_by=20)
         for page in msg:
             try:
-                await self.bot.whisper(box(page))
+                await ctx.author.send(box(page))
             except Exception as e:
                 print("page output failed " + str(e))
                 print("tried to print: " + page)

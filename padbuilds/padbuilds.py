@@ -21,7 +21,7 @@ class PadBuilds:
         self.file_path = "data/padbuilds/commands.json"
         self.c_commands = dataIO.load_json(self.file_path)
 
-    @commands.group(aliases=["build"], pass_context=True, no_pm=True)
+    @commands.group(aliases=["build"])
     async def builds(self, ctx):
         """PAD Builds management"""
         if ctx.invoked_subcommand is None:
@@ -42,7 +42,7 @@ class PadBuilds:
         command = command.lower()
         text = text.replace(u'\u200b', '')
         if command in self.bot.commands:
-            await self.bot.say("That is already a standard command.")
+            await ctx.send("That is already a standard command.")
             return
         if server.id not in self.c_commands:
             self.c_commands[server.id] = {}
@@ -51,9 +51,9 @@ class PadBuilds:
             cmdlist[command] = text
             self.c_commands[server.id] = cmdlist
             dataIO.save_json(self.file_path, self.c_commands)
-            await self.bot.say("PAD Build successfully added.")
+            await ctx.send("PAD Build successfully added.")
         else:
-            await self.bot.say("This build already exists. Use "
+            await ctx.send("This build already exists. Use "
                                "`{}builds edit` to edit it."
                                "".format(ctx.prefix))
 
@@ -74,13 +74,13 @@ class PadBuilds:
                 cmdlist[command] = text
                 self.c_commands[server.id] = cmdlist
                 dataIO.save_json(self.file_path, self.c_commands)
-                await self.bot.say("PAD Build successfully edited.")
+                await ctx.send("PAD Build successfully edited.")
             else:
-                await self.bot.say("That build doesn't exist. Use "
+                await ctx.send("That build doesn't exist. Use "
                                    "`{}builds add` to add it."
                                    "".format(ctx.prefix))
         else:
-            await self.bot.say("There are no PAD Builds in this server."
+            await ctx.send("There are no PAD Builds in this server."
                                " Use `{}builds add` to start adding some."
                                "".format(ctx.prefix))
 
@@ -99,11 +99,11 @@ class PadBuilds:
                 cmdlist.pop(command, None)
                 self.c_commands[server.id] = cmdlist
                 dataIO.save_json(self.file_path, self.c_commands)
-                await self.bot.say("PAD Build successfully deleted.")
+                await ctx.send("PAD Build successfully deleted.")
             else:
-                await self.bot.say("That command doesn't exist.")
+                await ctx.send("That command doesn't exist.")
         else:
-            await self.bot.say("There are no PAD Builds in this server."
+            await ctx.send("There are no PAD Builds in this server."
                                " Use `{}builds add` to start adding some."
                                "".format(ctx.prefix))
 
@@ -114,7 +114,7 @@ class PadBuilds:
         commands = self.c_commands.get(server.id, {})
 
         if not commands:
-            await self.bot.say("There are no PAD Builds in this server."
+            await ctx.send("There are no PAD Builds in this server."
                                " Use `{}builds add` to start adding some."
                                "".format(ctx.prefix))
             return
@@ -123,13 +123,13 @@ class PadBuilds:
         commands = "PAD Builds:\n\n" + commands
 
         if len(commands) < 1500:
-            await self.bot.say(box(commands))
+            await ctx.send(box(commands))
         else:
             for page in pagify(commands, delims=[" ", "\n"]):
-                await self.bot.whisper(box(page))
+                await ctx.author.send(box(page))
 
     async def on_message(self, message):
-        if len(message.content) < 2 or message.channel.is_private:
+        if len(message.content) < 2 or not isinstance(channel, discord.GuildChannel):
             return
 
         server = message.guild
@@ -144,11 +144,11 @@ class PadBuilds:
             if cmd in cmdlist:
                 cmd = cmdlist[cmd]
                 cmd = self.format_cc(cmd, message)
-                await self.bot.send_message(message.channel, cmd)
+                await  message.channel.send(cmd)
             elif cmd.lower() in cmdlist:
                 cmd = cmdlist[cmd.lower()]
                 cmd = self.format_cc(cmd, message)
-                await self.bot.send_message(message.channel, cmd)
+                await  message.channel.send(cmd)
 
     def get_prefix(self, message):
         for p in self.bot.settings.get_prefixes(message.server):

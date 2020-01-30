@@ -640,7 +640,7 @@ class PadSearch:
     @commands.command(pass_context=True)
     async def helpsearch(self, ctx):
         """Help info for the search command."""
-        await self.bot.whisper(box(HELP_MSG))
+        await ctx.author.send(box(HELP_MSG))
 
     @commands.command(pass_context=True)
     async def search(self, ctx, *, filter_spec: str):
@@ -685,11 +685,11 @@ class PadSearch:
 
         if dm_required:
             header += '\nList too long to display; sent via DM'
-            await self.bot.say(box(header))
+            await ctx.send(box(header))
             for page in pagify(msg):
-                await self.bot.whisper(box(page))
+                await ctx.author.send(box(page))
         else:
-            await self.bot.say(box(msg))
+            await ctx.send(box(msg))
 
     def _make_search_config(self, input):
         lexer = PadSearchLexer().build()
@@ -703,9 +703,9 @@ class PadSearch:
         m, err, debug_info = padinfo_cog.findMonster(query)
 
         if m is None:
-            await self.bot.say(box('No match: ' + err))
+            await ctx.send(box('No match: ' + err))
             return
 
-        await self.bot.say(box(json.dumps(m.search, indent=2, default=lambda o: o.__dict__)))
+        await ctx.send(box(json.dumps(m.search, indent=2, default=lambda o: o.__dict__)))
 
 

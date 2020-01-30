@@ -110,7 +110,7 @@ class PadEvents:
                                     except:
                                         pass  # do nothing if role is missing
 
-                                    await self.bot.send_message(channel, message)
+                                    await  channel.send(message)
                                 except Exception as ex:
                                     # deregister gr
                                     traceback.print_exc()
@@ -158,7 +158,7 @@ class PadEvents:
     async def _testevent(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, KR, JP")
             return
 
         te = dadguide.DgScheduledEvent(None, ignore_bad=True)
@@ -177,71 +177,71 @@ class PadEvents:
         te.event_modifier = 'fake_event_modifier'
         self.events.append(te)
 
-        await self.bot.say("Fake event injected.")
+        await ctx.send("Fake event injected.")
 
-    @padevents.command(name="addchannel", pass_context=True, no_pm=True)
+    @padevents.command(name="addchannel")
     @checks.mod_or_permissions(manage_guild=True)
     async def _addchannel(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, KR, JP")
             return
 
         channel_id = ctx.message.channel.id
         if self.settings.checkGuerrillaReg(channel_id, server):
-            await self.bot.say("Channel already active.")
+            await ctx.send("Channel already active.")
             return
 
         self.settings.addGuerrillaReg(channel_id, server)
-        await self.bot.say("Channel now active.")
+        await ctx.send("Channel now active.")
 
-    @padevents.command(name="rmchannel", pass_context=True, no_pm=True)
+    @padevents.command(name="rmchannel")
     @checks.mod_or_permissions(manage_guild=True)
     async def _rmchannel(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, KR, JP")
             return
 
         channel_id = ctx.message.channel.id
         if not self.settings.checkGuerrillaReg(channel_id, server):
-            await self.bot.say("Channel is not active.")
+            await ctx.send("Channel is not active.")
             return
 
         self.settings.removeGuerrillaReg(channel_id, server)
-        await self.bot.say("Channel deactivated.")
+        await ctx.send("Channel deactivated.")
 
-    @padevents.command(name="addchanneldaily", pass_context=True, no_pm=True)
+    @padevents.command(name="addchanneldaily")
     @checks.mod_or_permissions(manage_guild=True)
     async def _addchanneldaily(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, KR, JP")
             return
 
         channel_id = ctx.message.channel.id
         if self.settings.checkDailyReg(channel_id, server):
-            await self.bot.say("Channel already active.")
+            await ctx.send("Channel already active.")
             return
 
         self.settings.addDailyReg(channel_id, server)
-        await self.bot.say("Channel now active.")
+        await ctx.send("Channel now active.")
 
-    @padevents.command(name="rmchanneldaily", pass_context=True, no_pm=True)
+    @padevents.command(name="rmchanneldaily")
     @checks.mod_or_permissions(manage_guild=True)
     async def _rmchanneldaily(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, KR, JP")
             return
 
         channel_id = ctx.message.channel.id
         if not self.settings.checkDailyReg(channel_id, server):
-            await self.bot.say("Channel is not active.")
+            await ctx.send("Channel is not active.")
             return
 
         self.settings.removeDailyReg(channel_id, server)
-        await self.bot.say("Channel deactivated.")
+        await ctx.send("Channel deactivated.")
 
     @padevents.command(name="listchannels", pass_context=True)
     @checks.mod_or_permissions(manage_guild=True)
@@ -268,7 +268,7 @@ class PadEvents:
     async def _active(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, KR, JP")
             return
 
         msg = self.makeActiveText(server)
@@ -327,9 +327,9 @@ class PadEvents:
         for page in msg:
             try:
                 if channel_id is None:
-                    await self.bot.say(format_type(page))
+                    await ctx.send(format_type(page))
                 else:
-                    await self.bot.send_message(discord.Object(channel_id), format_type(page))
+                    await  discord.Object(channel_id).send(format_type(page))
             except Exception as e:
                 print("page output failed " + str(e))
                 print("tried to print: " + page)
@@ -397,7 +397,7 @@ class PadEvents:
         header = "Times are PT below\n\n"
         return header + tbl.get_string() + "\n"
 
-    @commands.command(pass_context=True, aliases=['events'])
+    @commands.command(aliases=['events'])
     async def eventsna(self, ctx):
         """Print upcoming daily events for NA."""
         await self.doPartial(ctx, 'NA')
@@ -410,7 +410,7 @@ class PadEvents:
     async def doPartial(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await self.bot.say("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, KR, JP")
             return
 
         events = EventList(self.events)
@@ -430,7 +430,7 @@ class PadEvents:
         pending_events.sort(key=lambda e: e.group, reverse=True)
 
         if len(active_events) == 0 and len(pending_events) == 0:
-            await self.bot.say("No events available for " + server)
+            await ctx.send("No events available for " + server)
             return
 
         output = "Events for {}".format(server)
@@ -445,7 +445,7 @@ class PadEvents:
             for e in pending_events:
                 output += "\n" + e.toPartialEvent(self)
 
-        await self.bot.say(box(output))
+        await ctx.send(box(output))
 
 
 

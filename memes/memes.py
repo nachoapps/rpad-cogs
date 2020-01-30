@@ -24,7 +24,7 @@ class Memes:
         self.c_commands = dataIO.load_json(self.file_path)
         self.settings = MemesSettings("memes")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.mod_or_permissions(administrator=True)
     async def addmeme(self, ctx, command: str, *, text):
         """Adds a meme
@@ -38,7 +38,7 @@ class Memes:
         server = ctx.message.guild
         command = command.lower()
         if command in self.bot.commands.keys():
-            await self.bot.say("That meme is already a standard command.")
+            await ctx.send("That meme is already a standard command.")
             return
         if not server.id in self.c_commands:
             self.c_commands[server.id] = {}
@@ -47,11 +47,11 @@ class Memes:
             cmdlist[command] = text
             self.c_commands[server.id] = cmdlist
             dataIO.save_json(self.file_path, self.c_commands)
-            await self.bot.say("Custom command successfully added.")
+            await ctx.send("Custom command successfully added.")
         else:
-            await self.bot.say("This command already exists. Use editmeme to edit it.")
+            await ctx.send("This command already exists. Use editmeme to edit it.")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.mod_or_permissions(administrator=True)
     async def editmeme(self, ctx, command: str, *, text):
         """Edits a meme
@@ -67,13 +67,13 @@ class Memes:
                 cmdlist[command] = text
                 self.c_commands[server.id] = cmdlist
                 dataIO.save_json(self.file_path, self.c_commands)
-                await self.bot.say("Custom command successfully edited.")
+                await ctx.send("Custom command successfully edited.")
             else:
-                await self.bot.say("That command doesn't exist. Use addmeme [command] [text]")
+                await ctx.send("That command doesn't exist. Use addmeme [command] [text]")
         else:
-            await self.bot.say("There are no custom memes in this server. Use addmeme [command] [text]")
+            await ctx.send("There are no custom memes in this server. Use addmeme [command] [text]")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.mod_or_permissions(administrator=True)
     async def delmeme(self, ctx, command: str):
         """Deletes a meme
@@ -88,13 +88,13 @@ class Memes:
                 cmdlist.pop(command, None)
                 self.c_commands[server.id] = cmdlist
                 dataIO.save_json(self.file_path, self.c_commands)
-                await self.bot.say("Custom meme successfully deleted.")
+                await ctx.send("Custom meme successfully deleted.")
             else:
-                await self.bot.say("That meme doesn't exist.")
+                await ctx.send("That meme doesn't exist.")
         else:
-            await self.bot.say("There are no custom memes in this server. Use addmeme [command] [text]")
+            await ctx.send("There are no custom memes in this server. Use addmeme [command] [text]")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.mod_or_permissions(administrator=True)
     async def setmemerole(self, ctx, rolename: str):
         """Sets the meme role
@@ -104,9 +104,9 @@ class Memes:
 
         role = get_role(ctx.message.guild.roles, rolename)
         self.settings.setPrivileged(ctx.message.guild.id, role.id)
-        await self.bot.say("done")
+        await ctx.send("done")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     async def memes(self, ctx):
         """Shows custom memes list"""
         server = ctx.message.guild
@@ -124,14 +124,14 @@ class Memes:
                         msg[i] += " {}{}\n".format(ctx.prefix, cmd)
                 msg[i] += "```"
                 for cmds in msg:
-                    await self.bot.whisper(cmds)
+                    await ctx.author.send(cmds)
             else:
-                await self.bot.say("There are no custom memes in this server. Use addmeme [command] [text]")
+                await ctx.send("There are no custom memes in this server. Use addmeme [command] [text]")
         else:
-            await self.bot.say("There are no custom memes in this server. Use addmeme [command] [text]")
+            await ctx.send("There are no custom memes in this server. Use addmeme [command] [text]")
 
     async def checkCC(self, message):
-        if len(message.content) < 2 or message.channel.is_private:
+        if len(message.content) < 2 or not isinstance(channel, discord.GuildChannel):
             return
 
         server = message.guild
@@ -154,11 +154,11 @@ class Memes:
             if cmd in cmdlist.keys():
                 cmd = cmdlist[cmd]
                 cmd = self.format_cc(cmd, message)
-                await self.bot.send_message(message.channel, cmd)
+                await  message.channel.send(cmd)
             elif cmd.lower() in cmdlist.keys():
                 cmd = cmdlist[cmd.lower()]
                 cmd = self.format_cc(cmd, message)
-                await self.bot.send_message(message.channel, cmd)
+                await  message.channel.send(cmd)
 
     def get_prefix(self, message):
         for p in self.bot.settings.get_prefixes(message.server):

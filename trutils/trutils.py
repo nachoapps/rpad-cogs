@@ -172,8 +172,8 @@ class TrUtils:
     @commands.command(pass_context=True)
     async def revertname(self, ctx):
         """Unsets your nickname"""
-        await self.bot.change_nickname(ctx.message.author, None)
-        await self.bot.say(inline('Done'))
+        await ctx.message.author.change_nickname(nick=None)
+        await ctx.send(inline('Done'))
 
     @commands.command(pass_context=True)
     @checks.mod_or_permissions(manage_guild=True)
@@ -184,19 +184,19 @@ class TrUtils:
         click the ... on a message.
         """
         try:
-            msg = await self.bot.get_message(channel, int(msg_id))
+            msg = await channel.fetch_message(int(msg_id))
         except discord.NotFound:
-            await self.bot.say(inline('Cannot find that message, check the channel and message id'))
+            await ctx.send(inline('Cannot find that message, check the channel and message id'))
             return
         except discord.Forbidden:
-            await self.bot.say(inline('No permissions to do that'))
+            await ctx.send(inline('No permissions to do that'))
             return
         if msg.author.id != self.bot.user.id:
-            await self.bot.say(inline('Can only edit messages I own'))
+            await ctx.send(inline('Can only edit messages I own'))
             return
 
-        await self.bot.edit_message(msg, new_msg)
-        await self.bot.say(inline('done'))
+        await msg.edit_message(new_msg)
+        await ctx.send(inline('done'))
 
     @commands.command(pass_context=True)
     @checks.mod_or_permissions(manage_guild=True)
@@ -221,15 +221,15 @@ class TrUtils:
 
     async def _dump(self, ctx, channel: discord.Channel=None, msg_id: int=None):
         if msg_id:
-            msg = await self.bot.get_message(channel, int(msg_id))
+            msg = await channel.fetch_message(int(msg_id))
         else:
             msg_limit = 2 if channel == ctx.message.channel else 1
-            async for message in self.bot.logs_from(channel, limit=msg_limit):
+            async for message in channel.history(limit=msg_limit):
                 msg = message
         content = msg.content.strip()
         content = re.sub(r'<(:[0-9a-z_]+:)\d{18}>', r'\1', content, flags=re.IGNORECASE)
         content = box(content.replace('`', u'\u200b`'))
-        await self.bot.say(content)
+        await ctx.send(content)
 
     @commands.command(pass_context=True)
     async def dumpmsgexact(self, ctx, msg_id: int):
@@ -239,22 +239,22 @@ class TrUtils:
         To find a message ID, enable developer mode in Discord settings and
         click the ... on a message.
         """
-        msg = await self.bot.get_message(ctx.message.channel, int(msg_id))
+        msg = await ctx.message.channel.fetch_message(int(msg_id))
         content = msg.content.strip()
         content = box(content.replace('`', u'\u200b`'))
-        await self.bot.say(content)
+        await ctx.send(content)
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def imagecopy(self, ctx, source_channel: discord.Channel, dest_channel: discord.Channel):
         self.settings.setImageCopy(ctx.message.guild.id, source_channel.id, dest_channel.id)
-        await self.bot.say('`done`')
+        await ctx.send('`done`')
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def clearimagecopy(self, ctx, channel: discord.Channel):
         self.settings.clearImageCopy(ctx.message.guild.id, channel.id)
-        await self.bot.say('`done`')
+        await ctx.send('`done`')
 
     async def copy_image_to_channel(self, img_url, author_name, channel_name, img_copy_channel_id):
         embed = discord.Embed()
@@ -262,7 +262,7 @@ class TrUtils:
         embed.set_image(url=img_url)
 
         try:
-            await self.bot.send_message(discord.Object(img_copy_channel_id), embed=embed)
+            await  discord.Object(img_copy_channel_id).send(embed=embed)
         except Exception as e:
             print('Failed to copy msg to', img_copy_channel_id, e)
 
@@ -271,7 +271,7 @@ class TrUtils:
         embed.set_footer(text='Posted by {} in {}'.format(msg.author.name, msg.channel.name))
         embed.set_image(url=in_attachment['url'])
         try:
-            await self.bot.send_message(discord.Object(img_copy_channel_id), embed=embed)
+            await  discord.Object(img_copy_channel_id).send(embed=embed)
         except Exception as e:
             print('Failed to copy attachment to', img_copy_channel_id, e)
 
@@ -282,12 +282,12 @@ class TrUtils:
         embed.set_image(url=in_embed['thumbnail']['proxy_url'])
         embed.set_footer(text='Posted by {} in {}'.format(msg.author.name, msg.channel.name))
         try:
-            await self.bot.send_message(discord.Object(img_copy_channel_id), embed=embed)
+            await  discord.Object(img_copy_channel_id).send(embed=embed)
         except Exception as e:
             print('Failed to copy embed to', img_copy_channel_id, e)
 
     async def on_imgcopy_message(self, message):
-        if message.author.id == self.bot.user.id or message.channel.is_private:
+        if message.author.id == self.bot.user.id or not isinstance(channel, discord.GuildChannel):
             return
 
         img_copy_channel_id = self.settings.getImageCopy(message.guild.id, message.channel.id)
@@ -309,7 +309,7 @@ class TrUtils:
             await self.on_imgcopy_message(new_message)
 
     async def on_imgblacklist_message(self, message):
-        if message.author.id == self.bot.user.id or message.channel.is_private:
+        if message.author.id == self.bot.user.id or not isinstance(channel, discord.GuildChannel):
             return
         img_blacklist = self.settings.getImageTypeBlacklist(message.guild.id, message.channel.id)
         if img_blacklist is None:
@@ -319,14 +319,14 @@ class TrUtils:
             for a in message.attachments:
                 print(a['url'])
                 if self._check_labels_for_blacklist(a['url'], img_blacklist):
-                    await self.bot.send_message(message.channel, inline('Hey, is there a {} in that picture!!!'.format(img_blacklist)))
+                    await  message.channel.send(inline('Hey, is there a {} in that picture!!!'.format(img_blacklist)))
                     return
             return
 
         if message.embeds and len(message.embeds):
             for e in message.embeds:
                 if self._check_labels_for_blacklist(e['thumbnail']['proxy_url'], img_blacklist):
-                    await self.bot.send_message(message.channel, inline('Hey, is there a {} in that picture!!!'.format(img_blacklist)))
+                    await  message.channel.send(inline('Hey, is there a {} in that picture!!!'.format(img_blacklist)))
                     return
             return
 
@@ -334,12 +334,12 @@ class TrUtils:
         if len(old_message.embeds) == 0 and len(new_message.embeds) > 0:
             await self.on_imgblacklist_message(new_message)
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def bulkimagecopy(self, ctx, source_channel: discord.Channel, dest_channel: discord.Channel, number: int):
         copy_items = []
-        async for message in self.bot.logs_from(source_channel, limit=number):
-            if message.author.id == self.bot.user.id or message.channel.is_private:
+        async for message in source_channel.logs_from(limit=number):
+            if message.author.id == self.bot.user.id or not isinstance(channel, discord.GuildChannel):
                 continue
             img_url = extract_image_url(message)
             if img_url:
@@ -353,17 +353,17 @@ class TrUtils:
             except Exception as error:
                 print(error)
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def imagetypeblacklist(self, ctx, channel: discord.Channel, image_type: str):
         self.settings.setImageTypeBlacklist(ctx.message.guild.id, channel.id, image_type)
-        await self.bot.say('`done`')
+        await ctx.send('`done`')
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def clearimagetypeblacklist(self, ctx, channel: discord.Channel, image_type: str):
         self.settings.clearImageTypeBlacklist(ctx.message.guild.id, channel.id)
-        await self.bot.say('`done`')
+        await ctx.send('`done`')
 
     @commands.command(pass_context=True)
     @checks.is_owner()
@@ -377,33 +377,33 @@ class TrUtils:
         for cog_name in cogs:
             cog = self.bot.get_cog(cog_name)
             if cog is None:
-                await self.bot.say('{} not loaded, trying to load it...'.format(cog_name))
+                await ctx.send('{} not loaded, trying to load it...'.format(cog_name))
                 try:
                     module = 'cogs.{}'.format(cog_name.lower())
                     owner_cog._load_cog(module)
                     set_cog(module, True)
                 except Exception as e:
-                    await self.bot.say(box("Loading cog failed: {}: {}".format(e.__class__.__name__, str(e))))
-        await self.bot.say('Done!')
+                    await ctx.send(box("Loading cog failed: {}: {}".format(e.__class__.__name__, str(e))))
+        await ctx.send('Done!')
 
     @commands.command()
     async def getmiru(self):
         """Tells you how to get Miru into your server"""
         for page in pagify(GETMIRU_HELP, delims=['\n'], shorten_by=8):
-            await self.bot.whisper(box(page))
+            await ctx.author.send(box(page))
 
     @commands.command()
     async def userhelp(self):
         """Shows a summary of the useful user features"""
         for page in pagify(USER_HELP, delims=['\n'], shorten_by=8):
-            await self.bot.whisper(box(page))
+            await ctx.author.send(box(page))
 
     @commands.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def modhelp(self):
         """Shows a summary of the useful moderator features"""
         for page in pagify(MOD_HELP, delims=['\n'], shorten_by=8):
-            await self.bot.whisper(box(page))
+            await ctx.author.send(box(page))
 
     @commands.command()
     async def credits(self):
@@ -449,18 +449,18 @@ class TrUtils:
         embed.set_thumbnail(url=self.bot.user.avatar_url)
 
         try:
-            await self.bot.say(embed=embed)
+            await ctx.send(embed=embed)
         except discord.HTTPException:
-            await self.bot.say("I need the `Embed links` permission "
+            await ctx.send("I need the `Embed links` permission "
                                "to send this")
 
-    @commands.command(pass_context=True, hidden=True)
+    @commands.command(hidden=True)
     @checks.is_owner()
     async def supersecretdebug(self, ctx, *, code):
         await self._superdebug(ctx, code=code)
-        await self.bot.delete_message(ctx.message)
+        await ctx.message.delete()
 
-    @commands.command(pass_context=True, hidden=True)
+    @commands.command(hidden=True)
     @checks.is_owner()
     async def superdebug(self, ctx, *, code):
         """Evaluates code"""
@@ -492,7 +492,7 @@ class TrUtils:
             eval(compile(code, '<string>', 'exec'), global_vars, local_vars)
             to_await = local_vars['to_await']
         except Exception as e:
-            await self.bot.say(box('{}: {}'.format(type(e).__name__, str(e)),
+            await ctx.send(box('{}: {}'.format(type(e).__name__, str(e)),
                                    lang="py"))
             return
 
@@ -505,18 +505,18 @@ class TrUtils:
     async def checkimg(self, ctx, img: str):
         """Classify the given image and display the results."""
         if img.startswith('https://cdn.discordapp'):
-            await self.bot.say(inline('That URL probably wont work because Discord blocks non-browser requests'))
+            await ctx.send(inline('That URL probably wont work because Discord blocks non-browser requests'))
 
         labels = self._get_image_labels(img)
         if labels is None:
-            await self.bot.say(inline('failed to classify, check your URL'))
+            await ctx.send(inline('failed to classify, check your URL'))
             return
 
         if len(labels):
             formatted_labels = map(lambda l: '({} {:.0%})'.format(l.description, l.score), labels)
-            await self.bot.say(inline('looks like: ' + ' '.join(formatted_labels)))
+            await ctx.send(inline('looks like: ' + ' '.join(formatted_labels)))
         else:
-            await self.bot.say(inline('not sure what that is'))
+            await ctx.send(inline('not sure what that is'))
 
     def _get_image_labels(self, img: str):
         client = vision.Client(project='rpad-discord')
@@ -536,7 +536,7 @@ class TrUtils:
                 return True
         return False
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def addroleall(self, ctx, rolename: str):
         """Ensures that everyone in the server has a role."""
@@ -548,13 +548,13 @@ class TrUtils:
             return role in m.roles
 
         async def change_role_fn(m: discord.Member):
-            await self.bot.add_roles(m, role)
+            await m.add_roles(role)
 
-        await self.bot.say(inline("About to ensure that all {} members in the server have role: {}".format(len(members), role.name)))
+        await ctx.send(inline("About to ensure that all {} members in the server have role: {}".format(len(members), role.name)))
         await self._do_all_members(members, ignore_role_fn, change_role_fn)
-        await self.bot.say("done")
+        await ctx.send("done")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def rmroleall(self, ctx, rolename: str):
         """Ensures that everyone in the server does not have a role."""
@@ -566,13 +566,13 @@ class TrUtils:
             return role not in m.roles
 
         async def change_role_fn(m: discord.Member):
-            await self.bot.remove_roles(m, role)
+            await   m.remove_roles(role)
 
-        await self.bot.say(inline("About to ensure that all {} members in the server do not have role: {}".format(len(members), role.name)))
+        await ctx.send(inline("About to ensure that all {} members in the server do not have role: {}".format(len(members), role.name)))
         await self._do_all_members(members, ignore_role_fn, change_role_fn)
-        await self.bot.say("done")
+        await ctx.send("done")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def addroleallrole(self, ctx, srcrolename: str, newrolename: str):
         """Ensures that everyone in the with srcrolename server has a newrolename."""
@@ -585,11 +585,11 @@ class TrUtils:
             return srcrole not in m.roles or newrole in m.roles
 
         async def change_role_fn(m: discord.Member):
-            await self.bot.add_roles(m, newrole)
+            await m.add_roles(newrole)
 
-        await self.bot.say(inline("About to ensure that all members in the server with role {} have role: {}".format(srcrole.name, newrole.name)))
+        await ctx.send(inline("About to ensure that all members in the server with role {} have role: {}".format(srcrole.name, newrole.name)))
         await self._do_all_members(members, ignore_role_fn, change_role_fn)
-        await self.bot.say("done")
+        await ctx.send("done")
 
     async def _do_all_members(self, members, ignore_role_fn, per_member_asyncfn):
         changed, ignored, errors = 0, 0, 0
@@ -604,7 +604,7 @@ class TrUtils:
                 except:
                     errors += 1
             if (changed + ignored + errors) % 10 == 0:
-                await self.bot.say(inline('Status: changed={} ignored={} errors={}'.format(changed, ignored, errors)))
+                await ctx.send(inline('Status: changed={} ignored={} errors={}'.format(changed, ignored, errors)))
 
     @commands.command(pass_context=True)
     @checks.is_owner()
@@ -617,7 +617,7 @@ class TrUtils:
         msg = 'Ban report for {} ({}):'.format(user.name, user.id)
         for server in self.bot.guilds:
             try:
-                ban_list = await self.bot.get_bans(server)
+                ban_list = await server.bans()
                 if user.id in [x.id for x in ban_list]:
                     msg += '\n\tUser already banned from {}'.format(server.name)
                     continue
@@ -639,7 +639,7 @@ class TrUtils:
                     msg += '\n\tUser not in {}; hackban failed: {}'.format(server.name, ex)
                 continue
             try:
-                await self.bot.ban(m, delete_message_days=0)
+                await m.ban(delete_message_days=0)
                 msg += '\n\tBanned from {}'.format(server.name)
                 await mod_cog.new_case(server,
                                        action="BAN",
@@ -650,7 +650,7 @@ class TrUtils:
                 msg += '\n\tFailed to ban from {} because {}'.format(server.name, ex)
 
         for page in pagify(msg):
-            await self.bot.say(box(page))
+            await ctx.send(box(page))
 
     async def _send_feedback(self, ctx, message: str, feedback_channel, success_message: str):
         if feedback_channel is None:
@@ -676,11 +676,11 @@ class TrUtils:
         e.set_footer(text=footer)
 
         try:
-            await self.bot.send_message(feedback_channel, embed=e)
+            await  feedback_channel.send(embed=e)
         except:
-            await self.bot.say(inline("I'm unable to deliver your message. Sorry."))
+            await ctx.send(inline("I'm unable to deliver your message. Sorry."))
         else:
-            await self.bot.say(inline("Your message has been sent."
+            await ctx.send(inline("Your message has been sent."
                                       " Abusing this feature will result in a blacklist."
                                       + success_message))
 
@@ -695,14 +695,14 @@ class TrUtils:
         feedback_channel = self.bot.get_channel(int(self.settings.getFeedbackChannel()))
         await self._send_feedback(ctx, message, feedback_channel, " Join the Miru Server to see any responses (^miruserver).")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def setfeedbackchannel(self, ctx, channel: discord.Channel):
         """Set the feedback destination channel."""
         self.settings.setFeedbackChannel(channel.id)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
-    @commands.command(pass_context=True, aliases=['mamafeedback'])
+    @commands.command(aliases=['mamafeedback'])
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def blogfeedback(self, ctx, *, message: str):
         """Provide feedback on Reni's blog or translations.
@@ -712,23 +712,23 @@ class TrUtils:
         feedback_channel = self.bot.get_channel(int(self.settings.getBlogFeedbackChannel()))
         await self._send_feedback(ctx, message, feedback_channel, " Join the PDX Server to see any responses (^pdx).")
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.is_owner()
     async def setblogfeedbackchannel(self, ctx, channel: discord.Channel):
         """Set the blog feedback destination channel."""
         self.settings.setBlogFeedbackChannel(channel.id)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command()
     @checks.mod_or_permissions(manage_guild=True)
     async def mentionable(self, ctx, role: discord.Role):
         """Toggle the mentionability of a role."""
         try:
             new_mentionable = not role.mentionable
-            await self.bot.edit_role(ctx.message.server, role, mentionable=new_mentionable)
-            await self.bot.say(inline('Role is now {}'.format('mentionable' if new_mentionable else 'unmentionable')))
+            await ctx.message.server.edit_role(role, mentionable=new_mentionable)
+            await ctx.send(inline('Role is now {}'.format('mentionable' if new_mentionable else 'unmentionable')))
         except Exception as ex:
-            await self.bot.say(inline('Error: failed to alter role'))
+            await ctx.send(inline('Error: failed to alter role'))
 
     @commands.command(pass_context=True)
     @checks.is_owner()
@@ -737,24 +737,24 @@ class TrUtils:
         if user:
             if user.id in self.settings.trackedUsers().keys():
                 self.settings.rmTrackedUser(user.id)
-                await self.bot.say(inline('No longer tracking user'))
+                await ctx.send(inline('No longer tracking user'))
             else:
                 self.settings.addTrackedUser(user.id)
-                await self.bot.say(inline('Tracking user'))
+                await ctx.send(inline('Tracking user'))
                 for server in self.bot.guilds:
                     member = server.get_member(int(user.id))
                     if member and str(member.status) != 'offline':
                         self.settings.updateTrackedUser(user.id)
-                        await self.bot.say(inline('User currently online'))
+                        await ctx.send(inline('User currently online'))
                         break
         else:
             msg = 'Tracked users:\n'
             for user_id, track_info in self.settings.trackedUsers().items():
-                user = await self.bot.get_user_info(int(user_id))
+                user = await self.bot.fetch_user(int(user_id))
                 user_name = user.name if user else user_id
                 msg += '\t{} : {}'.format(user_name, json.dumps(track_info, sort_keys=True))
 
-            await self.bot.say(box(msg))
+            await ctx.send(box(msg))
 
     async def on_trackuser_update(self, old_member: discord.Member, new_member: discord.Member):
         if new_member and str(new_member.status) != 'offline' and new_member.id in self.settings.trackedUsers():

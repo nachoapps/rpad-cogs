@@ -50,10 +50,11 @@ class PadBoard:
         return None
 
     async def download_image(self, image_url):
-        async with aiohttp.get(image_url) as r:
-            if r.status == 200:
-                image_data = await r.read()
-                return image_data
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get('url') as resp:
+               if r.status == 200:
+                   image_data = await r.read()
+                   return image_data
         return None
 
     @commands.command(pass_context=True)
@@ -78,7 +79,7 @@ class PadBoard:
 
         msg = '{}\n{}'.format(img_url, img_url2)
 
-        await self.bot.say(msg)
+        await ctx.send(msg)
 
     async def get_recent_image(self, ctx, user: discord.Member=None, message: discord.Message=None):
         user_id = user.id if user else ctx.message.author.id
@@ -89,14 +90,14 @@ class PadBoard:
 
         if not image_url:
             if user:
-                await self.bot.say(inline("Couldn't find an image in that user's recent messages."))
+                await ctx.send(inline("Couldn't find an image in that user's recent messages."))
             else:
-                await self.bot.say(inline("Couldn't find an image in your recent messages. Upload or link to one and try again"))
+                await ctx.send(inline("Couldn't find an image in your recent messages. Upload or link to one and try again"))
             return None
 
         image_data = await self.download_image(image_url)
         if not image_data:
-            await self.bot.say(inline("failed to download"))
+            await ctx.send(inline("failed to download"))
             return None
 
         return image_data

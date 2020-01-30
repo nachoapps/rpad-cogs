@@ -258,6 +258,6 @@ class DamageCalc:
         config = DamageConfig(lexer)
         damage = config.calculate(all_enhanced=False)
         enhanced_damage = config.calculate(all_enhanced=True)
-        await self.bot.say("```Damage (no enhanced) :  {}\nDamage (all enhanced) : {}```".format(damage, enhanced_damage))
+        await ctx.send("```Damage (no enhanced) :  {}\nDamage (all enhanced) : {}```".format(damage, enhanced_damage))
 
 
