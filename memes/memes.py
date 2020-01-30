@@ -35,7 +35,7 @@ class Memes:
         Memes can be enhanced with arguments:
         https://twentysix26.github.io/Red-Docs/red_guide_command_args/
         """
-        server = ctx.message.server
+        server = ctx.message.guild
         command = command.lower()
         if command in self.bot.commands.keys():
             await self.bot.say("That meme is already a standard command.")
@@ -59,7 +59,7 @@ class Memes:
         Example:
         [p]editmeme yourcommand Text you want
         """
-        server = ctx.message.server
+        server = ctx.message.guild
         command = command.lower()
         if server.id in self.c_commands:
             cmdlist = self.c_commands[server.id]
@@ -80,7 +80,7 @@ class Memes:
 
         Example:
         [p]delmeme yourcommand"""
-        server = ctx.message.server
+        server = ctx.message.guild
         command = command.lower()
         if server.id in self.c_commands:
             cmdlist = self.c_commands[server.id]
@@ -102,14 +102,14 @@ class Memes:
         Example:
         [p]setmemerole Regular"""
 
-        role = get_role(ctx.message.server.roles, rolename)
-        self.settings.setPrivileged(ctx.message.server.id, role.id)
+        role = get_role(ctx.message.guild.roles, rolename)
+        self.settings.setPrivileged(ctx.message.guild.id, role.id)
         await self.bot.say("done")
 
     @commands.command(pass_context=True, no_pm=True)
     async def memes(self, ctx):
         """Shows custom memes list"""
-        server = ctx.message.server
+        server = ctx.message.guild
         if server.id in self.c_commands:
             cmdlist = self.c_commands[server.id]
             if cmdlist:
@@ -134,14 +134,14 @@ class Memes:
         if len(message.content) < 2 or message.channel.is_private:
             return
 
-        server = message.server
+        server = message.guild
         prefix = self.get_prefix(message)
 
         if not prefix:
             return
 
         # MEME CODE
-        role_id = self.settings.getPrivileged(message.server.id)
+        role_id = self.settings.getPrivileged(message.guild.id)
         if role_id is not None:
             role = get_role_from_id(self.bot, message.server, role_id)
             if role not in message.author.roles:
@@ -183,7 +183,7 @@ class Memes:
             "message": message,
             "author": message.author,
             "channel": message.channel,
-            "server": message.server
+            "server": message.guild
         }
         if result in objects:
             return str(objects[result])

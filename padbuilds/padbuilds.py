@@ -38,7 +38,7 @@ class PadBuilds:
         Builds can be enhanced with arguments:
         https://twentysix26.github.io/Red-Docs/red_guide_command_args/
         """
-        server = ctx.message.server
+        server = ctx.message.guild
         command = command.lower()
         text = text.replace(u'\u200b', '')
         if command in self.bot.commands:
@@ -65,7 +65,7 @@ class PadBuilds:
         Example:
         [p]builds edit buildname Text you want
         """
-        server = ctx.message.server
+        server = ctx.message.guild
         command = command.lower()
         text = text.replace(u'\u200b', '')
         if server.id in self.c_commands:
@@ -91,7 +91,7 @@ class PadBuilds:
 
         Example:
         [p]builds delete buildname"""
-        server = ctx.message.server
+        server = ctx.message.guild
         command = command.lower()
         if server.id in self.c_commands:
             cmdlist = self.c_commands[server.id]
@@ -110,7 +110,7 @@ class PadBuilds:
     @builds.command(name="list", pass_context=True)
     async def cc_list(self, ctx):
         """Shows PAD Builds list"""
-        server = ctx.message.server
+        server = ctx.message.guild
         commands = self.c_commands.get(server.id, {})
 
         if not commands:
@@ -132,7 +132,7 @@ class PadBuilds:
         if len(message.content) < 2 or message.channel.is_private:
             return
 
-        server = message.server
+        server = message.guild
         prefix = self.get_prefix(message)
 
         if not prefix:
@@ -173,7 +173,7 @@ class PadBuilds:
             "message": message,
             "author": message.author,
             "channel": message.channel,
-            "server": message.server
+            "server": message.guild
         }
         if result in objects:
             return str(objects[result])

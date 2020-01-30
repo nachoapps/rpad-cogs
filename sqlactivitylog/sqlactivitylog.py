@@ -229,7 +229,7 @@ class SqlActivityLogger(object):
         await self.bot.say(inline('Locked is now {}'.format(self.lock)))
 
     @commands.group(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def exlog(self, context):
         """Extra log querying tools.
 
@@ -247,7 +247,7 @@ class SqlActivityLogger(object):
         Count is optional, with a low default and a maximum value.
         """
         count = min(count, MAX_LOGS)
-        server = ctx.message.server
+        server = ctx.message.guild
         values = {
             'server_id': server.id,
             'row_count': count,
@@ -271,7 +271,7 @@ class SqlActivityLogger(object):
         The bot is excluded from results.
         """
         count = min(count, MAX_LOGS)
-        server = ctx.message.server
+        server = ctx.message.guild
         values = {
             'server_id': server.id,
             'bot_id': self.bot.user.id,
@@ -295,7 +295,7 @@ class SqlActivityLogger(object):
         Count is optional, with a low default and a maximum value.
         """
         count = min(count, MAX_LOGS)
-        server = ctx.message.server
+        server = ctx.message.guild
         values = {
             'server_id': server.id,
             'row_count': count,
@@ -324,7 +324,7 @@ class SqlActivityLogger(object):
             return
 
         count = min(count, MAX_LOGS)
-        server = ctx.message.server
+        server = ctx.message.guild
         values = {
             'server_id': server.id,
             'bot_id': self.bot.user.id,
@@ -355,7 +355,7 @@ class SqlActivityLogger(object):
             return
 
         count = min(count, MAX_LOGS)
-        server = ctx.message.server
+        server = ctx.message.guild
         values = {
             'server_id': server.id,
             'bot_id': self.bot.user.id,
@@ -376,7 +376,7 @@ class SqlActivityLogger(object):
         """
         count = min(count, 30)
         start_date = datetime.today() - timedelta(days=(count + 1))
-        server = ctx.message.server
+        server = ctx.message.guild
         values = {
             'server_id': server.id,
             'row_count': count,
@@ -401,7 +401,7 @@ class SqlActivityLogger(object):
         start_date = start_date.replace(tzinfo=pytz.utc)
         end_date = end_date.replace(tzinfo=pytz.utc)
 
-        server = ctx.message.server
+        server = ctx.message.guild
         values = {
             'server_id': server.id,
             'start_timestamp': start_date,
@@ -427,7 +427,7 @@ class SqlActivityLogger(object):
         start_date = start_date.replace(tzinfo=pytz.utc)
         end_date = end_date.replace(tzinfo=pytz.utc)
 
-        server = ctx.message.server
+        server = ctx.message.guild
         values = {
             'server_id': server.id,
             'channel_id': channel.id,
@@ -455,7 +455,7 @@ class SqlActivityLogger(object):
         start_date = start_date.replace(tzinfo=pytz.utc)
         end_date = end_date.replace(tzinfo=pytz.utc)
 
-        server = ctx.message.server
+        server = ctx.message.guild
         values = {
             'server_id': server.id,
             'user_id': user.id,
@@ -513,7 +513,7 @@ class SqlActivityLogger(object):
                     member = server.get_member(int(value)) if server else None
                     value = member.name if member else value
                 if col == 'server_id':
-                    server_obj = self.bot.get_server(int(value))
+                    server_obj = self.bot.get_guild(int(value))
                     value = server_obj.name if server_obj else value
                 if col == 'clean_content':
                     value = value.replace('```', '~~~')
@@ -552,7 +552,7 @@ class SqlActivityLogger(object):
           VALUES(:timestamp, :server_id, :channel_id, :user_id, :msg_type, :content, :clean_content)
         '''
         timestamp = timestamp or datetime.utcnow()
-        server_id = message.server.id if message.server else -1
+        server_id = message.guild.id if message.guild else -1
         channel_id = message.channel.id if message.channel else -1
 
         msg_content = message.content

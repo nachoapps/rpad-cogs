@@ -44,7 +44,7 @@ class Statistics:
             x['created_at'] = self.bot.user.created_at.strftime('%B %d, %Y at %H:%M:%S')
             x['loaded_cogs'] = [cog for cog in self.bot.cogs]
             x['prefixes'] = self.bot.settings.prefixes
-            x['servers'] = [{'name': server.name, 'members': len(server.members), 'icon_url': server.icon_url} for server in self.bot.servers]
+            x['servers'] = [{'name': server.name, 'members': len(server.members), 'icon_url': server.icon_url} for server in self.bot.guilds]
             x['cogs'] = len(self.bot.cogs)
             return x
         else:
@@ -119,7 +119,7 @@ class Statistics:
     def retrieve_statistics(self):
         name = self.bot.user.name
         users = str(len(set(self.bot.get_all_members())))
-        servers = str(len(self.bot.servers))
+        servers = str(len(self.bot.guilds))
         commands_run = self.bot.counter['processed_commands']
         read_messages = self.bot.counter['messages_read']
         text_channels = 0

@@ -132,10 +132,10 @@ class PadGlobal:
         await self.bot.shutdown()
 
     @commands.command(pass_context=True)
-    @checks.admin_or_permissions(manage_server=True)
+    @checks.admin_or_permissions(manage_guild=True)
     async def togglepadglobal(self, ctx):
         """Enable or disable PAD Global commands for the server."""
-        server_id = ctx.message.server.id
+        server_id = ctx.message.guild.id
         if server_id in self.settings.disabledServers():
             self.settings.rmDisabledServer(server_id)
         else:
@@ -802,7 +802,7 @@ class PadGlobal:
     def _get_emojis(self):
         emojis = list()
         for server_id in self.settings.emojiServers():
-            emojis.extend(self.bot.get_server(int(server_id)).emojis)
+            emojis.extend(self.bot.get_guild(int(server_id)).emojis)
         return emojis
 
     @padglobal.command(pass_context=True)
@@ -840,7 +840,7 @@ class PadGlobal:
                 return
 
         for server_id in server_ids:
-            emoji_server = self.bot.get_server(int(server_id))
+            emoji_server = self.bot.get_guild(int(server_id))
             if len(emoji_server.emojis) < 50:
                 break
 
@@ -942,7 +942,7 @@ class PadGlobal:
             "message": message,
             "author": message.author,
             "channel": message.channel,
-            "server": message.server
+            "server": message.guild
         }
         if result in objects:
             return str(objects[result])
@@ -1271,9 +1271,9 @@ class PadGlobalSettings(CogSettings):
     def checkDisabled(self, ctx_or_msg):
         if hasattr(ctx_or_msg, 'message'):
             ctx_or_msg = ctx_or_msg.message
-        if ctx_or_msg.server is None:
+        if ctx_or_msg.guild is None:
             return False
-        return ctx_or_msg.server.id in self.disabledServers()
+        return ctx_or_msg.guild.id in self.disabledServers()
 
     def addDisabledServer(self, server_id):
         disabled_servers = self.disabledServers()

@@ -42,28 +42,28 @@ class StreamCopy:
         print("done refresh_stream")
 
     @commands.group(pass_context=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def streamcopy(self, context):
         """Utilities for reacting to users gaining/losing streaming status."""
         if context.invoked_subcommand is None:
             await send_cmd_help(context)
 
     @streamcopy.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def setStreamerRole(self, ctx, *, role_name: str):
         try:
-            role = get_role(ctx.message.server.roles, role_name)
+            role = get_role(ctx.message.guild.roles, role_name)
         except:
             await self.bot.say(inline('Unknown role'))
             return
 
-        self.settings.setStreamerRole(ctx.message.server.id, role.id)
+        self.settings.setStreamerRole(ctx.message.guild.id, role.id)
         await self.bot.say(inline('Done. Make sure that role is below the bot in the hierarchy'))
 
     @streamcopy.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def clearStreamerRole(self, ctx):
-        self.settings.clearStreamerRole(ctx.message.server.id)
+        self.settings.clearStreamerRole(ctx.message.guild.id)
         await self.bot.say(inline('Done'))
 
     @streamcopy.command(name="adduser", pass_context=True)
@@ -100,7 +100,7 @@ class StreamCopy:
             await self.bot.say(inline('Could not find a streamer'))
 
     async def check_stream(self, before, after):
-        streamer_role_id = self.settings.getStreamerRole(before.server.id)
+        streamer_role_id = self.settings.getStreamerRole(before.guild.id)
         if streamer_role_id:
             await self.ensure_user_streaming_role(after.server, streamer_role_id, after)
 
@@ -138,7 +138,7 @@ class StreamCopy:
         return other_stream
 
     async def do_ensure_roles(self):
-        servers = self.bot.servers
+        servers = self.bot.guilds
         for server in servers:
             streamer_role_id = self.settings.getStreamerRole(server.id)
             if not streamer_role_id:

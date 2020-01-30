@@ -130,7 +130,7 @@ def get_role_from_id(bot, server, roleid):
 
 
 def get_server_from_id(bot, serverid):
-    return discord.utils.get(bot.servers, id=serverid)
+    return discord.utils.get(bot.guilds, id=serverid)
 
 
 def normalizeServer(server):
@@ -265,7 +265,7 @@ class Menu():
         await bot.delete_message(message)
 
 #     def perms(self, ctx):
-#         user = ctx.message.server.get_member(int(self.bot.user.id))
+#         user = ctx.message.guild.get_member(int(self.bot.user.id))
 #         return ctx.message.channel.permissions_for(user)
 
     async def custom_menu(self, ctx, emoji_to_message, selected_emoji, **kwargs):
@@ -408,7 +408,7 @@ class UserConverter2(converter.IDConverter):
         message = self.ctx.message
         bot = self.ctx.bot
         match = self._get_id_match() or re.match(r'<@!?([0-9]+)>$', self.argument)
-        server = message.server
+        server = message.guild
         result = None
         if match is None:
             # not a mention...
@@ -626,7 +626,7 @@ async def await_and_remove(bot, react_msg, listen_user, delete_msgs=None, emoji=
 
     if r is None:
         try:
-            await bot.remove_reaction(react_msg, emoji, react_msg.server.me)
+            await bot.remove_reaction(react_msg, emoji, react_msg.guild.me)
         except Exception as e:
             # failed to remove reaction, ignore
             return

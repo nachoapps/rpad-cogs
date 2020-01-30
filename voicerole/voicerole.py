@@ -31,7 +31,7 @@ class VoiceRole:
         else:
             return
 
-        server = member_to_modify.server
+        server = member_to_modify.guild
         server_id = server.id
         channel_id = member_to_modify.voice_channel.id
 
@@ -72,20 +72,20 @@ class VoiceRole:
         if channel.type != discord.ChannelType.voice:
             await self.bot.say('Not a voice channel')
             return
-        self.settings.addChannelRole(ctx.message.server.id, channel.id, role.id)
+        self.settings.addChannelRole(ctx.message.guild.id, channel.id, role.id)
         await self.bot.say('done')
 
     @voicerole.command(pass_context=True, no_pm=True)
     async def clear(self, ctx, channel: discord.Channel):
         """Clear the role associated with a channel"""
-        self.settings.rmChannelRole(ctx.message.server.id, channel.id)
+        self.settings.rmChannelRole(ctx.message.guild.id, channel.id)
         await self.bot.say('done')
 
     @voicerole.command(pass_context=True, no_pm=True)
     async def list(self, ctx):
         """List the channel/role associations for this server."""
         msg = 'Channel -> Role:'
-        for channel_id, role_id in self.settings.getChannelRoles(ctx.message.server.id).items():
+        for channel_id, role_id in self.settings.getChannelRoles(ctx.message.guild.id).items():
             msg += '\n\t{} : {}'.format(channel_id, role_id)
         await self.bot.say(box(msg))
 

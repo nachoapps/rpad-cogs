@@ -147,7 +147,7 @@ class PadEvents:
         print("done check_started")
 
     @commands.group(pass_context=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def padevents(self, ctx):
         """PAD event tracking"""
         if ctx.invoked_subcommand is None:
@@ -180,7 +180,7 @@ class PadEvents:
         await self.bot.say("Fake event injected.")
 
     @padevents.command(name="addchannel", pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def _addchannel(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
@@ -196,7 +196,7 @@ class PadEvents:
         await self.bot.say("Channel now active.")
 
     @padevents.command(name="rmchannel", pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def _rmchannel(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
@@ -212,7 +212,7 @@ class PadEvents:
         await self.bot.say("Channel deactivated.")
 
     @padevents.command(name="addchanneldaily", pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def _addchanneldaily(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
@@ -228,7 +228,7 @@ class PadEvents:
         await self.bot.say("Channel now active.")
 
     @padevents.command(name="rmchanneldaily", pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def _rmchanneldaily(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
@@ -244,7 +244,7 @@ class PadEvents:
         await self.bot.say("Channel deactivated.")
 
     @padevents.command(name="listchannels", pass_context=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def _listchannel(self, ctx):
         msg = 'Following daily channels are registered:\n'
         msg += self.makeChannelList(self.settings.listDailyReg())
@@ -259,12 +259,12 @@ class PadEvents:
             reg_channel_id = cr['channel_id']
             channel = self.bot.get_channel(int(reg_channel_id))
             channel_name = channel.name if channel else 'Unknown(' + reg_channel_id + ')'
-            server_name = channel.server.name if channel else 'Unknown server'
+            server_name = channel.guild.name if channel else 'Unknown server'
             msg += "   " + cr['server'] + " : " + server_name + '(' + channel_name + ')\n'
         return msg
 
     @padevents.command(name="active", pass_context=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def _active(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:

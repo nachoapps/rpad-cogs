@@ -22,7 +22,7 @@ class ModNotes:
         self.settings = ModNotesSettings("modnotes")
 
     @commands.group(pass_context=True, no_pm=True, aliases=["usernote"])
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def usernotes(self, context):
         """Moderator notes for users.
 
@@ -32,10 +32,10 @@ class ModNotes:
             await send_cmd_help(context)
 
     @usernotes.command(name="print", pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def _print(self, ctx, user: discord.User):
         """Print the notes for a user."""
-        notes = self.settings.getNotesForUser(ctx.message.server.id, user.id)
+        notes = self.settings.getNotesForUser(ctx.message.guild.id, user.id)
         if not notes:
             await self.bot.say(box('No notes for {}'.format(user.name)))
             return
@@ -45,38 +45,38 @@ class ModNotes:
             await self.bot.say(box(note))
 
     @usernotes.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def add(self, ctx, user: discord.User, *, note_text: str):
         """Add a note to a user."""
         timestamp = str(ctx.message.timestamp)[:-7]
         msg = 'Added by {} ({}): {}'.format(ctx.message.author.name, timestamp, note_text)
-        server_id = ctx.message.server.id
+        server_id = ctx.message.guild.id
         notes = self.settings.addNoteForUser(server_id, user.id, msg)
         await self.bot.say(inline('Done. User {} now has {} notes'.format(user.name, len(notes))))
 
     @usernotes.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def delete(self, ctx, user: discord.User, note_num: int):
         """Delete a specific note for a user."""
-        notes = self.settings.getNotesForUser(ctx.message.server.id, user.id)
+        notes = self.settings.getNotesForUser(ctx.message.guild.id, user.id)
         if len(notes) < note_num:
             await self.bot.say(box('Note not found for {}'.format(user.name)))
             return
 
         note = notes[note_num - 1]
         notes.remove(note)
-        self.settings.setNotesForUser(ctx.message.server.id, user.id, notes)
+        self.settings.setNotesForUser(ctx.message.guild.id, user.id, notes)
         await self.bot.say(inline('Removed note {}. User has {} remaining.'.format(note_num, len(notes))))
         await self.bot.say(box(note))
 
     @usernotes.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def list(self, ctx):
         """Lists all users and note counts for the server."""
-        user_notes = self.settings.getUserNotes(ctx.message.server.id)
+        user_notes = self.settings.getUserNotes(ctx.message.guild.id)
         msg = 'Notes for {} users'.format(len(user_notes))
         for user_id, notes in user_notes.items():
-            user = ctx.message.server.get_member(int(user_id))
+            user = ctx.message.guild.get_member(int(user_id))
             user_text = '{} ({})'.format(user.name, user.id) if user else user_id
             msg += '\n\t{} : {}'.format(len(notes), user_text)
 

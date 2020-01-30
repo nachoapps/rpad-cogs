@@ -52,7 +52,7 @@ class ChannelMod:
         name when the oldest message in the channel is greater than the timeout.
         """
         channel = ctx.message.channel
-        server = channel.server
+        server = channel.guild
         has_permissions = channel.permissions_for(server.me).manage_channels
         if not has_permissions:
             await self.bot.say(inline('I need manage channel permissions to do this'))
@@ -65,7 +65,7 @@ class ChannelMod:
         if message.author.id == self.bot.user.id or message.channel.is_private:
             return
 
-        server = message.server
+        server = message.guild
         channel = message.channel
         timeout = self.settings.get_inactivity_monitor_channel_timeout(server.id, channel.id)
 
@@ -84,7 +84,7 @@ class ChannelMod:
             print('timeout check: cannot find channel', channel_id)
             return
 
-        server = channel.server
+        server = channel.guild
 
         has_permissions = channel.permissions_for(server.me).manage_channels
         if not has_permissions:
@@ -199,7 +199,7 @@ class ChannelMod:
 
                 if attribution_required:
                     msg = 'Posted by **{}** in *{} - #{}*:'.format(message.author.name,
-                                                                   message.server.name,
+                                                                   message.guild.name,
                                                                    message.channel.name)
                     await self.bot.send_message(dest_channel, msg)
 
@@ -266,7 +266,7 @@ class ChannelMod:
                 elif delete_message_content:
                     await self.bot.delete_message(dest_message)
                 elif delete_message_reaction:
-                    await self.bot.remove_reaction(dest_message, delete_message_reaction, dest_message.server.me)
+                    await self.bot.remove_reaction(dest_message, delete_message_reaction, dest_message.guild.me)
             except Exception as ex:
                 print('Failed to mirror message edit from ',
                       channel.id, 'to', dest_channel_id, ':', ex)

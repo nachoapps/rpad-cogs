@@ -176,7 +176,7 @@ class TrUtils:
         await self.bot.say(inline('Done'))
 
     @commands.command(pass_context=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def editmsg(self, ctx, channel: discord.Channel, msg_id: int, *, new_msg: str):
         """Given a channel and an ID for a message printed in that channel, replaces it.
 
@@ -199,7 +199,7 @@ class TrUtils:
         await self.bot.say(inline('done'))
 
     @commands.command(pass_context=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def dumpchannel(self, ctx, channel: discord.Channel, msg_id: int=None):
         """Given a channel and an ID for a message printed in that channel, dumps it 
         boxed with formatting escaped and some issues cleaned up.
@@ -247,13 +247,13 @@ class TrUtils:
     @commands.command(pass_context=True, no_pm=True)
     @checks.is_owner()
     async def imagecopy(self, ctx, source_channel: discord.Channel, dest_channel: discord.Channel):
-        self.settings.setImageCopy(ctx.message.server.id, source_channel.id, dest_channel.id)
+        self.settings.setImageCopy(ctx.message.guild.id, source_channel.id, dest_channel.id)
         await self.bot.say('`done`')
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.is_owner()
     async def clearimagecopy(self, ctx, channel: discord.Channel):
-        self.settings.clearImageCopy(ctx.message.server.id, channel.id)
+        self.settings.clearImageCopy(ctx.message.guild.id, channel.id)
         await self.bot.say('`done`')
 
     async def copy_image_to_channel(self, img_url, author_name, channel_name, img_copy_channel_id):
@@ -290,7 +290,7 @@ class TrUtils:
         if message.author.id == self.bot.user.id or message.channel.is_private:
             return
 
-        img_copy_channel_id = self.settings.getImageCopy(message.server.id, message.channel.id)
+        img_copy_channel_id = self.settings.getImageCopy(message.guild.id, message.channel.id)
         if img_copy_channel_id is None:
             return
 
@@ -311,7 +311,7 @@ class TrUtils:
     async def on_imgblacklist_message(self, message):
         if message.author.id == self.bot.user.id or message.channel.is_private:
             return
-        img_blacklist = self.settings.getImageTypeBlacklist(message.server.id, message.channel.id)
+        img_blacklist = self.settings.getImageTypeBlacklist(message.guild.id, message.channel.id)
         if img_blacklist is None:
             return
 
@@ -356,13 +356,13 @@ class TrUtils:
     @commands.command(pass_context=True, no_pm=True)
     @checks.is_owner()
     async def imagetypeblacklist(self, ctx, channel: discord.Channel, image_type: str):
-        self.settings.setImageTypeBlacklist(ctx.message.server.id, channel.id, image_type)
+        self.settings.setImageTypeBlacklist(ctx.message.guild.id, channel.id, image_type)
         await self.bot.say('`done`')
 
     @commands.command(pass_context=True, no_pm=True)
     @checks.is_owner()
     async def clearimagetypeblacklist(self, ctx, channel: discord.Channel, image_type: str):
-        self.settings.clearImageTypeBlacklist(ctx.message.server.id, channel.id)
+        self.settings.clearImageTypeBlacklist(ctx.message.guild.id, channel.id)
         await self.bot.say('`done`')
 
     @commands.command(pass_context=True)
@@ -399,7 +399,7 @@ class TrUtils:
             await self.bot.whisper(box(page))
 
     @commands.command()
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def modhelp(self):
         """Shows a summary of the useful moderator features"""
         for page in pagify(MOD_HELP, delims=['\n'], shorten_by=8):
@@ -483,7 +483,7 @@ class TrUtils:
         global_vars['message'] = ctx.message
         global_vars['author'] = ctx.message.author
         global_vars['channel'] = ctx.message.channel
-        global_vars['server'] = ctx.message.server
+        global_vars['server'] = ctx.message.guild
 
         local_vars = locals().copy()
         local_vars['to_await'] = list()
@@ -540,8 +540,8 @@ class TrUtils:
     @checks.is_owner()
     async def addroleall(self, ctx, rolename: str):
         """Ensures that everyone in the server has a role."""
-        role = get_role(ctx.message.server.roles, rolename)
-        server = ctx.message.server
+        role = get_role(ctx.message.guild.roles, rolename)
+        server = ctx.message.guild
         members = server.members
 
         def ignore_role_fn(m: discord.Member):
@@ -558,8 +558,8 @@ class TrUtils:
     @checks.is_owner()
     async def rmroleall(self, ctx, rolename: str):
         """Ensures that everyone in the server does not have a role."""
-        role = get_role(ctx.message.server.roles, rolename)
-        server = ctx.message.server
+        role = get_role(ctx.message.guild.roles, rolename)
+        server = ctx.message.guild
         members = server.members
 
         def ignore_role_fn(m: discord.Member):
@@ -576,9 +576,9 @@ class TrUtils:
     @checks.is_owner()
     async def addroleallrole(self, ctx, srcrolename: str, newrolename: str):
         """Ensures that everyone in the with srcrolename server has a newrolename."""
-        srcrole = get_role(ctx.message.server.roles, srcrolename)
-        newrole = get_role(ctx.message.server.roles, newrolename)
-        server = ctx.message.server
+        srcrole = get_role(ctx.message.guild.roles, srcrolename)
+        newrole = get_role(ctx.message.guild.roles, newrolename)
+        server = ctx.message.guild
         members = server.members
 
         def ignore_role_fn(m: discord.Member):
@@ -615,7 +615,7 @@ class TrUtils:
         """
         mod_cog = self.bot.get_cog('Mod')
         msg = 'Ban report for {} ({}):'.format(user.name, user.id)
-        for server in self.bot.servers:
+        for server in self.bot.guilds:
             try:
                 ban_list = await self.bot.get_bans(server)
                 if user.id in [x.id for x in ban_list]:
@@ -656,7 +656,7 @@ class TrUtils:
         if feedback_channel is None:
             raise ReportableError("Feedback channel not set")
 
-        server = ctx.message.server
+        server = ctx.message.guild
         author = ctx.message.author
         footer = "User ID: " + author.id
 
@@ -720,7 +720,7 @@ class TrUtils:
         await self.bot.say(inline('Done'))
 
     @commands.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def mentionable(self, ctx, role: discord.Role):
         """Toggle the mentionability of a role."""
         try:
@@ -741,7 +741,7 @@ class TrUtils:
             else:
                 self.settings.addTrackedUser(user.id)
                 await self.bot.say(inline('Tracking user'))
-                for server in self.bot.servers:
+                for server in self.bot.guilds:
                     member = server.get_member(int(user.id))
                     if member and str(member.status) != 'offline':
                         self.settings.updateTrackedUser(user.id)

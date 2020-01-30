@@ -70,7 +70,7 @@ and starts following a user if one was set upon construction."""
         await self.bot.say(self.info(ctx.message.channel))
 
 #     @twitter2.command(name="follow", pass_context=True, no_pm=True)
-#     @checks.mod_or_permissions(manage_server=True)
+#     @checks.mod_or_permissions(manage_guild=True)
 #     async def _follow(self, ctx, command):
 #         await self.bot.say("stopping follow on " + self.tuser)
 #         tuser = command
@@ -222,7 +222,7 @@ as the given channel. If channel is None, show active channels from all servers.
         ccount = 0
         cstr = ""
 #         for c in self.channels:
-#             if channel is None or c.server == channel.server:
+#             if channel is None or c.guild == channel.server:
 #                 ccount += 1
 #                 cstr += "#" + c.name + ", "
         if cstr:

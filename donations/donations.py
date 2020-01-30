@@ -144,7 +144,7 @@ class Donations:
     async def insultripper(self, ctx):
         """Fuck ripper."""
         ripper_id = 123529484476350467
-        ripper = ctx.message.server.get_member(int(ripper_id))
+        ripper = ctx.message.guild.get_member(int(ripper_id))
         insult = random.choice(self.insults_list)
         if ripper:
             await self.bot.say(ripper.mention + ' ' + insult)
@@ -162,7 +162,7 @@ class Donations:
             return
 
         ripper_id = 123529484476350467
-        ripper = ctx.message.server.get_member(int(ripper_id))
+        ripper = ctx.message.guild.get_member(int(ripper_id))
 
         if ripper is None:
             await self.bot.say(inline('Ripper must be in this server to use this command'))
@@ -232,17 +232,17 @@ class Donations:
             await self.bot.whisper(random.choice(self.perverted_list))
 
     @commands.group(pass_context=True)
-    @checks.admin_or_permissions(manage_server=True)
+    @checks.admin_or_permissions(manage_guild=True)
     async def donations(self, context):
         """Manage donation options."""
         if context.invoked_subcommand is None:
             await send_cmd_help(context)
 
     @donations.command(pass_context=True)
-    @checks.admin_or_permissions(manage_server=True)
+    @checks.admin_or_permissions(manage_guild=True)
     async def togglePerks(self, ctx):
         """Enable or disable donor-specific perks for the server."""
-        server_id = ctx.message.server.id
+        server_id = ctx.message.guild.id
         if server_id in self.settings.disabledServers():
             self.settings.rmDisabledServer(server_id)
             await self.bot.say(inline('Donor perks enabled on this server'))
@@ -302,7 +302,7 @@ class Donations:
 
         msg += '\n\nDisabled servers:'
         for server_id in disabled_servers:
-            server = self.bot.get_server(int(server_id))
+            server = self.bot.get_guild(int(server_id))
             msg += '\n\t{} ({})'.format(server.name if server else 'unknown', server_id)
 
         msg += '\n\n{} personal commands are set'.format(len(cmds))
@@ -323,7 +323,7 @@ class Donations:
         if user_id not in self.settings.donors():
             return
 
-        if message.server and message.server.id in self.settings.disabledServers():
+        if message.guild and message.guild.id in self.settings.disabledServers():
             return
 
         user_cmd = self.settings.customCommands().get(user_id)
@@ -362,7 +362,7 @@ class Donations:
         if message.author.id not in self.settings.insultsEnabled():
             return
 
-        if message.server and message.server.id in self.settings.disabledServers():
+        if message.guild and message.guild.id in self.settings.disabledServers():
             return
 
         content = message.clean_content
