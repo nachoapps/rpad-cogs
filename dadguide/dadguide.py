@@ -21,13 +21,11 @@ from enum import Enum
 
 import pytz
 import romkan
-from __main__ import send_cmd_help
 from discord.ext import commands
 
-from . import rpadutils
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.chat_formatting import inline
+from rpadutils.rpadutils import *
+from redbot.core import checks
+from redbot.core.utils.chat_formatting import inline
 
 CSV_FILE_PATTERN = 'data/dadguide/{}.csv'
 NAMES_EXPORT_PATH = 'data/dadguide/computed_names.json'
@@ -213,19 +211,19 @@ class Dadguide(object):
         await rpadutils.makeAsyncCachedPlainRequest(
             PANTHNAME_FILE_PATTERN, PANTHNAME_OVERRIDES_SHEET, one_hour_secs)
 
-    @commands.group(pass_context=True)
+    @commands.group()
     @checks.is_owner()
     async def dadguide(self, ctx):
         """Dadguide database settings"""
         if ctx.invoked_subcommand is None:
-            await send_cmd_help(ctx)
+            await self.bot.send_cmd_help(ctx)
 
-    @dadguide.command(pass_context=True)
+    @dadguide.command()
     @checks.is_owner()
     async def setdatafile(self, ctx, *, data_file):
         """Set a local path to dadguide data instead of downloading it."""
         self.settings.setDataFile(data_file)
-        await self.bot.say(inline('Done'))
+        await ctx.send(inline('Done'))
 
 
 class DadguideSettings(CogSettings):
@@ -241,12 +239,6 @@ class DadguideSettings(CogSettings):
     def setDataFile(self, data_file):
         self.bot_settings['data_file'] = data_file
         self.save_settings()
-
-
-def setup(bot):
-    n = Dadguide(bot)
-    bot.add_cog(n)
-    n.register_tasks()
 
 
 class Attribute(Enum):

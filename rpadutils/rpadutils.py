@@ -12,29 +12,23 @@ import aiohttp
 import backoff
 import discord
 import pytz
-from cogs.utils.chat_formatting import *
+from redbot.core.utils.chat_formatting import *
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from discord.ext.commands import converter
 
-from .utils.dataIO import fileIO
+from redbot.core import Config
 
 
 class RpadUtils:
     def __init__(self, bot):
         self.bot = bot
 
-    async def on_command_error(self, error, ctx):
-        channel = ctx.message.channel
+    async def on_command_error(self, ctx, error):
+        channel = ctx.channel
         if isinstance(error, ReportableError):
             msg = 'An error occurred while processing your command: {}'.format(error.message)
-            await self.bot.send_message(channel, inline(msg))
-
-
-def setup(bot):
-    print('rpadutils setup')
-    n = RpadUtils(bot)
-    bot.add_cog(n)
+            await channel.send(inline(msg))
 
 
 # TZ used for PAD NA
@@ -133,7 +127,7 @@ def get_role_from_id(bot, server, roleid):
 
 
 def get_server_from_id(bot, serverid):
-    return discord.utils.get(bot.servers, id=serverid)
+    return discord.utils.get(bot.guilds, id=serverid)
 
 
 def normalizeServer(server):
@@ -173,7 +167,7 @@ def readJsonFile(file_path):
 
 
 @backoff.on_exception(backoff.expo, aiohttp.ClientError, max_time=60)
-@backoff.on_exception(backoff.expo, aiohttp.DisconnectedError, max_time=60)
+@backoff.on_exception(backoff.expo, aiohttp.ServerDisconnectedError, max_time=60)
 async def async_cached_dadguide_request(file_path, file_url, expiry_secs):
     if should_download(file_path, expiry_secs):
         async with aiohttp.ClientSession() as session:
@@ -265,11 +259,11 @@ class Menu():
 
     # for use as an action
     async def reaction_delete_message(self, bot, ctx, message):
-        await bot.delete_message(message)
+        await message.delete()
 
 #     def perms(self, ctx):
-#         user = ctx.message.server.get_member(self.bot.user.id)
-#         return ctx.message.channel.permissions_for(user)
+#         user = ctx.guild.get_member(int(self.bot.user.id))
+#         return ctx.channel.permissions_for(user)
 
     async def custom_menu(self, ctx, emoji_to_message, selected_emoji, **kwargs):
         """Creates and manages a new menu
@@ -304,16 +298,15 @@ class Menu():
                         message,
                         new_message_content):
         if message:
-            if type(new_message_content) == discord.Embed:
-                return await self.bot.edit_message(message, embed=new_message_content)
+            if isinstance(new_message_content, discord.Embed):
+                return await message.edit(embed=new_message_content)
             else:
-                return await self.bot.edit_message(message, new_message_content)
+                return await message.edit(content=new_message_content)
         else:
-            if type(new_message_content) == discord.Embed:
-                return await self.bot.send_message(ctx.message.channel,
-                                                   embed=new_message_content)
+            if isinstance(new_message_content, discord.Embed):
+                return await ctx.send(embed=new_message_content)
             else:
-                return await self.bot.say(new_message_content)
+                return await ctx.send(new_message_content)
 
     async def _custom_menu(self, ctx, emoji_to_message, selected_emoji,
                            allowed_action=True, **kwargs):
@@ -329,21 +322,21 @@ class Menu():
         if reactions_required:
             for e in emoji_to_message.emoji_dict:
                 try:
-                    await self.bot.add_reaction(message, e)
+                    await message.add_reaction(e)
                 except Exception as e:
                     # failed to add reaction, ignore
                     pass
 
-        r = await self.bot.wait_for_reaction(
+        r = await self.bot.wait_for('add_reaction',
             emoji=list(emoji_to_message.emoji_dict.keys()),
             message=message,
-            user=ctx.message.author,
+            user=ctx.author,
             check=check,
             timeout=timeout)
 
         if r is None:
             try:
-                await self.bot.clear_reactions(message)
+                await message.clear_reactions()
             except Exception as e:
                 # This is expected when miru doesn't have manage messages
                 pass
@@ -362,7 +355,7 @@ class Menu():
             return None, None
 
         try:
-            await self.bot.remove_reaction(message, react_emoji, r.user)
+            await message.remove_reaction(react_emoji, r.user)
         except:
             # This is expected when miru doesn't have manage messages
             pass
@@ -407,27 +400,27 @@ def char_to_emoji(c):
 ##############################
 class UserConverter2(converter.IDConverter):
     @asyncio.coroutine
-    def convert(self):
-        message = self.ctx.message
-        bot = self.ctx.bot
-        match = self._get_id_match() or re.match(r'<@!?([0-9]+)>$', self.argument)
-        server = message.server
+    def convert(self, ctx, argument):
+        message = ctx.message
+        bot = ctx.bot
+        match = self._get_id_match() or re.match(r'<@!?([0-9]+)>$', argument)
+        server = message.guild
         result = None
         if match is None:
             # not a mention...
             if server:
-                result = server.get_member_named(self.argument)
+                result = server.get_member_named(argument)
             else:
-                result = _get_from_servers(bot, 'get_member_named', self.argument)
+                result = _get_from_servers(bot, 'get_member_named', argument)
         else:
             user_id = match.group(1)
             if server:
-                result = yield from bot.get_user_info(user_id)
+                result = yield from bot.get_user_info(int(user_id))
             else:
                 result = _get_from_servers(bot, 'get_member', user_id)
 
         if result is None:
-            raise BadArgument('Member "{}" not found'.format(self.argument))
+            raise BadArgument('Member "{}" not found'.format(argument))
 
         return result
 
@@ -541,11 +534,11 @@ class CogSettings:
         self.check_folder()
 
         self.default_settings = self.make_default_settings()
-        if not fileIO(self.file_path, "check"):
+        if not os.path.isfile(self.file_path):
             self.bot_settings = self.default_settings
             self.save_settings()
         else:
-            current = fileIO(self.file_path, "load")
+            current = readJsonFile(self.file_path)
             updated = False
             for key in self.default_settings.keys():
                 if key not in current.keys():
@@ -562,7 +555,7 @@ class CogSettings:
             os.makedirs(self.folder)
 
     def save_settings(self):
-        fileIO(self.file_path, "save", self.bot_settings)
+        writeJsonFile(self.file_path, self.bot_settings)
 
     def make_default_settings(self):
         return {}
@@ -616,12 +609,12 @@ def get_pdx_id_dadguide(m):
 
 async def await_and_remove(bot, react_msg, listen_user, delete_msgs=None, emoji="❌", timeout=15):
     try:
-        await bot.add_reaction(react_msg, emoji)
+        await react_msg.add_reaction(emoji)
     except Exception as e:
         # failed to add reaction, ignore
         return
 
-    r = await bot.wait_for_reaction(
+    r = await bot.wait_for('add_reaction',
         emoji=[emoji],
         message=react_msg,
         user=listen_user,
@@ -629,14 +622,14 @@ async def await_and_remove(bot, react_msg, listen_user, delete_msgs=None, emoji=
 
     if r is None:
         try:
-            await bot.remove_reaction(react_msg, emoji, react_msg.server.me)
+            await react_msg.remove_reaction(emoji, react_msg.guild.me)
         except Exception as e:
             # failed to remove reaction, ignore
             return
     else:
         msgs = delete_msgs or [react_msg]
         for m in msgs:
-            await bot.delete_message(m)
+            await m.delete_message()
 
 
 loop_executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
