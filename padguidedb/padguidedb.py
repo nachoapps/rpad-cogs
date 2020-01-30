@@ -42,6 +42,8 @@ class PadGuideDb:
     """PadGuide Database manipulator"""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=9409010306, force_registration=True)
+
         self.bot = bot
         self.settings = PadGuideDbSettings("padguidedb")
 

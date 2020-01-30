@@ -16,6 +16,8 @@ class Memes:
     """Custom memes."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=73735, force_registration=True)
+
         self.bot = bot
         self.file_path = "data/memes/commands.json"
         self.c_commands = dataIO.load_json(self.file_path)

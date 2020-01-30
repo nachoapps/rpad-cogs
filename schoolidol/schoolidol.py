@@ -24,6 +24,8 @@ class SchoolIdol:
     """SchoolIdol."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=5380071007, force_registration=True)
+
         self.bot = bot
         self.card_data = []
         self.menu = Menu(bot)

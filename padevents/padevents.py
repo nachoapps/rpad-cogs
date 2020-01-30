@@ -34,6 +34,8 @@ SUPPORTED_SERVERS = ["NA", "JP", "FAKE"]
 
 class PadEvents:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=640373775, force_registration=True)
+        
         self.bot = bot
 
         self.settings = PadEventSettings("padevents")

@@ -9,6 +9,8 @@ from redbot.utils.chat_formatting import *
 
 class PadMonitor:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=9407071702, force_registration=True)
+
         self.bot = bot
         self.settings = PadMonitorSettings("padmonitor")
 

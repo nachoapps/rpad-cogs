@@ -113,6 +113,8 @@ class Seniority(object):
     """Automatically promote people based on activity."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=537106177, force_registration=True)
+
         self.bot = bot
         self.settings = SenioritySettings("seniority")
         self.db_path = self.settings.folder + '/log.db'

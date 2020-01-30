@@ -223,6 +223,8 @@ def is_supermod():
 
 class SuperMod:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=50632700, force_registration=True)
+
         self.bot = bot
         self.settings = SuperModSettings("supermod")
 

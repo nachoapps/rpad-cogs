@@ -26,6 +26,7 @@ MIRUGLARE_BOARD_TEMPLATE = "https://storage.googleapis.com/mirubot/websites/pads
 
 class PadBoard:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=94060460, force_registration=True)
         self.bot = bot
         self.logs = defaultdict(lambda: deque(maxlen=1))
 

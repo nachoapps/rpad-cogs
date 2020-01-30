@@ -28,6 +28,8 @@ class ChannelMod:
     """Channel moderation tools."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=3749937300, force_registration=True)
+
         self.bot = bot
         self.settings = ChannelModSettings("channelmod")
         self.channel_last_spoke = {}

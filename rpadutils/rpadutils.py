@@ -22,6 +22,8 @@ from redbot.core import Config
 
 class RpadUtils:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=694007175, force_registration=True)
+
         self.bot = bot
 
     async def on_command_error(self, error, ctx):

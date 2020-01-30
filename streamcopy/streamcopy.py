@@ -23,6 +23,8 @@ from redbot.utils.settings import Settings
 
 class StreamCopy:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=5723473097, force_registration=True)
+
         self.bot = bot
         self.settings = StreamCopySettings("streamcopy")
         self.current_user_id = None

@@ -31,6 +31,8 @@ LOGS_PER_USER = 10
 
 class BadUser:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=8400534, force_registration=True)
+
         self.bot = bot
 
         self.settings = BadUserSettings("baduser")

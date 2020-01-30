@@ -48,6 +48,8 @@ class ChronoMagia:
     """ChronoMagia."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=34907034914, force_registration=True)
+
         self.bot = bot
         self.settings = ChronoMagiaSettings("chronomagia")
         self.card_data = []

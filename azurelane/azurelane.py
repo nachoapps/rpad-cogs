@@ -25,6 +25,8 @@ class AzureLane:
     """AzureLane."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=420637473, force_registration=True)
+
         self.bot = bot
         self.card_data = []
         self.menu = Menu(bot)

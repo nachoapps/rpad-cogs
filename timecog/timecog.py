@@ -22,6 +22,8 @@ class TimeCog:
     """Utilities to convert time"""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=7173309, force_registration=True)
+
         self.bot = bot
 
     @commands.command(name="time", pass_context=True)

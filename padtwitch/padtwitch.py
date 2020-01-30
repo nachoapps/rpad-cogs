@@ -28,6 +28,8 @@ if os.name != 'nt':
 
 class PadTwitch:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=640771735, force_registration=True)
+
         self.bot = bot
         self.settings = PadTwitchSettings("padtwitch")
 

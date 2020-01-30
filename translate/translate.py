@@ -18,6 +18,8 @@ class Translate:
     """Translation utilities."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=724757473, force_registration=True)
+
         self.bot = bot
         self.settings = TranslateSettings("translate")
 

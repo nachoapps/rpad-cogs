@@ -50,6 +50,8 @@ DB_DUMP_WORKING_FILE = 'data/dadguide/dadguide_working.sqlite'
 
 class Dadguide(object):
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=64090103, force_registration=True)
+
         self.bot = bot
         self._is_ready = asyncio.Event(loop=self.bot.loop)
 

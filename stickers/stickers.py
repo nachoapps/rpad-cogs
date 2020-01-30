@@ -28,6 +28,8 @@ class Stickers:
     """Sticker commands."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=57132365, force_registration=True)
+
         self.bot = bot
         self.file_path = "data/stickers/commands.json"
         self.c_commands = dataIO.load_json(self.file_path)

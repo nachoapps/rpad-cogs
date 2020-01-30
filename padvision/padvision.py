@@ -6,6 +6,8 @@ ORB_IMG_SIZE = 40
 
 class PadVision:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=640715107, force_registration=True)
+
         self.bot = bot
 
 

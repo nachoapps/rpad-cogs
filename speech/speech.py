@@ -33,6 +33,8 @@ class Speech:
     """Speech utilities."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=593337, force_registration=True)
+
         self.bot = bot
         self.settings = SpeechSettings("speech")
 

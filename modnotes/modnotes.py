@@ -16,6 +16,8 @@ from redbot.utils.chat_formatting import *
 
 class ModNotes:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=70070735, force_registration=True)
+
         self.bot = bot
         self.settings = ModNotesSettings("modnotes")
 

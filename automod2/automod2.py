@@ -101,6 +101,8 @@ class CtxWrapper:
 
 class AutoMod2:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=40703002, force_registration=True)
+
         self.bot = bot
 
         self.settings = AutoMod2Settings("automod2")

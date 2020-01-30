@@ -102,6 +102,8 @@ class IdEmojiUpdater(EmojiUpdater):
 
 class PadInfo:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=6401720, force_registration=True)
+
         self.bot = bot
 
         self.settings = PadInfoSettings("padinfo")

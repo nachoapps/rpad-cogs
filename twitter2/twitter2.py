@@ -22,6 +22,8 @@ TIME_FMT = """%a %b %d %H:%M:%S %Y"""
 
 class TwitterCog2:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=77177322, force_registration=True)
+
         self.bot = bot
         self.config = fileIO("data/twitter2/config.json", "load")
 

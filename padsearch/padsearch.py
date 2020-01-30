@@ -633,6 +633,8 @@ class PadSearch:
     """PAD data searching."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=640534632, force_registration=True)
+
         self.bot = bot
 
     @commands.command(pass_context=True)

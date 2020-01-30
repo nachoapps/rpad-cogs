@@ -64,6 +64,8 @@ def computeOldGroup(str_id):
 
 class Profile:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=6607173, force_registration=True)
+
         self.bot = bot
         self.settings = ProfileSettings("profile")
 

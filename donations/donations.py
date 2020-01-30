@@ -56,6 +56,8 @@ class Donations:
     """Manages donations and perks."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=607471075, force_registration=True)
+
         self.bot = bot
         self.settings = DonationsSettings("donations")
 

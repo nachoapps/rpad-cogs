@@ -16,6 +16,8 @@ SUPPORTED_SERVERS = ["NA", "JP"]
 
 class PadRem:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=640637, force_registration=True)
+
         self.bot = bot
 
         self.settings = PadRemSettings("padrem")

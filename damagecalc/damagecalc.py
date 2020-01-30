@@ -191,6 +191,8 @@ class DamageCalc:
     """Damage calculator."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=6434933473, force_registration=True)
+
         self.bot = bot
 
     @commands.command(pass_context=True)

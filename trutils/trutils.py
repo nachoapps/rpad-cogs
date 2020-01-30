@@ -164,6 +164,8 @@ in specific channels, or unless they have specific roles. Read the documentation
 
 class TrUtils:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=7207175, force_registration=True)
+
         self.bot = bot
         self.settings = TrUtilsSettings("trutils")
 

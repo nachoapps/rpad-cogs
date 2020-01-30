@@ -16,6 +16,8 @@ from redbot.core import Config
 
 class FancySay:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=14737547, force_registration=True)
+
         self.bot = bot
 
     @commands.group(pass_context=True, no_pm=True)

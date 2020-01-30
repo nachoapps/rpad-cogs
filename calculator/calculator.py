@@ -27,6 +27,8 @@ pow(x, y) instead of x^y. Here is the full symbol whitelist:
 
 class Calculator:
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=3473074704, force_registration=True)
+
         self.bot = bot
 
     @commands.group(pass_context=True)

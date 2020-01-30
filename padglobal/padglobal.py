@@ -65,6 +65,8 @@ class PadGlobal:
     """Global PAD commands."""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=640970847, force_registration=True)
+
         self.bot = bot
         self.file_path = "data/padglobal/commands.json"
         self.c_commands = dataIO.load_json(self.file_path)

@@ -188,6 +188,8 @@ class SqlActivityLogger(object):
     """Log activity seen by bot"""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=50743717177709936, force_registration=True)
+
         self.bot = bot
         self.settings = dataIO.load_json(JSON)
         self.lock = False

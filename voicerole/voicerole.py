@@ -15,6 +15,8 @@ class VoiceRole:
     """Gives a custom to anyone who enters a voice channel. THIS ROLE MUST EXIST AND THE BOT MUST HAVE THE RIGHTS TO CHANGE ROLES FOR IT TO WORK!"""
 
     def __init__(self, bot):
+        self.conf = Config.get_conf(self, identifier=701332073, force_registration=True)
+
         self.bot = bot
         self.settings = VoiceRoleSettings("voicerole")
 
