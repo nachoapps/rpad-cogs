@@ -160,12 +160,6 @@ class StreamCopy:
         await self.bot.change_presence(game=new_game)
 
 
-def setup(bot):
-    n = StreamCopy(bot)
-    bot.add_listener(n.check_stream, "on_member_update")
-    bot.loop.create_task(n.refresh_stream())
-    bot.add_cog(n)
-
 
 class StreamCopySettings(CogSettings):
     def make_default_settings(self):

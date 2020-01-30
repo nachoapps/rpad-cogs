@@ -109,6 +109,3 @@ def tzStrToObj(tz):
     return tz_obj
 
 
-def setup(bot):
-    n = TimeCog(bot)
-    bot.add_cog(n)

@@ -520,13 +520,6 @@ class PadInfo:
         return False
 
 
-def setup(bot):
-    print('padinfo bot setup')
-    n = PadInfo(bot)
-    bot.add_cog(n)
-    bot.loop.create_task(n.reload_nicknames())
-    print('done adding padinfo bot')
-
 
 class PadInfoSettings(CogSettings):
     def make_default_settings(self):

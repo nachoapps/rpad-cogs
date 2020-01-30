@@ -8,10 +8,6 @@ class PadVision:
     def __init__(self, bot):
         self.bot = bot
 
-def setup(bot):
-    n = PadVision(bot)
-    bot.add_cog(n)
-
 
 ###############################################################################
 # Library code

@@ -275,12 +275,6 @@ class Profile:
                 print("tried to print: " + page)
 
 
-def setup(bot):
-    print('profile bot setup')
-    n = Profile(bot)
-    bot.add_cog(n)
-    print('done adding profile bot')
-
 
 class ProfileSettings(CogSettings):
     def make_default_settings(self):

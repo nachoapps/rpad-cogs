@@ -198,7 +198,3 @@ def check_files():
         dataIO.save_json(f, {})
 
 
-def setup(bot):
-    check_folders()
-    check_files()
-    bot.add_cog(PadBuilds(bot))

@@ -82,10 +82,6 @@ class ModNotes:
             await self.bot.say(box(page))
 
 
-def setup(bot):
-    n = ModNotes(bot)
-    bot.add_cog(n)
-
 
 class ModNotesSettings(CogSettings):
     def make_default_settings(self):

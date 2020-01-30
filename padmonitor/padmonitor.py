@@ -95,12 +95,6 @@ class PadMonitor:
         await self.bot.say(inline('done'))
 
 
-def setup(bot):
-    n = PadMonitor(bot)
-    bot.add_cog(n)
-    bot.loop.create_task(n.check_seen_loop())
-    print('done adding padinfo bot')
-
 
 class PadMonitorSettings(CogSettings):
     def make_default_settings(self):

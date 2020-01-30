@@ -104,6 +104,3 @@ class FancySay:
             print("failed to fancysay", error)
 
 
-def setup(bot):
-    n = FancySay(bot)
-    bot.add_cog(n)

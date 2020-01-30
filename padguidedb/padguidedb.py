@@ -226,10 +226,6 @@ class PadGuideDb:
         subprocess.run(args)
 
 
-def setup(bot):
-    n = PadGuideDb(bot)
-    bot.add_cog(n)
-
 
 class PadGuideDbSettings(CogSettings):
     def make_default_settings(self):

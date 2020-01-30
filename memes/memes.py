@@ -208,13 +208,6 @@ def check_files():
         dataIO.save_json(f, {})
 
 
-def setup(bot):
-    check_folders()
-    check_files()
-    n = Memes(bot)
-    bot.add_listener(n.checkCC, "on_message")
-    bot.add_cog(n)
-
 
 class MemesSettings(CogSettings):
     def make_default_settings(self):

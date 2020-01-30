@@ -140,10 +140,6 @@ class Speech:
         await self.bot.say("done, make sure the key file is in the data/speech directory")
 
 
-def setup(bot):
-    n = Speech(bot)
-    bot.add_cog(n)
-
 
 class SpeechSettings(CogSettings):
     def make_default_settings(self):

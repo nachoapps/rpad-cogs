@@ -243,11 +243,6 @@ class DadguideSettings(CogSettings):
         self.save_settings()
 
 
-def setup(bot):
-    n = Dadguide(bot)
-    bot.add_cog(n)
-    n.register_tasks()
-
 
 class Attribute(Enum):
     """Standard 5 PAD colors in enum form. Values correspond to DadGuide values."""

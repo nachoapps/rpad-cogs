@@ -199,13 +199,6 @@ class PadRem:
                 print("tried to print: " + page)
 
 
-def setup(bot):
-    print('padrem bot setup')
-    n = PadRem(bot)
-    bot.add_cog(n)
-    bot.loop.create_task(n.reload_padrem())
-    print('done adding padrem bot')
-
 
 class PadRemSettings(CogSettings):
     def make_default_settings(self):

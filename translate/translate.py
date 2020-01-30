@@ -90,11 +90,6 @@ class Translate:
         await self.bot.say("done")
 
 
-def setup(bot):
-    n = Translate(bot)
-    bot.add_listener(n.checkAutoTranslateJp, "on_message")
-    bot.add_cog(n)
-
 
 class TranslateSettings(CogSettings):
     def make_default_settings(self):

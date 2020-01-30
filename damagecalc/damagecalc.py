@@ -259,6 +259,3 @@ class DamageCalc:
         await self.bot.say("```Damage (no enhanced) :  {}\nDamage (all enhanced) : {}```".format(damage, enhanced_damage))
 
 
-def setup(bot):
-    n = DamageCalc(bot)
-    bot.add_cog(n)

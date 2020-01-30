@@ -608,8 +608,3 @@ def check_files():
         dataIO.save_json(JSON, defaults)
 
 
-def setup(bot):
-    check_folders()
-    check_files()
-    n = SqlActivityLogger(bot)
-    bot.add_cog(n)

@@ -68,5 +68,3 @@ class Calculator:
             await self.bot.say(embed=em)
 
 
-def setup(bot):
-    bot.add_cog(Calculator(bot))

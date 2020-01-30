@@ -31,11 +31,6 @@ class RpadUtils:
             await self.bot.send_message(channel, inline(msg))
 
 
-def setup(bot):
-    print('rpadutils setup')
-    n = RpadUtils(bot)
-    bot.add_cog(n)
-
 
 # TZ used for PAD NA
 # NA_TZ_OBJ = pytz.timezone('America/Los_Angeles')

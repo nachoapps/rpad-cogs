@@ -707,6 +707,3 @@ class PadSearch:
         await self.bot.say(box(json.dumps(m.search, indent=2, default=lambda o: o.__dict__)))
 
 
-def setup(bot):
-    n = PadSearch(bot)
-    bot.add_cog(n)

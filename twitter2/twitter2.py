@@ -259,16 +259,6 @@ def check_file():
         fileIO(f, "save", config)
 
 
-def setup(bot):
-    print('twitter2 bot setup')
-    check_folder()
-    check_file()
-    n = TwitterCog2(bot)
-    loop = asyncio.get_event_loop()
-    loop.create_task(n.connect())
-    bot.add_cog(n)
-    print('done adding twitter2 bot')
-
 
 def _bisect_left(a, x, lo=0, hi=None, key=None, cmp=None):
     """Return the index where to insert item x in list a, assuming a is sorted.

@@ -775,13 +775,6 @@ class SuperMod:
         await self.bot.say(USER_CLEARED_IGNORE.format(author.name))
 
 
-def setup(bot):
-    n = SuperMod(bot)
-    bot.loop.create_task(n.refresh_supermod())
-    bot.add_listener(n.log_message, "on_message")
-    bot.add_listener(n.no_thinking, "on_message")
-    bot.add_cog(n)
-
 
 class SuperModSettings(CogSettings):
     def make_default_settings(self):

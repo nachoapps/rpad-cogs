@@ -176,13 +176,6 @@ def check_files():
         dataIO.save_json(f, {})
 
 
-def setup(bot):
-    check_folders()
-    check_files()
-    n = Stickers(bot)
-    bot.add_listener(n.checkCC, "on_message")
-    bot.add_cog(n)
-
 
 class StickersSettings(CogSettings):
     def make_default_settings(self):
