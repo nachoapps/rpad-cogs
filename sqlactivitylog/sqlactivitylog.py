@@ -18,6 +18,7 @@ from redbot import rpadutils
 from redbot.rpadutils import *
 from redbot.utils.chat_formatting import *
 
+from cogs.utils.dataIO import dataIO
 
 TIMESTAMP_FORMAT = '%Y-%m-%d %X'  # YYYY-MM-DD HH:MM:SS
 PATH_LIST = ['data', 'sqlactivitylog']

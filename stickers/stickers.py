@@ -12,6 +12,7 @@ from redbot.rpadutils import CogSettings
 from redbot.utils import checks
 from redbot.core import Config
 
+from cogs.utils.dataIO import dataIO
 
 STICKER_COG = None
 

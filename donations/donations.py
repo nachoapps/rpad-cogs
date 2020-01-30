@@ -15,6 +15,8 @@ from redbot.rpadutils import CogSettings
 from redbot.utils import checks
 from redbot.core import Config
 
+from cogs.utils.dataIO import dataIO
+
 
 DONATE_MSG = """
 To donate to cover bot hosting fees you can use one of:
