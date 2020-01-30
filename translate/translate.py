@@ -11,7 +11,7 @@ from __main__ import user_allowed, send_cmd_help
 from redbot.rpadutils import *
 from redbot.rpadutils import CogSettings
 from redbot.utils import checks
-from redbot.utils.dataIO import dataIO
+from redbot.core import Config
 
 
 class Translate:

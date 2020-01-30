@@ -11,7 +11,7 @@ import discord
 from discord.ext import commands
 
 from redbot.utils import checks
-from redbot.utils.dataIO import dataIO
+from redbot.core import Config
 
 
 try:

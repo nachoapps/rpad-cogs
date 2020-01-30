@@ -10,7 +10,7 @@ from redbot import rpadutils
 from redbot.rpadutils import *
 from redbot.rpadutils import CogSettings
 from redbot.utils import checks
-from redbot.utils.dataIO import dataIO
+from redbot.core import Config
 
 DATA_EXPORT_PATH = 'data/padglobal/padglobal_data.json'
 

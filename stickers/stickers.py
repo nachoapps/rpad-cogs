@@ -10,7 +10,7 @@ from discord.ext import commands
 from redbot.rpadutils import *
 from redbot.rpadutils import CogSettings
 from redbot.utils import checks
-from redbot.utils.dataIO import dataIO
+from redbot.core import Config
 
 
 STICKER_COG = None

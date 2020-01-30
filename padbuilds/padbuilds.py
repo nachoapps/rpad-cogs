@@ -5,7 +5,7 @@ from discord.ext import commands
 
 from redbot.utils import checks
 from redbot.utils.chat_formatting import pagify, box
-from redbot.utils.dataIO import dataIO
+from redbot.core import Config
 
 
 class PadBuilds:

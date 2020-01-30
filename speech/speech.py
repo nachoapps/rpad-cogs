@@ -14,7 +14,7 @@ from google.cloud import texttospeech
 from redbot.rpadutils import *
 from redbot.rpadutils import CogSettings
 from redbot.utils import checks
-from redbot.utils.dataIO import dataIO
+from redbot.core import Config
 
 
 try:
