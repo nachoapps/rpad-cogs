@@ -1,10 +1,10 @@
 from __main__ import send_cmd_help
 
-from . import rpadutils
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.chat_formatting import *
+from redbot import rpadutils
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.chat_formatting import *
 
 
 class PadMonitor:

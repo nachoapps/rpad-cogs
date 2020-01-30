@@ -11,10 +11,10 @@ from google.oauth2 import service_account
 from __main__ import user_allowed, send_cmd_help
 from google.cloud import texttospeech
 
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.dataIO import dataIO
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.dataIO import dataIO
 
 
 try:

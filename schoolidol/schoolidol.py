@@ -13,8 +13,8 @@ from cogs.utils import checks
 from cogs.utils.chat_formatting import pagify, box
 from cogs.utils.dataIO import dataIO
 
-from .rpadutils import Menu, EmojiUpdater, char_to_emoji
-from .utils.chat_formatting import *
+from redbot.rpadutils import Menu, EmojiUpdater, char_to_emoji
+from redbot.utils.chat_formatting import *
 
 
 FIRST_REQ = 'https://schoolido.lu/api/cards/?page_size=100'

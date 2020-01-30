@@ -7,10 +7,10 @@ try:
 except:
     print('google cloud vision not found, some features unavailable')
 
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.chat_formatting import *
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.chat_formatting import *
 
 GETMIRU_HELP = """
 The new public Miru is open for invite to any server: personal, private, secret-handshake-entry-only, etc

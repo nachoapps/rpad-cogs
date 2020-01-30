@@ -7,10 +7,10 @@ from __main__ import user_allowed, send_cmd_help
 import discord
 from discord.ext import commands
 
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.dataIO import dataIO
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.dataIO import dataIO
 
 
 STICKER_COG = None

@@ -19,11 +19,11 @@ import pymysql
 
 from __main__ import user_allowed, send_cmd_help
 
-from . import rpadutils
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.dataIO import dataIO
+from redbot import rpadutils
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.dataIO import dataIO
 
 
 PADGUIDEDB_COG = None

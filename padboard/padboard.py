@@ -12,10 +12,10 @@ import numpy as np
 
 from __main__ import send_cmd_help
 
-from . import padvision
-from . import rpadutils
-from .utils import checks
-from .utils.chat_formatting import *
+from redbot import padvision
+from redbot import rpadutils
+from redbot.utils import checks
+from redbot.utils.chat_formatting import *
 
 
 DATA_DIR = os.path.join('data', 'padboard')

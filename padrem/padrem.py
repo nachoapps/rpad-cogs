@@ -5,11 +5,11 @@ from _collections import OrderedDict
 
 from discord.ext import commands
 
-from . import dadguide
-from .rpadutils import *
-from .rpadutils import CogSettings, normalizeServer
-from .utils import checks
-from .utils.chat_formatting import box, pagify
+from redbot import dadguide
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings, normalizeServer
+from redbot.utils import checks
+from redbot.utils.chat_formatting import box, pagify
 
 SUPPORTED_SERVERS = ["NA", "JP"]
 

@@ -8,9 +8,9 @@ from png import itertools
 
 from __main__ import user_allowed, send_cmd_help
 
-from . import rpadutils
-from .utils import checks
-from .utils.chat_formatting import box, inline, pagify
+from redbot import rpadutils
+from redbot.utils import checks
+from redbot.utils.chat_formatting import box, inline, pagify
 
 
 HELP_MSG = """

@@ -16,10 +16,10 @@ from discord.ext import commands
 
 from __main__ import user_allowed, send_cmd_help
 
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.chat_formatting import *
-from .utils.dataIO import fileIO
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.chat_formatting import *
+from redbot.utils.dataIO import fileIO
 
 
 if os.name != 'nt':

@@ -17,9 +17,9 @@ from cogs.utils import checks
 from cogs.utils.dataIO import dataIO
 import sqlite3 as lite
 
-from . import rpadutils
-from .rpadutils import CogSettings
-from .utils.chat_formatting import *
+from redbot import rpadutils
+from redbot.rpadutils import CogSettings
+from redbot.utils.chat_formatting import *
 
 
 CREATE_TABLE = '''

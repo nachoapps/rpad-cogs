@@ -17,13 +17,13 @@ from discord.ext import commands
 from __main__ import send_cmd_help
 from __main__ import settings
 
-from . import rpadutils
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.chat_formatting import *
-from .utils.dataIO import fileIO
-from .utils.settings import Settings
+from redbot import rpadutils
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.chat_formatting import *
+from redbot.utils.dataIO import fileIO
+from redbot.utils.settings import Settings
 
 
 LOGS_PER_USER = 10

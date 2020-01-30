@@ -9,9 +9,9 @@ from __main__ import send_cmd_help
 import discord
 from discord.ext import commands
 
-from .utils import checks
-from .utils.chat_formatting import *
-from .utils.dataIO import fileIO
+from redbot.utils import checks
+from redbot.utils.chat_formatting import *
+from redbot.utils.dataIO import fileIO
 
 
 tz_lookup = dict([(pytz.timezone(x).localize(datetime.now()).tzname(), pytz.timezone(x))

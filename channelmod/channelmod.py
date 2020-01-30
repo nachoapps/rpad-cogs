@@ -13,7 +13,7 @@ from discord.ext import commands
 from cogs.utils import checks
 from cogs.utils.chat_formatting import inline, box
 
-from .rpadutils import CogSettings, ReportableError
+from redbot.rpadutils import CogSettings, ReportableError
 
 
 log = logging.getLogger("red.admin")

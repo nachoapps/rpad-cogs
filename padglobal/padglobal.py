@@ -6,11 +6,11 @@ from collections import defaultdict
 import prettytable
 from __main__ import send_cmd_help
 
-from . import rpadutils
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.dataIO import dataIO
+from redbot import rpadutils
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.dataIO import dataIO
 
 DATA_EXPORT_PATH = 'data/padglobal/padglobal_data.json'
 

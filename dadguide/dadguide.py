@@ -24,10 +24,10 @@ import romkan
 from __main__ import send_cmd_help
 from discord.ext import commands
 
-from . import rpadutils
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.chat_formatting import inline
+from redbot import rpadutils
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.chat_formatting import inline
 
 CSV_FILE_PATTERN = 'data/dadguide/{}.csv'
 NAMES_EXPORT_PATH = 'data/dadguide/computed_names.json'

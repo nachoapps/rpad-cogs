@@ -21,10 +21,10 @@ import discord
 from discord.ext import commands
 import prettytable
 
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.chat_formatting import *
-from .utils.dataIO import fileIO
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.chat_formatting import *
+from redbot.utils.dataIO import fileIO
 
 
 # from copy import deepcopy

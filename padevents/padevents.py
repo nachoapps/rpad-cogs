@@ -21,12 +21,12 @@ import pytz
 
 from __main__ import user_allowed, send_cmd_help
 
-from . import dadguide
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.chat_formatting import *
-from .utils.dataIO import fileIO
+from redbot import dadguide
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.chat_formatting import *
+from redbot.utils.dataIO import fileIO
 
 
 SUPPORTED_SERVERS = ["NA", "JP", "FAKE"]

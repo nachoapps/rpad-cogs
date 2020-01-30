@@ -17,10 +17,10 @@ from cogs.utils import checks
 from cogs.utils.chat_formatting import pagify, box
 from cogs.utils.dataIO import dataIO
 
-from . import rpadutils
-from .rpadutils import CogSettings
-from .rpadutils import Menu, char_to_emoji
-from .utils.chat_formatting import *
+from redbot import rpadutils
+from redbot.rpadutils import CogSettings
+from redbot.rpadutils import Menu, char_to_emoji
+from redbot.utils.chat_formatting import *
 
 
 SUMMARY_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQsO9Xi9cKaUQWPvDjjIKpHotZ036LCTN66PuNoQwvb8qZi4LmEUEOYmHDyqUJUzghI28aPrQHfRSYd/pub?gid=1488138129&single=true&output=csv'

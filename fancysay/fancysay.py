@@ -9,9 +9,9 @@ from discord.ext import commands
 
 from __main__ import send_cmd_help
 
-from .rpadutils import *
-from .utils import checks
-from .utils.dataIO import fileIO
+from redbot.rpadutils import *
+from redbot.utils import checks
+from redbot.utils.dataIO import fileIO
 
 
 class FancySay:

@@ -10,10 +10,10 @@ from numpy.doc import glossary
 
 from __main__ import user_allowed, send_cmd_help
 
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.dataIO import dataIO
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.dataIO import dataIO
 
 
 DONATE_MSG = """

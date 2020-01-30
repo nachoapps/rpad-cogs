@@ -5,10 +5,10 @@ import os
 from __main__ import user_allowed, send_cmd_help
 from cogs.utils.dataIO import dataIO
 
-from .rpadutils import *
-from .rpadutils import CogSettings
-from .utils import checks
-from .utils.chat_formatting import *
+from redbot.rpadutils import *
+from redbot.rpadutils import CogSettings
+from redbot.utils import checks
+from redbot.utils.chat_formatting import *
 
 
 class VoiceRole:

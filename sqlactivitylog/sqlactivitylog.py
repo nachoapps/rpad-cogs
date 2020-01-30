@@ -14,9 +14,9 @@ from cogs.utils import checks
 from cogs.utils.dataIO import dataIO
 import sqlite3 as lite
 
-from . import rpadutils
-from .rpadutils import *
-from .utils.chat_formatting import *
+from redbot import rpadutils
+from redbot.rpadutils import *
+from redbot.utils.chat_formatting import *
 
 
 TIMESTAMP_FORMAT = '%Y-%m-%d %X'  # YYYY-MM-DD HH:MM:SS
