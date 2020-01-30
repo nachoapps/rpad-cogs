@@ -23,7 +23,7 @@ from redbot import rpadutils
 from redbot.rpadutils import *
 from redbot.rpadutils import CogSettings
 from redbot.utils import checks
-from redbot.utils.dataIO import fileIO
+from redbot.core import Config
 from redbot.utils.settings import Settings
 
 

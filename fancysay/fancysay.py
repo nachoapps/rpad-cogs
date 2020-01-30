@@ -11,7 +11,7 @@ from __main__ import send_cmd_help
 
 from redbot.rpadutils import *
 from redbot.utils import checks
-from redbot.utils.dataIO import fileIO
+from redbot.core import Config
 
 
 class FancySay:

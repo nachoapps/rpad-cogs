@@ -11,7 +11,7 @@ from discord.ext import commands
 
 from redbot.utils import checks
 from redbot.utils.chat_formatting import *
-from redbot.utils.dataIO import fileIO
+from redbot.core import Config
 
 
 tz_lookup = dict([(pytz.timezone(x).localize(datetime.now()).tzname(), pytz.timezone(x))

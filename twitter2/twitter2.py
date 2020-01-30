@@ -15,7 +15,7 @@ from __main__ import user_allowed, send_cmd_help
 
 from redbot.utils import checks
 from redbot.utils.chat_formatting import *
-from redbot.utils.dataIO import fileIO
+from redbot.core import Config
 
 TIME_FMT = """%a %b %d %H:%M:%S %Y"""
 

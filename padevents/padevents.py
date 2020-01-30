@@ -26,7 +26,7 @@ from redbot.rpadutils import *
 from redbot.rpadutils import CogSettings
 from redbot.utils import checks
 from redbot.utils.chat_formatting import *
-from redbot.utils.dataIO import fileIO
+from redbot.core import Config
 
 
 SUPPORTED_SERVERS = ["NA", "JP", "FAKE"]

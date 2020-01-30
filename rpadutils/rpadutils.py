@@ -17,7 +17,7 @@ from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from discord.ext.commands import converter
 
-from redbot.utils.dataIO import fileIO
+from redbot.core import Config
 
 
 class RpadUtils:
