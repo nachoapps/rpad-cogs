@@ -5,7 +5,12 @@ from collections import defaultdict
 
 import prettytable
 from rpadutils.rpadutils import *
+import rpadutils.rpadutils
+import redbot.core
 from redbot.core import checks
+from redbot.core import commands
+
+global PADGLOBAL_COG
 
 DATA_EXPORT_PATH = 'data/padglobal/padglobal_data.json'
 
@@ -30,11 +35,9 @@ MP_BUY_MSG = ('This monster can be purchased with MP. **DO NOT** buy MP cards wi
               ', check ^mpdra? for specific recommendations.')
 SIMPLE_TREE_MSG = 'This monster appears to be uncontroversial; use the highest evolution.'
 
-PADGLOBAL_COG = None
-
 
 def is_padglobal_admin_check(ctx):
-    return PADGLOBAL_COG.settings.checkAdmin(ctx.author.id) or checks.is_owner_check(ctx)
+    return checks.is_owner() #or PADGLOBAL_COG.settings.checkAdmin(ctx.author.id)
 
 
 def is_padglobal_admin():
@@ -44,7 +47,7 @@ def is_padglobal_admin():
 def lookup_named_monster(query: str):
     padinfo_cog = PADGLOBAL_COG.bot.get_cog('PadInfo')
     if padinfo_cog is None:
-        return None, "cog not loaded"
+        raise Exception("Cog not Loaded")
     nm, err, debug_info = padinfo_cog._findMonster(query)
     return nm, err, debug_info
 
@@ -56,17 +59,18 @@ def monster_no_to_monster(monster_no):
     return padinfo_cog.get_monster_by_no(monster_no)
 
 
-class PadGlobal:
+class PadGlobal(redbot.core.commands.Cog):
     """Global PAD commands."""
 
     def __init__(self, bot):
-        self.bot = bot
-        self.file_path = "data/padglobal/commands.json"
-        self.c_commands = json.load(open(self.file_path))
-        self.settings = PadGlobalSettings("padglobal")
-
         global PADGLOBAL_COG
         PADGLOBAL_COG = self
+        self.bot = bot
+        self.file_path = "data/padglobal/commands.json"
+        with open("data/padglobal/commands.json", "a+") as f:
+            f.seek(0)
+            self.c_commands = json.load(f)
+        self.settings = PadGlobalSettings("padglobal")
 
         self._export_data()
 
@@ -254,7 +258,8 @@ class PadGlobal:
     async def padglobal(self, ctx):
         """PAD global custom commands."""
         if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
+            #await ctx.send_help()
+            pass
 
     @padglobal.command()
     async def say(self, ctx, *, text: str):
@@ -287,7 +292,7 @@ class PadGlobal:
 
         op = 'EDITED' if command in self.c_commands else 'ADDED'
         self.c_commands[command] = text
-        json.dump(open(self.file_path), self.c_commands)
+        json.dump(self.c_commands, open(self.file_path, 'w+'))
         await ctx.send("PAD command successfully {}.".format(op))
 
     @padglobal.command()
@@ -300,7 +305,7 @@ class PadGlobal:
         cmdlist = self.c_commands
         if command in cmdlist:
             cmdlist.pop(command, None)
-            json.dump(open(self.file_path), self.c_commands)
+            json.dump(self.c_commands, open(self.file_path, 'w+'))
             await ctx.send("PAD command successfully deleted.")
         else:
             await ctx.send("PAD command doesn't exist.")
@@ -390,10 +395,10 @@ class PadGlobal:
             await ctx.send("There are no padglobal commands yet")
             return
 
-        commands = list(cmdlist.keys())
+        cmds = list(cmdlist.keys())
         prefixes = defaultdict(int)
 
-        for c in commands:
+        for c in cmds:
             m = re.match(r'^([a-zA-Z]+)\d+$', c)
             if m:
                 grp = m.group(1)
@@ -655,13 +660,13 @@ class PadGlobal:
                 await ctx.author.send(box(page))
             return
 
-        name, definition = await self._resolve_which(term)
+        name, definition = await self._resolve_which(ctx, term)
         if name is None or definition is None:
             return
         await ctx.send(inline('Which {}'.format(name)))
         await ctx.send(definition)
 
-    async def _resolve_which(self, term):
+    async def _resolve_which(self, ctx, term):
         term = term.lower().replace('?', '')
         nm, _, _ = lookup_named_monster(term)
         if nm is None:
@@ -695,7 +700,7 @@ class PadGlobal:
         if await self._check_disabled(ctx):
             return
 
-        name, definition = await self._resolve_which(term)
+        name, definition = await self._resolve_which(ctx, term)
         if name is None or definition is None:
             return
         await self._do_send_which(ctx, to_user, name, definition)
@@ -850,14 +855,14 @@ class PadGlobal:
         if message.author.id == self.bot.user.id:
             return
 
-        global_ignores = self.bot.get_cog('Owner').global_ignores
+        global_ignores = {'blacklist':[]} # self.bot.get_cog('Owner').global_ignores
         if message.author.id in global_ignores["blacklist"]:
             return False
 
         if len(message.content) < 2:
             return
 
-        prefix = self.get_prefix(message)
+        prefix = await self.get_prefix(message)
 
         if not prefix:
             return
@@ -913,8 +918,8 @@ class PadGlobal:
         ]
         return [x for x in adjusted_cmd if x in options]
 
-    def get_prefix(self, message):
-        for p in self.bot.settings.get_prefixes(message.guild):
+    async def get_prefix(self, message):
+        for p in await self.bot.get_prefix(message):
             if message.content.startswith(p):
                 return p
         return False
@@ -1101,7 +1106,7 @@ def check_files():
         json.load(open(f))
     except:
         print("Creating empty commands.json...")
-        json.dump(open(f), {})
+        json.dump({}, open(f, "w+"))
 
 
 class PadGlobalSettings(CogSettings):
@@ -1281,3 +1286,4 @@ class PadGlobalSettings(CogSettings):
         if server_id in disabled_servers:
             disabled_servers.remove(server_id)
             self.save_settings()
+

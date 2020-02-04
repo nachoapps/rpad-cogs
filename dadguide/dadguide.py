@@ -24,6 +24,7 @@ import romkan
 from discord.ext import commands
 
 from rpadutils.rpadutils import *
+from rpadutils import rpadutils
 from redbot.core import checks
 from redbot.core.utils.chat_formatting import inline
 
@@ -46,7 +47,7 @@ DB_DUMP_FILE = 'data/dadguide/dadguide.sqlite'
 DB_DUMP_WORKING_FILE = 'data/dadguide/dadguide_working.sqlite'
 
 
-class Dadguide(object):
+class Dadguide(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._is_ready = asyncio.Event(loop=self.bot.loop)
@@ -216,7 +217,8 @@ class Dadguide(object):
     async def dadguide(self, ctx):
         """Dadguide database settings"""
         if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
+            #await ctx.send_help()
+            pass
 
     @dadguide.command()
     @checks.is_owner()

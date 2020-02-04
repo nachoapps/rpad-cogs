@@ -22,7 +22,7 @@ class PadBuilds:
     async def builds(self, ctx):
         """PAD Builds management"""
         if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
+            await ctx.send_help()
 
     @builds.command(name="add", pass_context=True)
     @checks.mod_or_permissions(administrator=True)

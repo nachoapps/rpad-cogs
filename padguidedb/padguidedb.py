@@ -54,7 +54,8 @@ class PadGuideDb:
         PADGUIDEDB_COG = self
 
     def get_connection(self):
-        with open(self.settings.configFile()) as f:
+        with open(self.settings.configFile(), 'a+') as f:
+            f.seek(0)
             db_config = json.load(f)
         return self.connect(db_config)
 

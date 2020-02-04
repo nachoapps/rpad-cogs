@@ -37,7 +37,7 @@ class ChannelMod:
     async def channelmod(self, ctx):
         """Manage channel moderation settings"""
         if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
+            await ctx.send_help()
 
     @channelmod.command(pass_context=True)
     @checks.mod_or_permissions(manage_channels=True)

@@ -18,6 +18,7 @@ import prettytable
 #import rpadutils
 import dadguide
 from rpadutils.rpadutils import *
+from rpadutils import rpadutils
 from redbot.core import checks
 from redbot.core.utils.chat_formatting import *
 
@@ -95,14 +96,14 @@ class IdEmojiUpdater(EmojiUpdater):
         self.emoji_dict = self.pad_info.get_id_emoji_options(m=self.m)
         return True
 
-def _validate_json(f):
+def _validate_json(fp):
     try:
-        json.load(f)
+        json.load(open(fp))
         return True
     except:
         return False
 
-class PadInfo:
+class PadInfo(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -130,16 +131,20 @@ class PadInfo:
 
         self.historic_lookups_file_path = "data/padinfo/historic_lookups.json"
         self.historic_lookups_file_path_id2 = "data/padinfo/historic_lookups_id2.json"
-        if not _validate_json(open(self.historic_lookups_file_path)):
+        if not _validate_json(self.historic_lookups_file_path):
             print("Creating empty historic_lookups.json...")
-            json.dump(open(self.historic_lookups_file_path), {})
+            json.dump({}, open(self.historic_lookups_file_path, "w+"))
 
-        if not _validate_json(open(self.historic_lookups_file_path_id2)):
+        if not _validate_json(self.historic_lookups_file_path_id2):
             print("Creating empty historic_lookups_id2.json...")
-            json.dump(open(self.historic_lookups_file_path_id2), {})
+            json.dump({}, open(self.historic_lookups_file_path_id2, "w+"))
 
-        self.historic_lookups = json.load(open(self.historic_lookups_file_path))
-        self.historic_lookups_id2 = json.load(open(self.historic_lookups_file_path_id2))
+        with open(self.historic_lookups_file_path, "a+") as f1:
+            f1.seek(0)
+            self.historic_lookups = json.load(f1)
+        with open(self.historic_lookups_file_path_id2, "a+") as f2:
+            f2.seek(0)
+            self.historic_lookups_id2 = json.load(f2)
 
     def __unload(self):
         # Manually nulling out database because the GC for cogs seems to be pretty shitty
@@ -163,6 +168,9 @@ class PadInfo:
     async def refresh_index(self):
         """Refresh the monster indexes."""
         dg_cog = self.bot.get_cog('Dadguide')
+        if not dg_cog:
+            print("Cog 'Dadguide' not loaded")
+            return
         await dg_cog.wait_until_ready()
         self.index_all = dg_cog.create_index()
         self.index_na = dg_cog.create_index(lambda m: m.on_na)
@@ -447,7 +455,7 @@ class PadInfo:
     async def padinfo(self, ctx):
         """PAD info management"""
         if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
+            await ctx.send_help()
 
     @padinfo.command()
     @checks.is_owner()
@@ -473,7 +481,7 @@ class PadInfo:
 
         monster_no = nm.monster_id if nm else -1
         self.historic_lookups[query] = monster_no
-        json.dump(open(self.historic_lookups_file_path), self.historic_lookups)
+        json.dump(self.historic_lookups, open(self.historic_lookups_file_path, "w+"))
 
         m = self.get_monster_by_no(nm.monster_id) if nm else None
 
@@ -489,7 +497,7 @@ class PadInfo:
 
         monster_no = nm.monster_id if nm else -1
         self.historic_lookups_id2[query] = monster_no
-        json.dump(open(self.historic_lookups_file_path_id2), self.historic_lookups_id2)
+        json.dump(self.historic_lookups_id2, open(self.historic_lookups_file_path_id2, "w+"))
 
         m = self.get_monster_by_no(nm.monster_id) if nm else None
 

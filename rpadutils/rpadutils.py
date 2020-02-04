@@ -13,7 +13,7 @@ import backoff
 import discord
 import pytz
 from redbot.core.utils.chat_formatting import *
-from discord.ext import commands
+from redbot.core import commands
 from discord.ext.commands import CommandNotFound
 from discord.ext.commands import converter
 
