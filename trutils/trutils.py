@@ -162,7 +162,7 @@ in specific channels, or unless they have specific roles. Read the documentation
 """
 
 
-class TrUtils:
+class TrUtils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.settings = TrUtilsSettings("trutils")

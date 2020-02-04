@@ -12,7 +12,7 @@ from .utils import checks
 from .utils.dataIO import dataIO
 
 
-class Memes:
+class Memes(commands.Cog):
     """Custom memes."""
 
     def __init__(self, bot):

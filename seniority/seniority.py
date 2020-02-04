@@ -109,7 +109,7 @@ WHERE record_date = ?
 '''
 
 
-class Seniority(object):
+class Seniority(commands.Cog):
     """Automatically promote people based on activity."""
 
     def __init__(self, bot):

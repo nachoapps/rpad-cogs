@@ -629,7 +629,7 @@ class SearchConfig(object):
         return new_value
 
 
-class PadSearch:
+class PadSearch(commands.Cog):
     """PAD data searching."""
 
     def __init__(self, bot):

@@ -20,7 +20,7 @@ from .utils.dataIO import fileIO
 TIME_FMT = """%a %b %d %H:%M:%S %Y"""
 
 
-class TwitterCog2:
+class TwitterCog2(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.config = fileIO("data/twitter2/config.json", "load")

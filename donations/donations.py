@@ -52,7 +52,7 @@ def roll(chance: int):
     return random.randrange(100) < chance
 
 
-class Donations:
+class Donations(commands.Cog):
     """Manages donations and perks."""
 
     def __init__(self, bot):

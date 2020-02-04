@@ -20,7 +20,7 @@ except:
     psutil = False
 
 
-class Statistics:
+class Statistics(commands.Cog):
     """
     Statistics
     """

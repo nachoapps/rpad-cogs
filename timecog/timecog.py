@@ -18,7 +18,7 @@ tz_lookup = dict([(pytz.timezone(x).localize(datetime.now()).tzname(), pytz.time
                   for x in pytz.all_timezones])
 
 
-class TimeCog:
+class TimeCog(commands.Cog):
     """Utilities to convert time"""
 
     def __init__(self, bot):

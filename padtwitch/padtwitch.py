@@ -26,7 +26,7 @@ if os.name != 'nt':
     import fcntl
 
 
-class PadTwitch:
+class PadTwitch(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.settings = PadTwitchSettings("padtwitch")

@@ -62,7 +62,7 @@ def computeOldGroup(str_id):
 #     return (int_id % 3)
 
 
-class Profile:
+class Profile(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.settings = ProfileSettings("profile")

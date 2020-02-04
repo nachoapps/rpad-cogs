@@ -44,7 +44,7 @@ class CmCard(object):
         self.cardeff = row[11]
 
 
-class ChronoMagia:
+class ChronoMagia(commands.Cog):
     """ChronoMagia."""
 
     def __init__(self, bot):

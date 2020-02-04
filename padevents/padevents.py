@@ -32,7 +32,7 @@ from .utils.dataIO import fileIO
 SUPPORTED_SERVERS = ["NA", "JP", "FAKE"]
 
 
-class PadEvents:
+class PadEvents(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

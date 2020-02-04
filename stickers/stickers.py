@@ -24,7 +24,7 @@ def is_sticker_admin():
     return commands.check(is_sticker_admin_check)
 
 
-class Stickers:
+class Stickers(commands.Cog):
     """Sticker commands."""
 
     def __init__(self, bot):

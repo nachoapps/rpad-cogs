@@ -38,7 +38,7 @@ def is_padguidedb_admin():
     return commands.check(is_padguidedb_admin_check)
 
 
-class PadGuideDb:
+class PadGuideDb(commands.Cog):
     """PadGuide Database manipulator"""
 
     def __init__(self, bot):

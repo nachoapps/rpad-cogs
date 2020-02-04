@@ -21,7 +21,7 @@ from .utils.dataIO import fileIO
 from .utils.settings import Settings
 
 
-class StreamCopy:
+class StreamCopy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.settings = StreamCopySettings("streamcopy")

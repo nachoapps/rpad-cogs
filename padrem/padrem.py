@@ -14,7 +14,7 @@ from .utils.chat_formatting import box, pagify
 SUPPORTED_SERVERS = ["NA", "JP"]
 
 
-class PadRem:
+class PadRem(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

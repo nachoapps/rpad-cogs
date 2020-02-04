@@ -7,7 +7,7 @@ from .utils import checks
 from .utils.chat_formatting import *
 
 
-class PadMonitor:
+class PadMonitor(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.settings = PadMonitorSettings("padmonitor")

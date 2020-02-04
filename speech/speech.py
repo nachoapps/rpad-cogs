@@ -28,7 +28,7 @@ else:
 SPOOL_PATH = "data/speech/spool.mp3"
 
 
-class Speech:
+class Speech(commands.Cog):
     """Speech utilities."""
 
     def __init__(self, bot):

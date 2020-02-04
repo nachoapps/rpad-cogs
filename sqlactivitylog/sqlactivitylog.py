@@ -184,7 +184,7 @@ WHERE server_id = :server_id
 '''
 
 
-class SqlActivityLogger(object):
+class SqlActivityLogger(commands.Cog):
     """Log activity seen by bot"""
 
     def __init__(self, bot):

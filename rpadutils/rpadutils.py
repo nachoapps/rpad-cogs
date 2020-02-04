@@ -20,7 +20,7 @@ from discord.ext.commands import converter
 from redbot.core import Config
 
 
-class RpadUtils:
+class RpadUtils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

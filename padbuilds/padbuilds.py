@@ -8,7 +8,7 @@ from .utils.chat_formatting import pagify, box
 from .utils.dataIO import dataIO
 
 
-class PadBuilds:
+class PadBuilds(commands.Cog):
     """Custom PAD builds
 
     Creates commands used to display text"""

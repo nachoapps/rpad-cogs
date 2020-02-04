@@ -20,7 +20,7 @@ from .utils.chat_formatting import *
 FIRST_REQ = 'https://schoolido.lu/api/cards/?page_size=100'
 
 
-class SchoolIdol:
+class SchoolIdol(commands.Cog):
     """SchoolIdol."""
 
     def __init__(self, bot):

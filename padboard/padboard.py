@@ -24,7 +24,7 @@ DAWNGLARE_BOARD_TEMPLATE = "https://candyninja001.github.io/Puzzled/?patt={}"
 MIRUGLARE_BOARD_TEMPLATE = "https://storage.googleapis.com/mirubot/websites/padsim/index.html?patt={}"
 
 
-class PadBoard:
+class PadBoard(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.logs = defaultdict(lambda: deque(maxlen=1))

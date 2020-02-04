@@ -14,7 +14,7 @@ from .utils import checks
 from .utils.chat_formatting import *
 
 
-class ModNotes:
+class ModNotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.settings = ModNotesSettings("modnotes")

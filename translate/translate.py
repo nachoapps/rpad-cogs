@@ -12,7 +12,7 @@ from redbot.core.utils import checks
 from redbot.core.utils.dataIO import dataIO
 
 
-class Translate:
+class Translate(commands.Cog):
     """Translation utilities."""
 
     def __init__(self, bot):

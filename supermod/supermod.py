@@ -221,7 +221,7 @@ def is_supermod():
     return commands.check(is_supermod_check)
 
 
-class SuperMod:
+class SuperMod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.settings = SuperModSettings("supermod")

@@ -21,7 +21,7 @@ BASE_URL = 'https://storage.googleapis.com/mirubot/alimages/raw'
 DATA_URL = '{}/azure_lane.json'.format(BASE_URL)
 
 
-class AzureLane:
+class AzureLane(commands.Cog):
     """AzureLane."""
 
     def __init__(self, bot):

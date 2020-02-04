@@ -99,7 +99,7 @@ class CtxWrapper:
         self.bot = bot
 
 
-class AutoMod2:
+class AutoMod2(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

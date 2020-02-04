@@ -29,7 +29,7 @@ from .utils.settings import Settings
 LOGS_PER_USER = 10
 
 
-class BadUser:
+class BadUser(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

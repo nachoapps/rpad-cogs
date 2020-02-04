@@ -24,7 +24,7 @@ INACTIVE = '_inactive'
 ATTRIBUTION_TIME_SECONDS = 60 * 60 * 3
 
 
-class ChannelMod:
+class ChannelMod(commands.Cog):
     """Channel moderation tools."""
 
     def __init__(self, bot):

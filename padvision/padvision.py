@@ -4,7 +4,7 @@ import traceback
 
 ORB_IMG_SIZE = 40
 
-class PadVision:
+class PadVision(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
