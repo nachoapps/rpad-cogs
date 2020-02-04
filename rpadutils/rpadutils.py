@@ -31,6 +31,35 @@ class RpadUtils(commands.Cog):
             await channel.send(inline(msg))
 
 
+    def user_allowed(self, message):
+        author = message.author
+
+        if author.bot:
+            return False
+
+        mod_cog = self.bot.get_cog('Mod')
+
+        if not isinstance(message.channel, discord.abc.PrivateChannel):
+            guild = message.guild
+            names = (self.bot.settings.get_server_admin(
+                guild), self.bot.settings.get_server_mod(guild))
+            results = map(
+                lambda name: discord.utils.get(author.roles, name=name),
+                names)
+            for r in results:
+                if r is not None:
+                    return True
+
+        if mod_cog is not None:
+            if not isinstance(message.channel, discord.abc.PrivateChannel):
+                if message.guild.id in mod_cog.ignore_list["SERVERS"]:
+                    return False
+
+                if message.channel.id in mod_cog.ignore_list["CHANNELS"]:
+                    return False
+
+        return True
+
 # TZ used for PAD NA
 # NA_TZ_OBJ = pytz.timezone('America/Los_Angeles')
 NA_TZ_OBJ = pytz.timezone('US/Pacific')

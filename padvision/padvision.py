@@ -1,21 +1,13 @@
 import PIL.Image
 import io
 import traceback
+import redbot.core
 
 ORB_IMG_SIZE = 40
 
-class PadVision(commands.Cog):
+class PadVision(redbot.core.commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-def setup(bot):
-    n = PadVision(bot)
-    bot.add_cog(n)
-
-
-###############################################################################
-# Library code
-###############################################################################
 
 EXTRACTABLE = 'rbgldhjpmo'
 
