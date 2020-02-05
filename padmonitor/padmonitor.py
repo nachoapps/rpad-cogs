@@ -74,21 +74,21 @@ class PadMonitor(commands.Cog):
             print('failed to send message to', channel_id, ' : ', ex)
 
     @commands.group(pass_context=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def padmonitor(self, ctx):
         """PAD info monitoring"""
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
     @padmonitor.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def addnewchannel(self, ctx):
         """Sets announcements for the current channel."""
         self.settings.add_new_monster_channel(ctx.message.channel.id)
         await self.bot.say(inline('done'))
 
     @padmonitor.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def rmnewchannel(self, ctx):
         """Removes announcements for the current channel."""
         self.settings.rm_new_monster_channel(ctx.message.channel.id)

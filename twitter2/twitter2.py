@@ -68,7 +68,7 @@ and starts following a user if one was set upon construction."""
         await self.bot.say(self.info(ctx.message.channel))
 
 #     @twitter2.command(name="follow", pass_context=True, no_pm=True)
-#     @checks.mod_or_permissions(manage_server=True)
+#     @checks.mod_or_permissions(manage_guild=True)
 #     async def _follow(self, ctx, command):
 #         await self.bot.say("stopping follow on " + self.tuser)
 #         tuser = command

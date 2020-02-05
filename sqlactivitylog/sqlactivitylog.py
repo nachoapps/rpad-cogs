@@ -226,7 +226,7 @@ class SqlActivityLogger(commands.Cog):
         await self.bot.say(inline('Locked is now {}'.format(self.lock)))
 
     @commands.group(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def exlog(self, context):
         """Extra log querying tools.
 

@@ -20,7 +20,7 @@ class ModNotes(commands.Cog):
         self.settings = ModNotesSettings("modnotes")
 
     @commands.group(pass_context=True, no_pm=True, aliases=["usernote"])
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def usernotes(self, context):
         """Moderator notes for users.
 
@@ -30,7 +30,7 @@ class ModNotes(commands.Cog):
             await send_cmd_help(context)
 
     @usernotes.command(name="print", pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def _print(self, ctx, user: discord.User):
         """Print the notes for a user."""
         notes = self.settings.getNotesForUser(ctx.message.server.id, user.id)
@@ -43,7 +43,7 @@ class ModNotes(commands.Cog):
             await self.bot.say(box(note))
 
     @usernotes.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def add(self, ctx, user: discord.User, *, note_text: str):
         """Add a note to a user."""
         timestamp = str(ctx.message.timestamp)[:-7]
@@ -53,7 +53,7 @@ class ModNotes(commands.Cog):
         await self.bot.say(inline('Done. User {} now has {} notes'.format(user.name, len(notes))))
 
     @usernotes.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def delete(self, ctx, user: discord.User, note_num: int):
         """Delete a specific note for a user."""
         notes = self.settings.getNotesForUser(ctx.message.server.id, user.id)
@@ -68,7 +68,7 @@ class ModNotes(commands.Cog):
         await self.bot.say(box(note))
 
     @usernotes.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def list(self, ctx):
         """Lists all users and note counts for the server."""
         user_notes = self.settings.getUserNotes(ctx.message.server.id)

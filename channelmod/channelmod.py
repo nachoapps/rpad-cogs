@@ -182,9 +182,9 @@ class ChannelMod(commands.Cog):
             # If we know we're copying a message and that message has an attachment,
             # pre download it and reuse it for every upload.
             attachment = message.attachments[0]
-            if 'url' and 'filename' in attachment:
-                url = attachment['url']
-                filename = attachment['filename']
+            if hasattr(attachment, 'url') and hasattr(attachment, 'filename'):
+                url = attachment.url
+                filename = attachment.filename
                 async with aiohttp.ClientSession() as session:
                     async with session.get(url) as response:
                         attachment_bytes = io.BytesIO(await response.read())

@@ -499,49 +499,49 @@ class SuperMod(commands.Cog):
         await self.bot.say(DONE)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def modhelp(self, ctx):
         """Prints help for moderators"""
         for page in pagify(MOD_HELP):
             await self.bot.whisper(box(page))
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def addPermanentSupermod(self, ctx, user: discord.Member):
         """Ensures a user is always selected as SuperMod."""
         self.settings.addPermanentSupermod(ctx.message.server.id, user.id)
         await self.bot.say(DONE)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def rmPermanentSupermod(self, ctx, user: discord.Member):
         """Removes a user from the always SuperMod list."""
         self.settings.rmPermanentSupermod(ctx.message.server.id, user.id)
         await self.bot.say(DONE)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def setSupermodCount(self, ctx, count: int):
         """Set the number of automatically selected SuperMods on this server."""
         self.settings.setSupermodCount(ctx.message.server.id, count)
         await self.bot.say(DONE)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def setModLogChannel(self, ctx, channel: discord.Channel):
         """Sets the channel used for printing moderation logs."""
         self.settings.setModlogChannel(ctx.message.server.id, channel.id)
         await self.bot.say(DONE)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def clearModLogChannel(self, ctx):
         """Clears the channel used for printing moderation logs."""
         self.settings.clearModlogChannel(ctx.message.server.id)
         await self.bot.say(DONE)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def setSupermodRole(self, ctx, role_name: str):
         """Sets the role that designates a user as SuperMod (make sure to hoist it)."""
         role = get_role(ctx.message.server.roles, role_name)
@@ -549,14 +549,14 @@ class SuperMod(commands.Cog):
         await self.bot.say(DONE)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def clearSupermodRole(self, ctx):
         """Clears the role that designates a user as SuperMod."""
         self.settings.clearSupermodRole(ctx.message.server.id)
         await self.bot.say(DONE)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def addDiscussionChannel(self, ctx, channel: discord.Channel):
         """Marks a channel as containing discussion.
 
@@ -571,7 +571,7 @@ class SuperMod(commands.Cog):
         await self.do_modlog(ctx.message.server.id, msg)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def rmDiscussionChannel(self, ctx, channel: discord.Channel):
         """Clears the discussion status from a channel."""
         self.settings.rmDiscussionChannel(ctx.message.server.id, channel.id)
@@ -579,7 +579,7 @@ class SuperMod(commands.Cog):
         await self.do_modlog(ctx.message.server.id, msg)
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def addBlacklistedUser(self, ctx, member: discord.Member):
         """Removes SuperMod status from a user (if they have it) and ensures they won't be selected."""
         self.settings.addBlacklistUser(ctx.message.server.id, member.id)
@@ -587,14 +587,14 @@ class SuperMod(commands.Cog):
         await self.remove_supermod(member, self.get_supermod_role(ctx.message.server))
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def rmBlacklistedUser(self, ctx, member: discord.Member):
         """Re-enable SuperMod selection for a user."""
         self.settings.rmBlacklistUser(ctx.message.server.id, member.id)
         await self.do_modlog(ctx.message.server.id, inline('{} was forgiven, they can SuperMod again}'.format(member.name)))
 
     @supermod.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def info(self, ctx):
         """Print the SuperMod configuration for this server."""
         server = ctx.message.server

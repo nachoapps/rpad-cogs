@@ -149,7 +149,7 @@ class Seniority(commands.Cog):
         print('Seniority: init complete')
 
     @commands.group(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_server=True)
+    @checks.mod_or_permissions(manage_guild=True)
     async def seniority(self, context):
         """Automatically promote people based on activity."""
         if context.invoked_subcommand is None:

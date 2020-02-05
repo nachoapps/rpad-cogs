@@ -181,10 +181,6 @@ def should_download(file_path, expiry_secs):
         return False
 
 
-def shouldDownload(file_path, expiry_secs):
-    return should_download(file_path, expiry_secs)
-
-
 def writeJsonFile(file_path, js_data):
     with open(file_path, "w") as f:
         json.dump(js_data, f, sort_keys=True, indent=4)
@@ -229,7 +225,7 @@ async def makeAsyncPlainRequest(file_url):
 
 
 async def makeAsyncCachedPlainRequest(file_path, file_url, expiry_secs):
-    if shouldDownload(file_path, expiry_secs):
+    if should_download(file_path, expiry_secs):
         resp = await makeAsyncPlainRequest(file_url)
         writePlainFile(file_path, resp)
     return readPlainFile(file_path)
@@ -435,7 +431,7 @@ class UserConverter2(converter.IDConverter):
     def convert(self, ctx, argument):
         message = ctx.message
         bot = ctx.bot
-        match = self._get_id_match() or re.match(r'<@!?([0-9]+)>$', argument)
+        match = self._get_id_match(argument) or re.match(r'<@!?([0-9]+)>$', argument)
         server = message.guild
         result = None
         if match is None:
@@ -447,7 +443,7 @@ class UserConverter2(converter.IDConverter):
         else:
             user_id = match.group(1)
             if server:
-                result = yield from bot.get_user_info(int(user_id))
+                result = yield from bot.fetch_user(int(user_id))
             else:
                 result = _get_from_servers(bot, 'get_member', user_id)
 
@@ -527,8 +523,8 @@ def is_valid_image_url(url):
 def extract_image_url(m):
     if is_valid_image_url(m.content):
         return m.content
-    if m.attachments and len(m.attachments) and is_valid_image_url(m.attachments[0]['url']):
-        return m.attachments[0]['url']
+    if m.attachments and len(m.attachments) and is_valid_image_url(m.attachments[0].url):
+        return m.attachments[0].url
     return None
 
 

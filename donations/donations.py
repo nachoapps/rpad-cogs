@@ -228,14 +228,14 @@ class Donations(commands.Cog):
             await self.bot.whisper(random.choice(self.perverted_list))
 
     @commands.group(pass_context=True)
-    @checks.admin_or_permissions(manage_server=True)
+    @checks.admin_or_permissions(manage_guild=True)
     async def donations(self, context):
         """Manage donation options."""
         if context.invoked_subcommand is None:
             await send_cmd_help(context)
 
     @donations.command(pass_context=True)
-    @checks.admin_or_permissions(manage_server=True)
+    @checks.admin_or_permissions(manage_guild=True)
     async def togglePerks(self, ctx):
         """Enable or disable donor-specific perks for the server."""
         server_id = ctx.message.server.id
