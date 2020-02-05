@@ -360,7 +360,10 @@ class Menu():
             raise ValueError(message, ctx)
             return None, None
 
-        p = await self.bot.wait_for('raw_reaction_add', check=check, timeout=timeout)
+        try:
+            p = await self.bot.wait_for('raw_reaction_add', check=check, timeout=timeout)
+        except Exception as e:
+            p = None
 
         if p is None:
             try:
@@ -647,7 +650,11 @@ async def await_and_remove(bot, react_msg, listen_user, delete_msgs=None, emoji=
                payload.user_id == listen_user.id and\
                payload.message_id == react_msg.id
 
-    p = await self.bot.wait_for('add_reaction', check=check, timeout=timeout)
+    try:
+        p = await bot.wait_for('add_reaction', check=check, timeout=timeout)
+    except:
+        #Expected after {timeout} seconds
+        p = None
 
     if p is None:
         try:
