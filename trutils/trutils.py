@@ -277,9 +277,9 @@ class TrUtils(commands.Cog):
 
     async def copy_embed_to_channel(self, msg, in_embed, img_copy_channel_id):
         embed = discord.Embed()
-        embed.description = in_embed['url']
-        embed.title = in_embed['title'] if 'title' in in_embed else None
-        embed.set_image(url=in_embed['thumbnail']['proxy_url'])
+        embed.description = in_embed.url
+        embed.title = in_embed.title hasattr(in_embed, 'title') else None
+        embed.set_image(url=in_embed.thumbnail.proxy_url)
         embed.set_footer(text='Posted by {} in {}'.format(msg.author.name, msg.channel.name))
         try:
             await self.bot.get_channel(img_copy_channel_id).send(embed=embed)
