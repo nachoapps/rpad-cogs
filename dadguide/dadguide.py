@@ -521,6 +521,23 @@ class DadguideDatabase(object):
             DgEvolution,
             as_generator=True)
 
+    def get_base_monster_by_monster(self, monster_id):
+        base = {'from_id':monster_id, 'to_id':monster_id}
+        lastbase = None
+        while base != None:
+            lastbase = base
+            base = self.get_prev_evolution_by_monster(base['from_id'])
+        return lastbase
+
+    def get_all_evolutions_by_monster(self, monster_id):
+        base = self.get_base_monster_by_monster(monster_id)
+        queue = [base]
+
+        while queue:
+            curr = queue.pop(0)
+            yield curr
+            queue.extend(self.get_next_evolutions_by_monster(curr['to_id']))
+
     def get_evolution_by_material(self, monster_id):
         return self._query_many(
             self._select_builder(

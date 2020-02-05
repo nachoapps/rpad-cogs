@@ -36,7 +36,7 @@ class RpadUtils(commands.Cog):
 
         if author.bot:
             return False
-
+        """
         mod_cog = self.bot.get_cog('Mod')
 
         if not isinstance(message.channel, discord.abc.PrivateChannel):
@@ -57,7 +57,7 @@ class RpadUtils(commands.Cog):
 
                 if message.channel.id in mod_cog.ignore_list["CHANNELS"]:
                     return False
-
+        """
         return True
 
 # TZ used for PAD NA
@@ -244,12 +244,8 @@ class Forbidden():
     pass
 
 
-def default_check(reaction, user):
-    if user.bot:
-        return False
-    else:
-        return True
-
+def default_check(payload):
+    return not payload.member.bot
 
 class EmojiUpdater(object):
     # a pass-through class that does nothing to the emoji dictionary
@@ -340,14 +336,16 @@ class Menu():
     async def _custom_menu(self, ctx, emoji_to_message, selected_emoji,
                            allowed_action=True, **kwargs):
         timeout = kwargs.get('timeout', 15)
-        check = kwargs.get('check', default_check)
         message = kwargs.get('message', None)
 
         reactions_required = not message
         new_message_content = emoji_to_message.emoji_dict[selected_emoji]
         if allowed_action:
-            message = await self.show_menu(ctx, message, new_message_content)
-
+            if not message:
+                message = await self.show_menu(ctx, message, new_message_content)
+            else:
+                await self.show_menu(ctx, message, new_message_content)
+                
         if reactions_required:
             for e in emoji_to_message.emoji_dict:
                 try:
@@ -356,14 +354,19 @@ class Menu():
                     # failed to add reaction, ignore
                     pass
 
-        r = await self.bot.wait_for('add_reaction',
-            emoji=list(emoji_to_message.emoji_dict.keys()),
-            message=message,
-            user=ctx.author,
-            check=check,
-            timeout=timeout)
+        def check(payload):
+            return kwargs.get('check', default_check)(payload) and\
+                   str(payload.emoji.name) in list(emoji_to_message.emoji_dict.keys()) and\
+                   payload.user_id == ctx.author.id and\
+                   payload.message_id == message.id
 
-        if r is None:
+        if not message:
+            raise ValueError(message, ctx)
+            return None, None
+
+        p = await self.bot.wait_for('raw_reaction_add', check=check, timeout=timeout)
+
+        if p is None:
             try:
                 await message.clear_reactions()
             except Exception as e:
@@ -371,8 +374,8 @@ class Menu():
                 pass
             return message, new_message_content
 
-        react_emoji = r.reaction.emoji
-        react_action = emoji_to_message.emoji_dict[r.reaction.emoji]
+        react_emoji = p.emoji.name
+        react_action = emoji_to_message.emoji_dict[p.emoji.name]
 
         if inspect.iscoroutinefunction(react_action):
             message = await react_action(self.bot, ctx, message)
@@ -384,7 +387,7 @@ class Menu():
             return None, None
 
         try:
-            await message.remove_reaction(react_emoji, r.user)
+            await message.remove_reaction(react_emoji, p.member)
         except:
             # This is expected when miru doesn't have manage messages
             pass
@@ -643,13 +646,14 @@ async def await_and_remove(bot, react_msg, listen_user, delete_msgs=None, emoji=
         # failed to add reaction, ignore
         return
 
-    r = await bot.wait_for('add_reaction',
-        emoji=[emoji],
-        message=react_msg,
-        user=listen_user,
-        timeout=timeout)
+    def check(payload):
+        return str(payload.emoji.name) == emoji and\
+               payload.user_id == listen_user.id and\
+               payload.message_id == react_msg.id
 
-    if r is None:
+    p = await self.bot.wait_for('add_reaction', check=check, timeout=timeout)
+
+    if p is None:
         try:
             await react_msg.remove_reaction(emoji, react_msg.guild.me)
         except Exception as e:

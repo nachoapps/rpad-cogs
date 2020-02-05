@@ -75,13 +75,37 @@ def get_pic_url(m):
 
 class IdEmojiUpdater(EmojiUpdater):
     def __init__(self, emoji_to_embed, m:dadguide.DgMonster=None,
-                 pad_info=None, selected_emoji=None):
+                 pad_info=None, selected_emoji=None, bot=None):
         self.emoji_dict = emoji_to_embed
         self.m = m
         self.pad_info = pad_info
         self.selected_emoji = selected_emoji
+        self.bot = bot
 
     def on_update(self, selected_emoji):
+        # TODO: River Suggestion
+        """
+        DGCOG = self.bot.get_cog('Dadguide')
+        evos = list(map(lambda x: [x['from_id'], x['to_id']], DGCOG.database.get_all_evolutions_by_monster(self.m.monster_id)))
+        evos = list(set(sum(evos,[])))
+        evos.sort()
+        index = evos.index(self.m.monster_id)
+        if selected_emoji == self.pad_info.previous_monster_emoji:
+            if index == 0:
+                self.m = DGCOG.get_monster_by_no(evos[-1])
+            else:
+                self.m = DGCOG.get_monster_by_no(evos[index-1])
+        elif selected_emoji == self.pad_info.next_monster_emoji:
+            if index == len(evos)-1:
+                self.m = DGCOG.get_monster_by_no(evos[0])
+            else:
+                self.m = DGCOG.get_monster_by_no(evos[index+1])
+        else:
+            self.selected_emoji = selected_emoji
+            return True
+        self.emoji_dict = self.pad_info.get_id_emoji_options(m=self.m)
+        return True
+        """
         if selected_emoji == self.pad_info.previous_monster_emoji:
             if self.m.prev_monster is None:
                 return False
@@ -95,6 +119,7 @@ class IdEmojiUpdater(EmojiUpdater):
             return True
         self.emoji_dict = self.pad_info.get_id_emoji_options(m=self.m)
         return True
+        
 
 def _validate_json(fp):
     try:
@@ -269,7 +294,7 @@ class PadInfo(commands.Cog):
             ctx,
             starting_menu_emoji,
             IdEmojiUpdater(emoji_to_embed, pad_info=self,
-                           m=m, selected_emoji=starting_menu_emoji)
+                           m=m, selected_emoji=starting_menu_emoji, bot=self.bot)
         )
 
     def get_id_emoji_options(self, m=None):
