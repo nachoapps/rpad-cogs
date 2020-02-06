@@ -283,7 +283,7 @@ class SuperMod(commands.Cog):
             except Exception as e:
                 print("failed to remove supermod", member.name, e)
 
-    def get_current_supermods(self, server: discord.Server, supermod_role: discord.Role):
+    def get_current_supermods(self, server: discord.Guild, supermod_role: discord.Role):
         if supermod_role is None:
             return []
         return [member for member in server.members if self.check_supermod(member, supermod_role)]

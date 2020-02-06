@@ -346,7 +346,7 @@ class Seniority(commands.Cog):
                         raise rpadutils.ReportableError(str(ex))
 
     async def do_print_overages(self,
-                                server: discord.Server,
+                                server: discord.Guild,
                                 lookback_days: int,
                                 check_name: str,
                                 points_greater_than: bool):
@@ -382,7 +382,7 @@ class Seniority(commands.Cog):
             for page in pagify(msg):
                 await self.bot.say(box(page))
 
-    def roles_and_amounts(self, server: discord.Server, check_name: str):
+    def roles_and_amounts(self, server: discord.Guild, check_name: str):
         for role_id, role_config in self.settings.roles(server.id).items():
             amount = role_config[check_name]
             try:
@@ -392,7 +392,7 @@ class Seniority(commands.Cog):
             yield role_id, role, amount
 
     async def get_grant_ignore_users(self,
-                                     server: discord.Server,
+                                     server: discord.Guild,
                                      role: discord.Role,
                                      amount: int,
                                      lookback_days: int,
@@ -409,7 +409,7 @@ class Seniority(commands.Cog):
 
         return grant_users, ignored_users
 
-    async def get_lookback_points(self, server: discord.Server, lookback_days: int):
+    async def get_lookback_points(self, server: discord.Guild, lookback_days: int):
         lookback_date = datetime.now(rpadutils.NA_TZ_OBJ) - timedelta(days=lookback_days)
         lookback_date_str = lookback_date.date().isoformat()
 
@@ -421,7 +421,7 @@ class Seniority(commands.Cog):
 
     def check_users_for_role(self,
                              users_and_points,
-                             server: discord.Server,
+                             server: discord.Guild,
                              point_check_fn,
                              role: discord.Role,
                              adding_role: bool):
@@ -648,7 +648,7 @@ class Seniority(commands.Cog):
         self.settings.set_min_words(server_id, words)
         await self.bot.say(inline('Min word count set to {}.'.format(words)))
 
-    def check_acceptable(self, server: discord.Server, text: str):
+    def check_acceptable(self, server: discord.Guild, text: str):
         server_id = server.id
         # Disabled
         # self.settings.ignore_impolite(server_id)
@@ -685,7 +685,7 @@ class Seniority(commands.Cog):
         now_date_str = now_date()
         await self.process_message(server, channel, user, now_date_str, msg_content)
 
-    async def process_message(self, server: discord.Server, channel: discord.Channel, user: discord.User, now_date_str: str, msg_content: str):
+    async def process_message(self, server: discord.Guild, channel: discord.Channel, user: discord.User, now_date_str: str, msg_content: str):
         if self.lock:
             return
         if server is None:
@@ -727,21 +727,21 @@ class Seniority(commands.Cog):
 
         return incremental_points
 
-    async def get_current_channel_points(self, now_date_str: str, server: discord.Server, channel: discord.Channel, user: discord.User):
+    async def get_current_channel_points(self, now_date_str: str, server: discord.Guild, channel: discord.Channel, user: discord.User):
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(GET_NEWMESSAGE_POINTS_QUERY, now_date_str, server.id, channel.id, user.id)
                 results = await cur.fetchone()
                 return results.points if results else 0
 
-    async def get_current_server_points(self, now_date_str: str, server: discord.Server, user: discord.User):
+    async def get_current_server_points(self, now_date_str: str, server: discord.Guild, user: discord.User):
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(GET_NEWMESSAGE_SERVER_POINTS_QUERY, now_date_str, server.id, user.id)
                 results = await cur.fetchone()
                 return results.points if results else 0
 
-    async def save_current_points(self, now_date_str: str, server: discord.Server, channel: discord.Channel, user: discord.User, new_points: int):
+    async def save_current_points(self, now_date_str: str, server: discord.Guild, channel: discord.Channel, user: discord.User, new_points: int):
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(REPLACE_POINTS_QUERY, now_date_str, server.id, channel.id, user.id, new_points)

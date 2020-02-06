@@ -18,17 +18,7 @@ class VoiceRole(commands.Cog):
         self.bot = bot
         self.settings = VoiceRoleSettings("voicerole")
 
-    async def _on_voice_state_update(self, before, after):
-        member_to_modify = None
-        if before.voice_channel is None and after.voice_channel is not None:
-            member_to_modify = after
-            do_add = True
-        elif before.voice_channel is not None and after.voice_channel is None:
-            member_to_modify = before
-            do_add = False
-        else:
-            return
-
+    async def _on_voice_state_update(self, member_to_modify, before, after):
         server = member_to_modify.server
         server_id = server.id
         channel_id = member_to_modify.voice_channel.id

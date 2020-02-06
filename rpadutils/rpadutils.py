@@ -16,6 +16,8 @@ from redbot.core.utils.chat_formatting import *
 from redbot.core import commands
 from discord.ext.commands import CommandNotFound
 from discord.ext.commands import converter
+from discord.ext.commands import BadArgument
+
 
 from redbot.core import Config
 
@@ -134,24 +136,25 @@ def get_role(roles, role_string):
         lambda r: r.name.lower() == role_string.lower(), roles)
 
     if role is None:
+        print("Could not find role named " + role_string)
         raise ReportableError("Could not find role named " + role_string)
 
     return role
 
 
-def get_role_from_id(bot, server, roleid):
+def get_role_from_id(bot, guild, roleid):
     try:
-        roles = server.roles
+        roles = guild.roles
     except AttributeError:
-        server = get_server_from_id(bot, server)
+        guild = get_server_from_id(bot, guild)
         try:
-            roles = server.roles
+            roles = guild.roles
         except AttributeError:
-            raise RoleNotFound(server, roleid)
+            raise RoleNotFound(guild, roleid)
 
     role = discord.utils.get(roles, id=roleid)
     if role is None:
-        raise ReportableError("Could not find role id {} in server {}".format(roleid, server.name))
+        raise ReportableError("Could not find role id {} in guild {}".format(roleid, guild.name))
     return role
 
 
@@ -183,7 +186,7 @@ def should_download(file_path, expiry_secs):
 
 def writeJsonFile(file_path, js_data):
     with open(file_path, "w") as f:
-        json.dump(js_data, f, sort_keys=True, indent=4)
+        json.dump(js_data, f, indent=4)
 
 
 def readJsonFile(file_path):

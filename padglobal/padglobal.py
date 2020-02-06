@@ -119,9 +119,9 @@ class PadGlobal(redbot.core.commands.Cog):
         print(msg)
 
         try:
-            owner = discord.utils.get(self.bot.get_all_members(),
-                                      id=self.bot.settings.owner)
-            await owner.send(owner, msg)
+            app_info = await self.bot.application_info()
+            owner = app_info.owner
+            await owner.send(msg)
             await ctx.send("Owner has been notified, shutting down...")
         except Exception as ex:
             print('Failed to notifiy for breakglass: ' + str(ex))
