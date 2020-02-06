@@ -129,6 +129,7 @@ class Memes(commands.Cog):
         else:
             await ctx.send("There are no custom memes in this server. Use addmeme [command] [text]")
 
+    @commands.Cog.listener('on_message')
     async def checkCC(self, message):
         if len(message.content) < 2 or isinstance(message.channel, discord.abc.PrivateChannel):
             return

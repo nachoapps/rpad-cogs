@@ -286,6 +286,7 @@ class TrUtils(commands.Cog):
         except Exception as e:
             print('Failed to copy embed to', img_copy_channel_id, e)
 
+    @commands.Cog.listener('on_message')
     async def on_imgcopy_message(self, message):
         if message.author.id == self.bot.user.id or isinstance(message.channel, discord.abc.PrivateChannel):
             return
@@ -304,10 +305,12 @@ class TrUtils(commands.Cog):
                 await self.copy_embed_to_channel(message, e, img_copy_channel_id)
             return
 
+    @commands.Cog.listener('on_message_edit')
     async def on_imgcopy_edit_message(self, old_message, new_message):
         if len(old_message.embeds) == 0 and len(new_message.embeds) > 0:
             await self.on_imgcopy_message(new_message)
 
+    @commands.Cog.listener('on_message')
     async def on_imgblacklist_message(self, message):
         if message.author.id == self.bot.user.id or isinstance(message.channel, discord.abc.PrivateChannel):
             return
@@ -329,6 +332,7 @@ class TrUtils(commands.Cog):
                     return
             return
 
+    @commands.Cog.listener('on_message_edit')
     async def on_imgblacklist_edit_message(self, old_message, new_message):
         if len(old_message.embeds) == 0 and len(new_message.embeds) > 0:
             await self.on_imgblacklist_message(new_message)
@@ -766,10 +770,11 @@ class TrUtils(commands.Cog):
             for user_id, track_info in self.settings.trackedUsers().items():
                 user = await self.bot.fetch_user(user_id)
                 user_name = user.name if user else user_id
-                msg += '\t{} : {}'.format(user_name, json.dumps(track_info, sort_keys=True))
+                msg += '\t{} : {}'.format(user_name, json.dumps(track_info))
 
             await ctx.send(box(msg))
 
+    @commands.Cog.listener('on_member_update')
     async def on_trackuser_update(self, old_member: discord.Member, new_member: discord.Member):
         if new_member and str(new_member.status) != 'offline' and new_member.id in self.settings.trackedUsers():
             self.settings.updateTrackedUser(new_member.id)

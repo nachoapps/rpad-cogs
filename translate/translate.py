@@ -27,6 +27,7 @@ class Translate(commands.Cog):
         if api_key:
             self.service = build('translate', 'v2', developerKey=api_key)
 
+    @commands.Cog.listener('on_message')
     async def checkAutoTranslateJp(self, message):
         if (isinstance(message.channel, discord.abc.PrivateChannel)
             or not self.service

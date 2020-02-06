@@ -16,7 +16,7 @@ from enum import Enum
 import prettytable
 
 #import rpadutils
-import dadguide
+from dadguide import *
 from rpadutils.rpadutils import *
 from rpadutils import rpadutils
 from redbot.core import checks

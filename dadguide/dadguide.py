@@ -168,7 +168,7 @@ class Dadguide(commands.Cog):
             results[name] = int(rpadutils.get_pdx_id_dadguide(nm))
 
         with open(NAMES_EXPORT_PATH, 'w', encoding='utf-8') as f:
-            json.dump(results, f, sort_keys=True)
+            json.dump(results, f)
 
         results = {}
         for nm in self.index.all_monsters:
@@ -178,7 +178,7 @@ class Dadguide(commands.Cog):
             results[int(rpadutils.get_pdx_id_dadguide(nm))] = entry
 
         with open(BASENAMES_EXPORT_PATH, 'w', encoding='utf-8') as f:
-            json.dump(results, f, sort_keys=True)
+            json.dump(results, f)
 
     def _csv_to_tuples(self, file_path: str, cols: int = 2):
         # Loads a two-column CSV into an array of tuples.

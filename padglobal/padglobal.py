@@ -98,7 +98,7 @@ class PadGlobal(redbot.core.commands.Cog):
         }
 
         with open(DATA_EXPORT_PATH, 'w', encoding='utf-8') as f:
-            json.dump(results, f, sort_keys=True, indent=4)
+            json.dump(results, f, indent=4)
 
     @commands.command()
     @is_padglobal_admin()
@@ -851,6 +851,7 @@ class PadGlobal(redbot.core.commands.Cog):
         except Exception as ex:
             await ctx.send(box('Error:\n' + str(ex)))
 
+    @commands.Cog.listener('on_message')
     async def checkCC(self, message):
         if message.author.id == self.bot.user.id:
             return
@@ -1092,21 +1093,6 @@ def check_simple_tree(monster):
         if 'awoken' in m.name_na.lower():
             return False
     return True
-
-
-def check_folders():
-    if not os.path.exists("data/padglobal"):
-        print("Creating data/padglobal folder...")
-        os.makedirs("data/padglobal")
-
-
-def check_files():
-    f = "data/padglobal/commands.json"
-    try:
-        json.load(open(f))
-    except:
-        print("Creating empty commands.json...")
-        json.dump({}, open(f, "w+"))
 
 
 class PadGlobalSettings(CogSettings):

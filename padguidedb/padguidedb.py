@@ -107,7 +107,7 @@ class PadGuideDb(commands.Cog):
                    " order by dungeon_id desc limit 20".format(search_text, search_text))
             cursor.execute(sql)
             results = list(cursor.fetchall())
-            msg = 'Results\n' + json.dumps(results, indent=2, sort_keys=True, ensure_ascii=False)
+            msg = 'Results\n' + json.dumps(results, indent=2, ensure_ascii=False)
             await self.bot.say(inline(sql))
             for page in pagify(msg):
                 await self.bot.say(box(page))

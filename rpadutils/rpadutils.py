@@ -557,7 +557,21 @@ def clean_global_mentions(content):
     return re.sub(r'(@)(\w)', '\\g<1>\u200b\\g<2>', content)
 
 
-class CogSettings:
+def intify(iterable):
+    if isinstance(iterable, dict):
+        for item in list(iterable):
+            try:
+                iterable[int(item)] = intify(iterable[item])
+            except:
+                iterable[item] = intify(iterable[item])
+    elif isinstance(iterable, (list,tuple)):
+        for item in iterable:
+            if intify(item) != item:
+                iterable.append(intify(item))
+    return iterable
+
+
+class CogSettings(object):
     BASE_DATA_PATH = "data"
     SETTINGS_FILE_NAME = "settings.json"
 
@@ -572,7 +586,7 @@ class CogSettings:
             self.bot_settings = self.default_settings
             self.save_settings()
         else:
-            current = readJsonFile(self.file_path)
+            current = intify(readJsonFile(self.file_path))
             updated = False
             for key in self.default_settings.keys():
                 if key not in current.keys():

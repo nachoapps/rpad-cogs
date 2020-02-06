@@ -1,8 +1,6 @@
 from .rpadutils import *
 
 def setup(bot):
-    print('rpadutils setup')
-    n = RpadUtils(bot)
-    bot.add_cog(n)
+    bot.add_cog(RpadUtils(bot))
 
 __all__ = list(globals())

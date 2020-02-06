@@ -1,5 +1,4 @@
 from .automod2 import *
 
 def setup(bot):
-    n = AutoMod2(bot)
-    bot.add_cog(n)
+    bot.add_cog(AutoMod2(bot))

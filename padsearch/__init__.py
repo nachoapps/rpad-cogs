@@ -1,5 +1,4 @@
 from .padsearch import *
 
 def setup(bot):
-    n = PadSearch(bot)
-    bot.add_cog(n)
+    bot.add_cog(PadSearch(bot))

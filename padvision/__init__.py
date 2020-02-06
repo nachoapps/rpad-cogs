@@ -1,5 +1,4 @@
 from .padvision import *
 
 def setup(bot):
-    n = PadVision(bot)
-    bot.add_cog(n)
+    bot.add_cog(PadVision(bot))
