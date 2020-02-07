@@ -6,15 +6,13 @@ from time import time
 
 import aiohttp
 import discord
-from discord.ext import commands
+from redbot.core import commands
 
-from __main__ import send_cmd_help, set_cog
-from cogs.utils import checks
-from cogs.utils.chat_formatting import pagify, box
-from cogs.utils.dataIO import dataIO
+from redbot.core import checks
+from redbot.core.utils.chat_formatting import pagify, box
 
-from .rpadutils import Menu, EmojiUpdater, char_to_emoji
-from .utils.chat_formatting import *
+from rpadutils.rpadutils import Menu, EmojiUpdater, char_to_emoji
+from redbot.core.utils.chat_formatting import *
 
 
 BASE_URL = 'https://storage.googleapis.com/mirubot/alimages/raw'
@@ -47,7 +45,7 @@ class AzureLane(commands.Cog):
             #             **collection_name_to_card,
         }
 
-    @commands.command(pass_context=True)
+    @commands.command()
     async def alid(self, ctx, *, query: str):
         """Azure Lane query."""
         query = query.lower().strip()
@@ -65,7 +63,7 @@ class AzureLane(commands.Cog):
         if c:
             await self.do_menu(ctx, c)
         else:
-            await self.bot.say(inline('no matches'))
+            await ctx.send(inline('no matches'))
 
     async def do_menu(self, ctx, c):
         emoji_to_embed = OrderedDict()
@@ -85,7 +83,7 @@ class AzureLane(commands.Cog):
             if result_msg and result_embed:
                 # Message is finished but not deleted, clear the footer
                 result_embed.set_footer(text=discord.Embed.Empty)
-                await self.bot.edit_message(result_msg, embed=result_embed)
+                await result_msg.edit(embed=result_embed)
         except Exception as ex:
             print('Menu failure', ex)
 
@@ -110,19 +108,3 @@ def make_card_embed(c, image_idx):
     embed.set_image(url=image_url)
     embed.set_footer(text='Requester may click the reactions below to switch tabs')
     return embed
-
-
-def check_folders():
-    pass
-
-
-def check_files():
-    pass
-
-
-def setup(bot):
-    check_folders()
-    check_files()
-    n = AzureLane(bot)
-    bot.add_cog(n)
-    bot.loop.create_task(n.reload_al())

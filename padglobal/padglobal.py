@@ -59,7 +59,7 @@ def monster_no_to_monster(monster_no):
     return padinfo_cog.get_monster_by_no(monster_no)
 
 
-class PadGlobal(redbot.core.commands.Cog):
+class PadGlobal(commands.Cog):
     """Global PAD commands."""
 
     def __init__(self, bot):

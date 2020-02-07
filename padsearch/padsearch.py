@@ -628,7 +628,7 @@ class SearchConfig(object):
         return new_value
 
 
-class PadSearch(redbot.core.commands.Cog):
+class PadSearch(commands.Cog):
     """PAD data searching."""
 
     def __init__(self, bot):

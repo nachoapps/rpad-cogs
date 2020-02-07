@@ -2,10 +2,11 @@ import PIL.Image
 import io
 import traceback
 import redbot.core
+from redbot.core import commands
 
 ORB_IMG_SIZE = 40
 
-class PadVision(redbot.core.commands.Cog):
+class PadVision(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
