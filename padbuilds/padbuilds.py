@@ -126,7 +126,7 @@ class PadBuilds(commands.Cog):
                 await self.bot.whisper(box(page))
 
     async def on_message(self, message):
-        if len(message.content) < 2 or message.channel.is_private:
+        if len(message.content) < 2 or isinstance(message.channel, discord.abc.PrivateChannel):
             return
 
         server = message.server
