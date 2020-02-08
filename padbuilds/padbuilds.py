@@ -1,33 +1,29 @@
 import os
 import re
+import discord 
 
-from discord.ext import commands
+from redbot.core import commands
 
-from redbot.utils import checks
-from redbot.utils.chat_formatting import pagify, box
-from redbot.core import Config
+from redbot.core import checks
+from redbot.core.utils.chat_formatting import pagify, box
+from rpadutils.rpadutils import CogSettings
 
-from cogs.utils.dataIO import dataIO
 
-class PadBuilds:
+class PadBuilds(commands.Cog):
     """Custom PAD builds
 
     Creates commands used to display text"""
 
     def __init__(self, bot):
-        self.conf = Config.get_conf(self, identifier=940801705, force_registration=True)
-
         self.bot = bot
-        self.file_path = "data/padbuilds/commands.json"
-        self.c_commands = dataIO.load_json(self.file_path)
+        self.c_commands = PadBuildSettings("padbuilds")
 
     @commands.group(aliases=["build"])
+    @commands.guild_only()
     async def builds(self, ctx):
         """PAD Builds management"""
-        if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
 
-    @builds.command(name="add", pass_context=True)
+    @builds.command(name="add")
     @checks.mod_or_permissions(administrator=True)
     async def cc_add(self, ctx, command: str, *, text):
         """Adds a PAD Build
@@ -38,26 +34,26 @@ class PadBuilds:
         Builds can be enhanced with arguments:
         https://twentysix26.github.io/Red-Docs/red_guide_command_args/
         """
-        server = ctx.message.guild
+        server = ctx.guild
         command = command.lower()
         text = text.replace(u'\u200b', '')
         if command in self.bot.commands:
             await ctx.send("That is already a standard command.")
             return
         if server.id not in self.c_commands:
-            self.c_commands[server.id] = {}
-        cmdlist = self.c_commands[server.id]
+            self.c_commands.set_key(server.id, {})
+        cmdlist = self.c_commands.get_key(server.id)
         if command not in cmdlist:
             cmdlist[command] = text
-            self.c_commands[server.id] = cmdlist
-            dataIO.save_json(self.file_path, self.c_commands)
+            self.c_commands.set_key(server.id, cmdlist)
+            self.c_commands.save_settings()
             await ctx.send("PAD Build successfully added.")
         else:
             await ctx.send("This build already exists. Use "
                                "`{}builds edit` to edit it."
                                "".format(ctx.prefix))
 
-    @builds.command(name="edit", pass_context=True)
+    @builds.command(name="edit")
     @checks.mod_or_permissions(administrator=True)
     async def cc_edit(self, ctx, command: str, *, text):
         """Edits a PAD Build
@@ -65,15 +61,15 @@ class PadBuilds:
         Example:
         [p]builds edit buildname Text you want
         """
-        server = ctx.message.guild
+        server = ctx.guild
         command = command.lower()
         text = text.replace(u'\u200b', '')
         if server.id in self.c_commands:
-            cmdlist = self.c_commands[server.id]
+            cmdlist = self.c_commands.get_key(server.id)
             if command in cmdlist:
                 cmdlist[command] = text
-                self.c_commands[server.id] = cmdlist
-                dataIO.save_json(self.file_path, self.c_commands)
+                self.c_commands.set_key(server.id, cmdlist)
+                self.c_commands.save_settings()
                 await ctx.send("PAD Build successfully edited.")
             else:
                 await ctx.send("That build doesn't exist. Use "
@@ -84,21 +80,21 @@ class PadBuilds:
                                " Use `{}builds add` to start adding some."
                                "".format(ctx.prefix))
 
-    @builds.command(name="delete", pass_context=True)
+    @builds.command(name="delete")
     @checks.mod_or_permissions(administrator=True)
     async def cc_delete(self, ctx, command: str):
         """Deletes a PAD Build
 
         Example:
         [p]builds delete buildname"""
-        server = ctx.message.guild
+        server = ctx.guild
         command = command.lower()
         if server.id in self.c_commands:
-            cmdlist = self.c_commands[server.id]
+            cmdlist = self.c_commands.get_key(server.id)
             if command in cmdlist:
                 cmdlist.pop(command, None)
-                self.c_commands[server.id] = cmdlist
-                dataIO.save_json(self.file_path, self.c_commands)
+                self.c_commands.set_key(server.id, cmdlist)
+                self.c_commands.save_settings()
                 await ctx.send("PAD Build successfully deleted.")
             else:
                 await ctx.send("That command doesn't exist.")
@@ -107,11 +103,11 @@ class PadBuilds:
                                " Use `{}builds add` to start adding some."
                                "".format(ctx.prefix))
 
-    @builds.command(name="list", pass_context=True)
+    @builds.command(name="list")
     async def cc_list(self, ctx):
         """Shows PAD Builds list"""
-        server = ctx.message.guild
-        commands = self.c_commands.get(server.id, {})
+        server = ctx.guild
+        commands = self.c_commands.get_key(server.id, default = {})
 
         if not commands:
             await ctx.send("There are no PAD Builds in this server."
@@ -128,33 +124,29 @@ class PadBuilds:
             for page in pagify(commands, delims=[" ", "\n"]):
                 await ctx.author.send(box(page))
 
+    @commands.Cog.listener("on_message")
     async def on_message(self, message):
-        if len(message.content) < 2 or not isinstance(channel, discord.GuildChannel):
+        if len(message.content) < 2 or isinstance(message.channel, discord.abc.PrivateChannel):
             return
 
         server = message.guild
-        prefix = self.get_prefix(message)
+        prefix = await self.bot.get_prefix(message)
+        prefix = prefix[0]
 
         if not prefix:
             return
 
-        if server.id in self.c_commands and self.bot.user_allowed(message):
-            cmdlist = self.c_commands[server.id]
+        if server.id in self.c_commands:
+            cmdlist = self.c_commands.get_key(server.id)
             cmd = message.content[len(prefix):]
             if cmd in cmdlist:
                 cmd = cmdlist[cmd]
                 cmd = self.format_cc(cmd, message)
-                await  message.channel.send(cmd)
+                await message.channel.send(cmd)
             elif cmd.lower() in cmdlist:
                 cmd = cmdlist[cmd.lower()]
                 cmd = self.format_cc(cmd, message)
-                await  message.channel.send(cmd)
-
-    def get_prefix(self, message):
-        for p in self.bot.settings.get_prefixes(message.server):
-            if message.content.startswith(p):
-                return p
-        return False
+                await message.channel.send(cmd)
 
     def format_cc(self, command, message):
         results = re.findall("\{([^}]+)\}", command)
@@ -188,16 +180,22 @@ class PadBuilds:
         return str(getattr(first, second, raw_result))
 
 
-def check_folders():
-    if not os.path.exists("data/padbuilds"):
-        print("Creating data/padbuilds folder...")
-        os.makedirs("data/padbuilds")
+class PadBuildSettings(CogSettings):
+    SETTINGS_FILE_NAME = "commands.json"
 
+    def make_default_settings(self):
+        return {}
 
-def check_files():
-    f = "data/padbuilds/commands.json"
-    if not dataIO.is_valid_json(f):
-        print("Creating empty commands.json...")
-        dataIO.save_json(f, {})
+    def get_key(self, key, **kwargs):
+        if 'default' in kwargs:
+            return self.bot_settings.get(key, kwargs['default']) 
+        return self.bot_settings[key]
 
+    def set_key(self, key, value):
+        self.bot_settings[key] = value
 
+    def del_key(self, key):
+        del self.bot_settings[key]
+
+    def __contains__(self, item):
+        return item in self.bot_settings

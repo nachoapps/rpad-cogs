@@ -1,7 +1,5 @@
 import asyncio
 from collections import defaultdict
-from datetime import datetime
-from datetime import timedelta
 import http.client
 import json
 import os
@@ -11,31 +9,29 @@ import time
 import time
 import traceback
 import urllib.parse
+import datetime
 
+from rpadutils.rpadutils import *
+from datetime import timedelta
 from dateutil import tz
 import discord
-from discord.ext import commands
+from redbot.core import commands
 from enum import Enum
 import prettytable
 import pytz
 
-from __main__ import user_allowed, send_cmd_help
 
-from redbot import dadguide
-from redbot.rpadutils import *
-from redbot.rpadutils import CogSettings
-from redbot.utils import checks
-from redbot.utils.chat_formatting import *
-from redbot.core import Config
+from dadguide import dadguide
+from rpadutils.rpadutils import CogSettings
+from redbot.core import checks
+from redbot.core.utils.chat_formatting import *
 
 
 SUPPORTED_SERVERS = ["NA", "JP", "FAKE"]
 
 
-class PadEvents:
+class PadEvents(commands.Cog):
     def __init__(self, bot):
-        self.conf = Config.get_conf(self, identifier=640373775, force_registration=True)
-        
         self.bot = bot
 
         self.settings = PadEventSettings("padevents")
@@ -103,14 +99,14 @@ class PadEvents:
                                     try:
                                         role_name = '{}_group_{}'.format(
                                             e.server, e.groupLongName())
-                                        role = get_role(channel.server.roles, role_name)
+                                        role = get_role(channel.guild.roles, role_name)
                                         if role and role.mentionable:
                                             message = "{} `: {} is starting`".format(
                                                 role.mention, e.name_and_modifier)
                                     except:
                                         pass  # do nothing if role is missing
 
-                                    await  channel.send(message)
+                                    await channel.send(message)
                                 except Exception as ex:
                                     # deregister gr
                                     traceback.print_exc()
@@ -127,7 +123,7 @@ class PadEvents:
                     for daily_registration in list(self.settings.listDailyReg()):
                         try:
                             if server == daily_registration['server']:
-                                await self.pageOutput(msg, channel_id=daily_registration['channel_id'])
+                                await self.pageOutput(ctx, msg, channel_id=daily_registration['channel_id'])
                         except Exception as ex:
                             traceback.print_exc()
 #                             self.settings.removeDailyReg(
@@ -146,22 +142,21 @@ class PadEvents:
                 raise ex
         print("done check_started")
 
-    @commands.group(pass_context=True)
+    @commands.group()
     @checks.mod_or_permissions(manage_guild=True)
     async def padevents(self, ctx):
         """PAD event tracking"""
-        if ctx.invoked_subcommand is None:
-            await send_cmd_help(ctx)
 
-    @padevents.command(name="testevent", pass_context=True)
+    @padevents.command(name="testevent")
     @checks.is_owner()
     async def _testevent(self, ctx, server):
+        #TODO: Fix this (it's borked)
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await ctx.send("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, ~~KR~~, JP")
             return
 
-        te = dadguide.DgScheduledEvent(None, ignore_bad=True)
+        te = dadguide.DgScheduledEvent([], None)
         te.server = server
 
         te.dungeon_code = 1
@@ -171,7 +166,7 @@ class PadEvents:
         te.key = self.fake_uid
         te.group = 'F'
 
-        te.open_datetime = datetime.now(pytz.utc)
+        te.open_datetime = datetime.datetime.now(pytz.utc)
         te.close_datetime = te.open_datetime + timedelta(minutes=1)
         te.dungeon_name = 'fake_dungeon_name'
         te.event_modifier = 'fake_event_modifier'
@@ -184,10 +179,10 @@ class PadEvents:
     async def _addchannel(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await ctx.send("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, ~~KR~~, JP")
             return
 
-        channel_id = ctx.message.channel.id
+        channel_id = ctx.channel.id
         if self.settings.checkGuerrillaReg(channel_id, server):
             await ctx.send("Channel already active.")
             return
@@ -196,14 +191,15 @@ class PadEvents:
         await ctx.send("Channel now active.")
 
     @padevents.command(name="rmchannel")
+    @commands.guild_only()
     @checks.mod_or_permissions(manage_guild=True)
     async def _rmchannel(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await ctx.send("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, ~~KR~~, JP")
             return
 
-        channel_id = ctx.message.channel.id
+        channel_id = ctx.channel.id
         if not self.settings.checkGuerrillaReg(channel_id, server):
             await ctx.send("Channel is not active.")
             return
@@ -212,14 +208,15 @@ class PadEvents:
         await ctx.send("Channel deactivated.")
 
     @padevents.command(name="addchanneldaily")
+    @commands.guild_only()
     @checks.mod_or_permissions(manage_guild=True)
     async def _addchanneldaily(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await ctx.send("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, ~~KR~~, JP")
             return
 
-        channel_id = ctx.message.channel.id
+        channel_id = ctx.channel.id
         if self.settings.checkDailyReg(channel_id, server):
             await ctx.send("Channel already active.")
             return
@@ -228,14 +225,15 @@ class PadEvents:
         await ctx.send("Channel now active.")
 
     @padevents.command(name="rmchanneldaily")
+    @commands.guild_only()
     @checks.mod_or_permissions(manage_guild=True)
     async def _rmchanneldaily(self, ctx, server):
         server = normalizeServer(server)
         if server not in SUPPORTED_SERVERS:
-            await ctx.send("Unsupported server, pick one of NA, KR, JP")
+            await ctx.send("Unsupported server, pick one of NA, ~~KR~~, JP")
             return
 
-        channel_id = ctx.message.channel.id
+        channel_id = ctx.channel.id
         if not self.settings.checkDailyReg(channel_id, server):
             await ctx.send("Channel is not active.")
             return
@@ -243,7 +241,7 @@ class PadEvents:
         self.settings.removeDailyReg(channel_id, server)
         await ctx.send("Channel deactivated.")
 
-    @padevents.command(name="listchannels", pass_context=True)
+    @padevents.command(name="listchannels")
     @checks.mod_or_permissions(manage_guild=True)
     async def _listchannel(self, ctx):
         msg = 'Following daily channels are registered:\n'
@@ -251,7 +249,7 @@ class PadEvents:
         msg += "\n"
         msg += 'Following guerilla channels are registered:\n'
         msg += self.makeChannelList(self.settings.listGuerrillaReg())
-        await self.pageOutput(msg)
+        await self.pageOutput(ctx, msg)
 
     def makeChannelList(self, reg_list):
         msg = ""
@@ -263,7 +261,7 @@ class PadEvents:
             msg += "   " + cr['server'] + " : " + server_name + '(' + channel_name + ')\n'
         return msg
 
-    @padevents.command(name="active", pass_context=True)
+    @padevents.command(name="active")
     @checks.mod_or_permissions(manage_guild=True)
     async def _active(self, ctx, server):
         server = normalizeServer(server)
@@ -272,7 +270,7 @@ class PadEvents:
             return
 
         msg = self.makeActiveText(server)
-        await self.pageOutput(msg)
+        await self.pageOutput(ctx, msg)
 
     def makeActiveText(self, server):
         server_events = EventList(self.events).withServer(server)
@@ -321,7 +319,7 @@ class PadEvents:
 
         return msg
 
-    async def pageOutput(self, msg, channel_id=None, format_type=box):
+    async def pageOutput(self, ctx, msg, channel_id=None, format_type=box):
         msg = msg.strip()
         msg = pagify(msg, ["\n"], shorten_by=20)
         for page in msg:
@@ -329,7 +327,7 @@ class PadEvents:
                 if channel_id is None:
                     await ctx.send(format_type(page))
                 else:
-                    await  discord.Object(channel_id).send(format_type(page))
+                    await self.bot.get_channel(int(channel_id)).send(format_type(page))
             except Exception as e:
                 print("page output failed " + str(e))
                 print("tried to print: " + page)
@@ -448,7 +446,6 @@ class PadEvents:
         await ctx.send(box(output))
 
 
-
 def makeChannelReg(channel_id, server):
     server = normalizeServer(server)
     return {
@@ -518,11 +515,11 @@ class Event:
             scheduled_event.dungeon.dungeon_type) if scheduled_event.dungeon else DungeonType.Unknown
 
     def start_from_now_sec(self):
-        now = datetime.now(pytz.utc)
+        now = datetime.datetime.now(pytz.utc)
         return (self.open_datetime - now).total_seconds()
 
     def end_from_now_sec(self):
-        now = datetime.now(pytz.utc)
+        now = datetime.datetime.now(pytz.utc)
         return (self.close_datetime - now).total_seconds()
 
     def is_started(self):

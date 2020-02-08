@@ -3,21 +3,19 @@ import random
 import traceback
 from _collections import OrderedDict
 
-from discord.ext import commands
+from redbot.core import commands
 
-from redbot import dadguide
-from redbot.rpadutils import *
-from redbot.rpadutils import CogSettings, normalizeServer
-from redbot.utils import checks
-from redbot.utils.chat_formatting import box, pagify
+from dadguide import dadguide
+from rpadutils.rpadutils import *
+from rpadutils.rpadutils import CogSettings, normalizeServer
+from redbot.core import checks
+from redbot.core.utils.chat_formatting import box, pagify
 
 SUPPORTED_SERVERS = ["NA", "JP"]
 
 
-class PadRem:
+class PadRem(commands.Cog):
     def __init__(self, bot):
-        self.conf = Config.get_conf(self, identifier=640637, force_registration=True)
-
         self.bot = bot
 
         self.settings = PadRemSettings("padrem")
@@ -46,7 +44,7 @@ class PadRem:
         database = dg_cog.database
         self.pgrem = PgRemWrapper(database, self.settings.getBoosts())
 
-    @commands.command(name="setboost", pass_context=True)
+    @commands.command(name="setboost")
     @checks.is_owner()
     async def _setboost(self, ctx, machine_id: str, boost_rate: int):
         """Sets the boost rate for a specific REM.
@@ -63,7 +61,7 @@ class PadRem:
         self.settings.setBoost(machine_id, boost_rate)
         await ctx.send(box('Done'))
 
-    @commands.command(name="remlist", pass_context=True)
+    @commands.command(name="remlist")
     async def _remlist(self, ctx):
         """Lists available rare egg machines that can be rolled"""
         msg = ""
@@ -76,7 +74,7 @@ class PadRem:
 
         await ctx.send(box(msg))
 
-    @commands.command(name="reminfo", pass_context=True)
+    @commands.command(name="reminfo")
     async def _reminfo(self, ctx, server, rem_name):
         """Displays detailed information on the contents of a REM
 
@@ -99,7 +97,7 @@ class PadRem:
 
         await self.sayPageOutput(machine.toDescription())
 
-    @commands.command(name="rollrem", pass_context=True)
+    @commands.command(name="rollrem")
     async def _rollrem(self, ctx, server, rem_name):
         """Rolls a rare egg machine and prints the result
 
@@ -124,7 +122,7 @@ class PadRem:
         msg = 'You rolled : #{} {}'.format(monster.monster_no_na, monster.name_na)
         await ctx.send(box(msg))
 
-    @commands.command(name="rollremfor", pass_context=True)
+    @commands.command(name="rollremfor")
     async def _rollremfor(self, ctx, server: str, rem_name: str, monster_query: str):
         """Rolls a rare egg machine until the selected monster pops out
 
@@ -173,8 +171,8 @@ class PadRem:
             if check_monster_fn(monster):
                 stones = picks * roll_stones
                 price = stones * stone_price
-                msg = 'It took {} tries, ${:.0f}, and {} stones to pull : #{} {}'.format(
-                    picks, price, stones, monster.monster_no_na, monster.name_na)
+                msg = 'It took {} tries and {} stones (${:.0f}) to pull : #{} {}'.format(
+                    picks, stones, price, monster.monster_no_na, monster.name_na)
                 await ctx.send(box(msg))
                 return
 
@@ -197,9 +195,9 @@ class PadRem:
             try:
                 await ctx.author.send(format_type(page))
             except Exception as e:
+                await ctx.send("Page output failed.")
                 print("page output failed " + str(e))
                 print("tried to print: " + page)
-
 
 
 class PadRemSettings(CogSettings):

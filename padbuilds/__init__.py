@@ -1,6 +1,4 @@
-from .padbuilds import PadBuilds
+from .padbuilds import *
 
 def setup(bot):
-    check_folders()
-    check_files()
     bot.add_cog(PadBuilds(bot))
